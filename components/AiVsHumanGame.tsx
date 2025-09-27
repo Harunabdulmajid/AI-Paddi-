@@ -8,7 +8,7 @@ import { Difficulty } from '../types';
 export const AiVsHumanGame: React.FC = () => {
   const context = useContext(AppContext);
   if (!context) throw new Error("AiVsHumanGame must be used within an AppProvider");
-  const { language, user, addPoints } = context;
+  const { language, user, addTransaction } = context;
   const t = useTranslations();
   
   const [content, setContent] = useState<{ text: string; isAi: boolean } | null>(null);
@@ -65,7 +65,11 @@ export const AiVsHumanGame: React.FC = () => {
 
     if (correctGuess) {
       setResult('correct');
-      addPoints(10);
+      addTransaction({
+          type: 'earn',
+          description: t.game.pointDescription,
+          amount: 10
+      });
     } else {
       setResult('incorrect');
     }

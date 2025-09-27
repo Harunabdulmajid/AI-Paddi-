@@ -1,7 +1,7 @@
 import React, { useContext, useRef, useCallback, useState } from 'react';
 import { AppContext } from '../context/AppContext';
-import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Swords } from 'lucide-react';
-import { LearningPath, User } from '../types';
+import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Wallet } from 'lucide-react';
+import { LearningPath, User, Page } from '../types';
 import { useTranslations } from '../i18n';
 import { CURRICULUM_MODULES, BADGES } from '../constants';
 import * as htmlToImage from 'html-to-image';
@@ -9,25 +9,26 @@ import { apiService } from '../services/apiService';
 import { BadgeIcon } from './BadgeIcon';
 import { FeedbackModal } from './FeedbackModal';
 
-const Certificate: React.FC<{ userName: string, certificateRef: React.RefObject<HTMLDivElement> }> = ({ userName, certificateRef }) => {
+const Certificate: React.FC<{ user: User, certificateRef: React.RefObject<HTMLDivElement> }> = ({ user, certificateRef }) => {
     const t = useTranslations();
     const completionDate = new Date().toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-    const certificateId = `AIK-${new Date().getFullYear()}-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+    const certificateId = `AIK-${new Date().getFullYear()}-${user.id.slice(-6).toUpperCase()}`;
+    const isDistinction = user.certificateLevel === 'distinction';
 
     return (
-        <div ref={certificateRef} className="bg-white p-6 md:p-8 rounded-xl border-2 border-primary relative overflow-hidden">
+        <div ref={certificateRef} className={`bg-white p-6 md:p-8 rounded-xl border-2 ${isDistinction ? 'border-amber-400' : 'border-primary'} relative overflow-hidden`}>
             <div className="absolute top-0 left-0 w-full h-full bg-neutral-50 z-0 opacity-50"></div>
-            <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full z-0"></div>
+            <div className={`absolute -top-10 -right-10 w-40 h-40 ${isDistinction ? 'bg-amber-400/10' : 'bg-primary/10'} rounded-full z-0`}></div>
             <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-secondary/10 rounded-full z-0"></div>
             
             <div className="relative z-10 text-center">
-                <div className="flex justify-center items-center gap-3">
-                  <ShieldCheck className="text-primary" size={40} />
-                  <h3 className="text-2xl md:text-3xl font-bold text-primary">{t.profile.certificateTitleSingle}</h3>
+                <div className={`flex justify-center items-center gap-3 ${isDistinction ? 'text-amber-500' : 'text-primary'}`}>
+                  <ShieldCheck size={40} />
+                  <h3 className="text-2xl md:text-3xl font-bold">{t.profile.certificateTitleSingle}{isDistinction && ' with Distinction'}</h3>
                 </div>
                 <p className="text-neutral-500 mt-1 font-semibold">{t.profile.certificateIssuedBy('AI Paddi')}</p>
                 <p className="text-neutral-500 mt-4">{t.profile.certificateFor}</p>
-                <p className="text-3xl md:text-4xl font-extrabold text-neutral-800 my-4 md:my-6 border-y-2 border-neutral-200 py-4">{userName}</p>
+                <p className="text-3xl md:text-4xl font-extrabold text-neutral-800 my-4 md:my-6 border-y-2 border-neutral-200 py-4">{user.name}</p>
                 <p className="text-base md:text-lg text-neutral-600 font-medium">{t.profile.certificateCourseName}</p>
                 <div className="flex justify-center items-center gap-2 mt-4 text-secondary">
                     <CheckCircle size={24} />
@@ -43,7 +44,7 @@ const Certificate: React.FC<{ userName: string, certificateRef: React.RefObject<
 export const Profile: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("Profile must be used within an AppProvider");
-    const { user, setUser, logout } = context;
+    const { user, setUser, logout, setCurrentPage } = context;
     const t = useTranslations();
     const certificateRef = useRef<HTMLDivElement>(null);
 
@@ -129,6 +130,11 @@ export const Profile: React.FC = () => {
                             <Award size={22} />
                             {user.points} {t.profile.points}
                         </div>
+                        <div className="mt-4">
+                             <button onClick={() => setCurrentPage(Page.Wallet)} className="flex items-center justify-center gap-2 text-md font-bold text-primary hover:text-primary-dark transition-colors">
+                                <Wallet size={20} /> {t.profile.viewWallet}
+                            </button>
+                        </div>
                         <div className="mt-8 border-t border-neutral-200 w-full pt-6 flex flex-col items-center gap-4">
                             <button onClick={() => setIsFeedbackModalOpen(true)} className="flex items-center justify-center gap-2 text-md font-bold text-neutral-600 hover:text-primary transition-colors">
                                 <MessageSquarePlus size={20} /> {t.profile.feedbackButton}
@@ -191,7 +197,7 @@ export const Profile: React.FC = () => {
                             <h4 className="text-xl md:text-2xl font-bold text-neutral-800 mb-5">{t.profile.certificatesTitle}</h4>
                             { allModulesCompleted ? (
                                 <div>
-                                    <Certificate userName={user.name} certificateRef={certificateRef} />
+                                    <Certificate user={user} certificateRef={certificateRef} />
                                     <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:justify-end">
                                         <button onClick={handleDownload} className="flex items-center justify-center gap-2 bg-neutral-700 text-white font-bold py-3 px-5 rounded-lg hover:bg-neutral-800 transition text-base" aria-label="Download certificate">
                                             <Download size={20} /> {t.profile.downloadButton}

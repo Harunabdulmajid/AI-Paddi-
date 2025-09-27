@@ -1,8 +1,9 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Quiz as QuizType } from '../types';
-import { CheckCircle, XCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle, XCircle, ArrowRight, Mic } from 'lucide-react';
 import { useTranslations } from '../i18n';
 import { AppContext } from '../context/AppContext';
+import { useSpeech } from '../hooks/useSpeech';
 
 interface QuizProps {
   quiz: QuizType;
@@ -12,7 +13,8 @@ interface QuizProps {
 export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
   const context = useContext(AppContext);
   if (!context) throw new Error("Quiz must be used within an AppProvider");
-  const { addPoints } = context;
+  const { addTransaction, isVoiceModeEnabled, language, activeModuleId } = context;
+  const { isListening, speak, startListening } = useSpeech();
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -23,6 +25,34 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
   const t = useTranslations();
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
+
+  useEffect(() => {
+    if (isVoiceModeEnabled && !isAnswered) {
+      let textToSpeak = currentQuestion.question;
+      if (currentQuestion.type === 'multiple-choice') {
+        textToSpeak += currentQuestion.options.map((opt, i) => ` Option ${i + 1}: ${opt}`).join('. ');
+      }
+      speak(textToSpeak, language);
+    }
+  }, [currentQuestion, isVoiceModeEnabled, isAnswered, speak, language]);
+
+  const handleVoiceAnswer = (transcript: string) => {
+    const lowerTranscript = transcript.toLowerCase();
+    
+    if (currentQuestion.type === 'multiple-choice') {
+        const foundIndex = currentQuestion.options.findIndex((opt, index) => 
+            lowerTranscript.includes(opt.toLowerCase()) || 
+            lowerTranscript.includes(`option ${index + 1}`) ||
+            (index + 1).toString() === lowerTranscript.trim()
+        );
+        if (foundIndex !== -1) {
+            handleSubmitAnswer(foundIndex);
+        }
+    } else if (currentQuestion.type === 'fill-in-the-blank') {
+        setInputValue(transcript);
+        handleSubmitAnswer(transcript);
+    }
+  };
   
   const handleSubmitAnswer = (answer: number | string) => {
     if (isAnswered) return;
@@ -39,8 +69,14 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
     setIsAnswered(true);
 
     if (correct) {
-        const bonus = Math.min(10, streak * 2); // 2 bonus points per streak item, max 10
-        addPoints(10 + bonus);
+        const points = 5;
+        const bonus = Math.min(5, streak); // 1 bonus point per streak item, max 5
+        const totalPoints = points + bonus;
+        addTransaction({
+            type: 'earn',
+            description: `Correct answer in '${t.curriculum[activeModuleId!]?.title}' quiz`,
+            amount: totalPoints
+        });
         setStreak(s => s + 1);
     } else {
         setStreak(0);
@@ -73,7 +109,14 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
         )}
       </div>
       <div className="bg-neutral-50 p-6 rounded-xl">
-        <p className="text-lg font-semibold text-neutral-700 mb-5">{currentQuestion.question}</p>
+        <div className="flex justify-between items-start">
+            <p className="text-lg font-semibold text-neutral-700 mb-5 flex-grow">{currentQuestion.question}</p>
+            {isVoiceModeEnabled && !isAnswered && (
+                <button onClick={() => startListening(handleVoiceAnswer, language)} disabled={isListening} className="ml-4 p-2 rounded-full bg-primary/10 text-primary disabled:opacity-50">
+                    <Mic className={isListening ? 'animate-pulse' : ''}/>
+                </button>
+            )}
+        </div>
         
         {currentQuestion.type === 'multiple-choice' ? (
              <div className="space-y-3">
@@ -128,7 +171,7 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
 
         {isAnswered && (
           <div className={`mt-5 p-4 rounded-lg ${isCorrect ? 'bg-green-100 text-green-900' : 'bg-red-100 text-red-900'}`}>
-            <p className="font-bold">{isCorrect ? t.lesson.quizCorrect : t.lesson.quizIncorrect}</p>
+            <p className="font-bold">{isCorrect ? t.lesson.quizCorrect(5 + Math.min(5, streak -1)) : t.lesson.quizIncorrect}</p>
             {!isCorrect && <p className="mt-1 font-semibold">{currentQuestion.type === 'multiple-choice' ? currentQuestion.options[currentQuestion.correctAnswerIndex] : currentQuestion.answer}</p>}
             <p className="text-sm mt-2">{currentQuestion.explanation}</p>
           </div>

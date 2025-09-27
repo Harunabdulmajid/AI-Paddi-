@@ -26,6 +26,7 @@ export enum Page {
   Profile = 'Profile & Certificates',
   Lesson = 'Lesson',
   Leaderboard = 'Leaderboard',
+  Wallet = 'Wallet',
 }
 
 export type Difficulty = 'Easy' | 'Hard';
@@ -41,11 +42,31 @@ export interface Badge {
   name: string;
   description: string;
   icon: React.ComponentType<{ className?: string; size?: number }>;
+  cost?: number; // Optional cost for purchasing in the marketplace
 }
 
 export interface MultiplayerStats {
     wins: number;
     gamesPlayed: number;
+}
+
+export interface Transaction {
+  id: string;
+  type: 'earn' | 'spend' | 'send' | 'receive';
+  description: string;
+  amount: number; // Always positive
+  timestamp: number;
+  from?: string; // Name of sender
+  to?: string; // Name of recipient
+}
+
+export interface Wallet {
+  balance: number;
+  transactions: Transaction[];
+  dailyTransfer: {
+    date: string; // YYYY-MM-DD
+    amount: number;
+  };
 }
 
 export interface User {
@@ -55,10 +76,17 @@ export interface User {
   name: string;
   avatarUrl?: string;
   level: LearningPath | null;
-  points: number;
+  points: number; // This will mirror wallet.balance for easy access
   completedModules: string[];
   badges: string[];
   multiplayerStats: MultiplayerStats;
+  wallet: Wallet;
+  lastLoginDate: string; // YYYY-MM-DD
+  loginStreak: number;
+  certificateLevel: 'basic' | 'distinction';
+  theme: string; // e.g., 'default', 'dark'
+  avatarId: string; // e.g., 'avatar-01'
+  unlockedVoices: Language[];
 }
 
 export interface Question {
@@ -79,7 +107,7 @@ export interface LessonContent {
   title: string;
   introduction: string;
   sections: { heading: string; content: string }[];
-  summary: string;
+  summary:string;
   quiz: Quiz;
 }
 
@@ -120,6 +148,21 @@ export interface GameSession {
 }
 // --- End Multiplayer Types ---
 
+export type MarketplaceCategory = 'Recognition' | 'Customization' | 'Learning Boosters' | 'Social Play' | 'Future Perks';
+
+export interface MarketplaceItem {
+    id: string;
+    category: MarketplaceCategory;
+    title: string;
+    description: string;
+    cost: number;
+    icon: React.ComponentType<{ className?: string; size?: number }>;
+    isComingSoon?: boolean;
+    isOwned?: (user: User) => boolean;
+    payload: Record<string, any>;
+}
+
+
 export interface AppContextType {
   user: User | null;
   setUser: (user: User | null) => void;
@@ -130,9 +173,16 @@ export interface AppContextType {
   setCurrentPage: React.Dispatch<React.SetStateAction<Page>>;
   activeModuleId: string | null;
   setActiveModuleId: React.Dispatch<React.SetStateAction<string | null>>;
-  addPoints: (points: number) => Promise<void>;
-  completeModule: (moduleId: string) => Promise<void>;
+  addTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => Promise<void>;
   awardBadge: (badgeId: string) => Promise<void>;
   gameSession: GameSession | null;
   setGameSession: React.Dispatch<React.SetStateAction<GameSession | null>>;
+  // Offline and Voice Features
+  isOnline: boolean;
+  downloadedModules: string[];
+  downloadModule: (moduleId: string) => Promise<void>;
+  isVoiceModeEnabled: boolean;
+  toggleVoiceMode: () => void;
+  speak: (text: string, lang: Language) => void;
+  isListening: boolean;
 }

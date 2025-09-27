@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Onboarding } from './components/Onboarding';
 import { Dashboard } from './components/Dashboard';
 import { Header } from './components/Header';
 import { Multiplayer } from './components/Multiplayer';
 import { AiVsHumanGame } from './components/AiVsHumanGame';
 import { Profile } from './components/Profile';
-import { AppContextType, User, Language, Page, Badge, GameSession } from './types';
-import { ArrowLeft, Loader2 } from 'lucide-react';
-import { useTranslations } from './i18n';
+import { AppContextType, User, Language, Page, Badge, GameSession, Module, Transaction } from './types';
+import { ArrowLeft, Loader2, Send } from 'lucide-react';
+import { translations, englishTranslations } from './i18n';
 import { Lesson } from './components/Lesson';
 import { AppContext } from './context/AppContext';
 import { useLocalStorage } from './hooks/useLocalStorage';
@@ -15,6 +15,11 @@ import { Leaderboard } from './components/Leaderboard';
 import { apiService } from './services/apiService';
 import { Toast } from './components/Toast';
 import { BADGES, CURRICULUM_MODULES } from './constants';
+import { dbService } from './services/db';
+import { geminiService } from './services/geminiService';
+import { SettingsModal } from './components/SettingsModal';
+import { useSpeech } from './hooks/useSpeech';
+import { Wallet } from './components/Wallet';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -22,16 +27,85 @@ const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>(Page.Dashboard);
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [unlockedBadge, setUnlockedBadge] = useState<Badge | null>(null);
+  const [toastQueue, setToastQueue] = useState<Array<Badge | Transaction>>([]);
   const [gameSession, setGameSession] = useState<GameSession | null>(null);
+  
+  // Offline & Voice Features State
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [downloadedModules, setDownloadedModules] = useState<string[]>([]);
+  const [isVoiceModeEnabled, setIsVoiceModeEnabled] = useLocalStorage('voiceMode', false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const { isListening, speak, startContinuousListening, stopListening } = useSpeech();
+
+  const t = translations[language] || englishTranslations;
+  
+  const showToast = useCallback((item: Badge | Transaction) => {
+    setToastQueue(prev => [...prev, item]);
+    setTimeout(() => {
+        setToastQueue(prev => prev.slice(1));
+    }, 5000);
+  }, []);
+
+  // Online/Offline status detection
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Fetch initial offline data
+  useEffect(() => {
+    dbService.getDownloadedModuleIds().then(setDownloadedModules);
+  }, []);
+
+  // Sync offline actions when coming online
+  useEffect(() => {
+    const syncOfflineActions = async () => {
+      if (isOnline && user) {
+        const actions = await dbService.getActions();
+        if (actions.length === 0) return;
+
+        console.log(`Syncing ${actions.length} offline actions...`);
+
+        const finalUpdates = actions.reduce((acc, action) => {
+            if (action.type === 'updateUser') {
+               Object.assign(acc, action.payload);
+            }
+            return acc;
+        }, {} as Partial<User>);
+
+        try {
+          const updatedUser = await apiService.updateUser(user.email, finalUpdates);
+           if (updatedUser) {
+              setUser(updatedUser as User);
+          }
+          for (const action of actions) {
+              if(action.id) await dbService.deleteAction(action.id);
+          }
+          console.log("Sync complete.");
+        } catch (error) {
+           console.error("Failed to sync offline actions:", error);
+        }
+      }
+    };
+    syncOfflineActions();
+  }, [isOnline, user]);
 
   useEffect(() => {
     const checkUserSession = async () => {
       const userEmail = localStorage.getItem('userEmail');
       if (userEmail) {
         try {
-          const fetchedUser = await apiService.getUserByEmail(userEmail);
+          const { user: fetchedUser, newTransactions } = await apiService.handleUserLogin(userEmail);
           setUser(fetchedUser);
+          newTransactions.forEach(showToast);
         } catch (error) {
           console.error("Failed to fetch user:", error);
           localStorage.removeItem('userEmail');
@@ -40,76 +114,213 @@ const App: React.FC = () => {
       setIsLoading(false);
     };
     checkUserSession();
-  }, []);
-
-  const handleSetUser = (newUser: User | null) => {
+  }, [showToast]);
+  
+  const handleSetUser = useCallback((newUser: User | null) => {
     setUser(newUser);
     if (newUser) {
       localStorage.setItem('userEmail', newUser.email);
     } else {
       localStorage.removeItem('userEmail');
     }
-  };
-  
-  const logout = () => {
+  }, []);
+
+  const logout = useCallback(() => {
     handleSetUser(null);
     setCurrentPage(Page.Dashboard);
     setActiveModuleId(null);
     setGameSession(null);
-  };
+  }, [handleSetUser]);
 
-  const awardBadge = async (badgeId: string) => {
+  const curriculumTopics: Module[] = useMemo(() => CURRICULUM_MODULES.map(module => ({
+    ...module,
+    title: t.curriculum[module.id].title,
+    description: t.curriculum[module.id].description,
+  })), [t]);
+
+  const findModuleFromCommand = useCallback((command: string): { id: string, title: string } | null => {
+      const lowerCommand = command.toLowerCase();
+      
+      const numberMap: { [key: string]: number } = {
+          'one': 1, '1': 1,
+          'two': 2, '2': 2,
+          'three': 3, '3': 3,
+          'four': 4, '4': 4,
+          'five': 5, '5': 5,
+      };
+
+      for (const key in numberMap) {
+          if (lowerCommand.includes(`module ${key}`) || lowerCommand.includes(`lesson ${key}`)) {
+              const moduleIndex = numberMap[key] - 1;
+              if (curriculumTopics[moduleIndex]) {
+                  return { id: curriculumTopics[moduleIndex].id, title: curriculumTopics[moduleIndex].title };
+              }
+          }
+      }
+      
+      for (const module of curriculumTopics) {
+          if (lowerCommand.includes(module.title.toLowerCase())) {
+              return { id: module.id, title: module.title };
+          }
+      }
+
+      return null;
+  }, [curriculumTopics]);
+
+  const handleVoiceCommand = useCallback((command: string) => {
+    const lowerCommand = command.toLowerCase();
+    console.log("Voice command received:", lowerCommand);
+
+    if (lowerCommand.includes('dashboard') || lowerCommand.includes('home')) {
+        setCurrentPage(Page.Dashboard);
+        speak(t.voice.navigatingTo.dashboard, language);
+    } else if (lowerCommand.includes('profile')) {
+        setCurrentPage(Page.Profile);
+        speak(t.voice.navigatingTo.profile, language);
+    } else if (lowerCommand.includes('leaderboard')) {
+        setCurrentPage(Page.Leaderboard);
+        speak(t.voice.navigatingTo.leaderboard, language);
+    } else if (lowerCommand.includes('wallet') || lowerCommand.includes('points')) {
+        setCurrentPage(Page.Wallet);
+        speak(t.voice.navigatingTo.wallet, language);
+    } else if (lowerCommand.includes('game') || lowerCommand.includes('human')) {
+        setCurrentPage(Page.AiVsHuman);
+        speak(t.voice.navigatingTo.game, language);
+    } else if (lowerCommand.includes('multiplayer')) {
+        setCurrentPage(Page.Multiplayer);
+        speak(t.voice.navigatingTo.multiplayer, language);
+    } else if (lowerCommand.includes('open settings')) {
+        setIsSettingsOpen(true);
+        speak(t.voice.openingSettings, language);
+    } else if (lowerCommand.includes('close settings')) {
+        setIsSettingsOpen(false);
+        speak(t.voice.closingSettings, language);
+    } else if (lowerCommand.includes('logout') || lowerCommand.includes('log out')) {
+        speak(t.voice.loggingOut, language);
+        logout();
+    } else {
+        const moduleInfo = findModuleFromCommand(lowerCommand);
+        if (moduleInfo) {
+            setActiveModuleId(moduleInfo.id);
+            setCurrentPage(Page.Lesson);
+            speak(t.voice.startingModule(moduleInfo.title), language);
+        }
+    }
+  }, [language, speak, t, findModuleFromCommand, logout]);
+
+  useEffect(() => {
+    if (isVoiceModeEnabled) {
+      startContinuousListening(handleVoiceCommand, language);
+    } else {
+      stopListening();
+    }
+    return () => {
+      stopListening();
+    };
+  }, [isVoiceModeEnabled, language, startContinuousListening, stopListening, handleVoiceCommand]);
+
+  const addTransaction = useCallback(async (transaction: Omit<Transaction, 'id' | 'timestamp'>) => {
+      if (!user) return;
+      
+      const fullTransaction: Transaction = {
+          ...transaction,
+          id: `txn-${Date.now()}`,
+          timestamp: Date.now(),
+      };
+      
+      const newBalance = user.wallet.balance + (transaction.type === 'earn' ? transaction.amount : -transaction.amount);
+      const newTransactions = [fullTransaction, ...user.wallet.transactions];
+      
+      const updatedWallet = { ...user.wallet, balance: newBalance, transactions: newTransactions };
+      const updates = { points: newBalance, wallet: updatedWallet };
+
+      setUser(prev => prev ? { ...prev, ...updates } : null);
+
+      if (isOnline) {
+          const updatedUser = await apiService.updateUser(user.email, updates);
+          if (updatedUser) setUser(updatedUser as User);
+      } else {
+          await dbService.addAction({ type: 'updateUser', payload: updates, timestamp: Date.now() });
+      }
+      // Check for point-based badges
+      if(user.wallet.balance < 100 && newBalance >= 100) {
+        awardBadge('point-pioneer');
+      }
+  }, [user, isOnline]);
+
+  const awardBadge = useCallback(async (badgeId: string) => {
     if (!user || user.badges.includes(badgeId)) return;
     
     const badge = BADGES[badgeId];
     if (badge) {
-        const updatedUser = await apiService.updateUser(user.email, {
-            badges: [...user.badges, badgeId],
-        });
-        if (updatedUser) {
-            setUser(updatedUser as User);
-            setUnlockedBadge(badge);
-            setTimeout(() => setUnlockedBadge(null), 5000); // Hide toast after 5s
+        const updates = { badges: [...user.badges, badgeId] };
+        setUser(prev => prev ? { ...prev, badges: updates.badges } : null);
+        
+        if (isOnline) {
+            const updatedUser = await apiService.updateUser(user.email, updates);
+            if(updatedUser) setUser(updatedUser as User);
+        } else {
+            await dbService.addAction({ type: 'updateUser', payload: updates, timestamp: Date.now() });
         }
+        showToast(badge);
     }
-  };
+  }, [user, isOnline, showToast]);
 
-  const addPoints = async (pointsToAdd: number) => {
-    if (!user) return;
-    const oldPoints = user.points;
-    const newPoints = oldPoints + pointsToAdd;
-    const updatedUser = await apiService.updateUser(user.email, { points: newPoints });
-    if (updatedUser) {
-      setUser(updatedUser as User);
-      // Award badge if they cross 100 points
-      if(oldPoints < 100 && newPoints >= 100) {
-        awardBadge('point-pioneer');
-      }
-    }
-  };
-
-  const completeModule = async (moduleId: string) => {
+  const completeModule = useCallback(async (moduleId: string) => {
     if (!user || user.completedModules.includes(moduleId)) return;
-
+    
     const updatedCompletedModules = [...user.completedModules, moduleId];
-
-    const updatedUser = await apiService.updateUser(user.email, {
-        points: user.points + 25,
-        completedModules: updatedCompletedModules,
+    
+    addTransaction({
+        type: 'earn',
+        description: `Completed '${t.curriculum[moduleId].title}' module`,
+        amount: 50
     });
-    if (updatedUser) {
-      setUser(updatedUser as User);
-      // Award badges based on progress
-      if(updatedCompletedModules.length === 1) {
-        awardBadge('first-step');
-      }
-      if(updatedCompletedModules.length === CURRICULUM_MODULES.length) {
-        awardBadge('ai-graduate');
-      }
+    
+    const moduleUpdates = { completedModules: updatedCompletedModules };
+    setUser(prev => prev ? { ...prev, ...moduleUpdates } : null);
+    
+    if (isOnline) {
+        const updatedUser = await apiService.updateUser(user.email, moduleUpdates);
+        if (updatedUser) setUser(updatedUser as User);
+    } else {
+        await dbService.addAction({ type: 'updateUser', payload: moduleUpdates, timestamp: Date.now() });
     }
+
+    if(updatedCompletedModules.length === 1) {
+      awardBadge('first-step');
+    }
+    if(updatedCompletedModules.length === CURRICULUM_MODULES.length) {
+      awardBadge('ai-graduate');
+    }
+  }, [user, isOnline, awardBadge, addTransaction, t.curriculum]);
+
+  const downloadModule = useCallback(async (moduleId: string) => {
+      const englishContent = englishTranslations.curriculum[moduleId].lessonContent;
+      if (!englishContent) return;
+
+      const { title, quiz, ...contentToSave } = englishContent;
+      await dbService.saveContent(moduleId, Language.English, contentToSave);
+
+      if (language !== Language.English) {
+          try {
+              const translatedContent = await geminiService.generateDynamicLessonContent(contentToSave, language);
+              await dbService.saveContent(moduleId, language, translatedContent);
+          } catch (error) {
+              console.error(`Failed to download translated content for ${moduleId}`, error);
+          }
+      }
+      setDownloadedModules(prev => [...new Set([...prev, moduleId])]);
+  }, [language]);
+  
+  const toggleVoiceMode = () => {
+    if (!isVoiceModeEnabled) {
+        alert("Voice-First mode requires microphone access to function. Please allow access if prompted.");
+    }
+    setIsVoiceModeEnabled(!isVoiceModeEnabled);
   };
 
-  const contextValue: AppContextType = {
+  const contextValue: AppContextType = useMemo(() => ({
     user,
     setUser: handleSetUser,
     logout,
@@ -119,44 +330,44 @@ const App: React.FC = () => {
     setCurrentPage,
     activeModuleId,
     setActiveModuleId,
-    addPoints,
+    addTransaction,
     completeModule,
     awardBadge,
     gameSession,
     setGameSession,
-  };
+    isOnline,
+    downloadedModules,
+    downloadModule,
+    isVoiceModeEnabled,
+    toggleVoiceMode,
+    speak,
+    isListening,
+  }), [user, language, setLanguage, currentPage, activeModuleId, gameSession, isOnline, downloadedModules, isVoiceModeEnabled, addTransaction, completeModule, awardBadge, downloadModule, speak, isListening, logout, handleSetUser]);
 
   const renderCurrentPage = () => {
     switch(currentPage) {
-        case Page.Dashboard:
-            return <Dashboard />;
-        case Page.Multiplayer:
-            return <Multiplayer />;
-        case Page.AiVsHuman:
-            return <AiVsHumanGame />;
-        case Page.Profile:
-            return <Profile />;
-        case Page.Lesson:
-            return <Lesson />;
-        case Page.Leaderboard:
-            return <Leaderboard />;
-        default:
-            return <Dashboard />;
+        case Page.Dashboard: return <Dashboard />;
+        case Page.Multiplayer: return <Multiplayer />;
+        case Page.AiVsHuman: return <AiVsHumanGame />;
+        case Page.Profile: return <Profile />;
+        case Page.Lesson: return <Lesson />;
+        case Page.Leaderboard: return <Leaderboard />;
+        case Page.Wallet: return <Wallet />;
+        default: return <Dashboard />;
     }
   }
 
   const PageWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const t = useTranslations();
     return (
         <div className="min-h-screen flex flex-col bg-neutral-100">
-            <Header />
+            <Header onSettingsClick={() => setIsSettingsOpen(true)} />
             <div className="flex-grow flex flex-col">
                  {currentPage !== Page.Dashboard && (
                     <div className="container mx-auto pt-6 px-4 md:px-8">
                          <button onClick={() => {
                              setCurrentPage(Page.Dashboard);
                              setActiveModuleId(null);
-                             setGameSession(null); // Clear game session when leaving a sub-page
+                             setGameSession(null);
                             }} className="flex items-center gap-2 text-md font-bold text-neutral-600 hover:text-primary transition-colors">
                             <ArrowLeft size={20} />
                             {t.common.backToDashboard}
@@ -182,17 +393,20 @@ const App: React.FC = () => {
       </div>
     );
   }
+  
+  if (!user) {
+      return <Onboarding setUser={handleSetUser} t={t} />;
+  }
 
   return (
     <AppContext.Provider value={contextValue}>
-        {unlockedBadge && <Toast badge={unlockedBadge} />}
-        {!user ? (
-            <Onboarding />
-        ) : (
-            <PageWrapper>
-                {renderCurrentPage()}
-            </PageWrapper>
-        )}
+        {toastQueue.map((item, index) => (
+             <Toast key={index} item={item} />
+        ))}
+        <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+        <PageWrapper>
+            {renderCurrentPage()}
+        </PageWrapper>
     </AppContext.Provider>
   );
 };

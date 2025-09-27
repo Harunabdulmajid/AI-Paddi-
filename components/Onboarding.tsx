@@ -1,16 +1,16 @@
-import React, { useState, useContext } from 'react';
+
+import React, { useState } from 'react';
 import { Loader2, ArrowRight, GraduationCap, PartyPopper } from 'lucide-react';
 import { apiService } from '../services/apiService';
-import { AppContext } from '../context/AppContext';
-import { useTranslations } from '../i18n';
-import { LearningPath } from '../types';
+import { LearningPath, User } from '../types';
+import { Translation } from '../i18n';
 
-export const Onboarding: React.FC = () => {
-  const context = useContext(AppContext);
-  if (!context) throw new Error("Onboarding must be used within an AppProvider");
-  const { setUser } = context;
-  const t = useTranslations();
+interface OnboardingProps {
+    setUser: (user: User | null) => void;
+    t: Translation;
+}
 
+export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

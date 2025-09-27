@@ -4,10 +4,11 @@ import { Page, Badge, Language, LessonContent } from '../types';
 import { useTranslations, englishTranslations } from '../i18n';
 import { Quiz } from './Quiz';
 import { TooltipTerm } from './TooltipTerm';
-import { Award, PartyPopper, Loader2 } from 'lucide-react';
+import { Award, PartyPopper, Loader2, Volume2 } from 'lucide-react';
 import { BADGES } from '../constants';
 import { BadgeIcon } from './BadgeIcon';
 import { geminiService } from '../services/geminiService';
+import { dbService } from '../services/db';
 
 type LessonState = 'reading' | 'quizzing' | 'complete';
 
@@ -47,7 +48,7 @@ const CompletionModal: React.FC<{ onAcknowledge: () => void; points: number, unl
 export const Lesson: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("Lesson component must be used within AppProvider");
-    const { activeModuleId, setCurrentPage, setActiveModuleId, completeModule, user, language } = context;
+    const { activeModuleId, setCurrentPage, setActiveModuleId, completeModule, user, language, isOnline, isVoiceModeEnabled, speak } = context;
     const t = useTranslations();
     
     const [lessonState, setLessonState] = useState<LessonState>('reading');
@@ -55,21 +56,40 @@ export const Lesson: React.FC = () => {
 
     const [dynamicContent, setDynamicContent] = useState<Omit<LessonContent, 'quiz' | 'title'> | null>(null);
     const [isLoadingContent, setIsLoadingContent] = useState(true);
+    const [isOfflineContent, setIsOfflineContent] = useState(false);
 
     const initialBadges = user?.badges || [];
     const staticModuleContent = activeModuleId ? t.curriculum[activeModuleId]?.lessonContent : null;
     const englishModuleContent = activeModuleId ? englishTranslations.curriculum[activeModuleId]?.lessonContent : null;
 
     useEffect(() => {
-        const generateContent = async () => {
-            if (!englishModuleContent) {
+        const fetchContent = async () => {
+            if (!activeModuleId || !englishModuleContent) {
+                 setIsLoadingContent(false);
+                 return;
+            }
+            
+            setIsLoadingContent(true);
+            setIsOfflineContent(false);
+
+            // Try fetching from offline DB first
+            const offlineContent = await dbService.getContent(activeModuleId, language);
+            if (offlineContent) {
+                setDynamicContent(offlineContent);
+                setIsOfflineContent(true);
                 setIsLoadingContent(false);
                 return;
             }
 
-            setIsLoadingContent(true);
+            // If not available offline and user is offline, show message
+            if (!isOnline) {
+                setDynamicContent(null);
+                setIsLoadingContent(false);
+                return;
+            }
+
+            // Fetch from API if online
             try {
-                // For English, use the source of truth directly without an API call.
                 if (language === Language.English) {
                     const { title, quiz, ...content } = englishModuleContent;
                     setDynamicContent(content);
@@ -80,7 +100,6 @@ export const Lesson: React.FC = () => {
                 }
             } catch (error) {
                 console.error("Failed to generate dynamic content, falling back to static translations.", error);
-                // On failure, use the pre-translated static content as a fallback.
                 if (staticModuleContent) {
                     const { title, quiz, ...staticContent } = staticModuleContent;
                     setDynamicContent(staticContent);
@@ -90,14 +109,10 @@ export const Lesson: React.FC = () => {
             }
         };
 
-        if (activeModuleId) {
-            generateContent();
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeModuleId, language]);
+        fetchContent();
+    }, [activeModuleId, language, isOnline, staticModuleContent, englishModuleContent]);
 
     useEffect(() => {
-      // Logic to determine which badges were newly unlocked after this lesson
       if (lessonState === 'complete' && user) {
         const newBadges = user.badges.filter(b => !initialBadges.includes(b));
         setUnlockedBadgesOnComplete(newBadges);
@@ -106,30 +121,33 @@ export const Lesson: React.FC = () => {
     }, [lessonState, user?.badges]);
 
     if (!activeModuleId) {
-        // Fallback to prevent crashing if the page is loaded without a module
         setCurrentPage(Page.Dashboard);
         return null;
     }
     
-    if (!staticModuleContent) {
-        return <div className="p-8 text-center text-red-500">Error: Lesson content not found for this module.</div>;
-    }
-
     if (isLoadingContent) {
         return (
             <div className="container mx-auto p-4 md:p-8">
                 <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-lg flex flex-col items-center justify-center min-h-[50vh]">
                     <Loader2 className="animate-spin text-primary" size={48} />
-                    <p className="mt-4 text-lg font-semibold text-neutral-600">Creating your personalized lesson...</p>
+                    <p className="mt-4 text-lg font-semibold text-neutral-600">Loading lesson...</p>
                 </div>
             </div>
         );
     }
     
-    // Use dynamic content if available, otherwise fall back to static
-    const displayContent = dynamicContent 
-        ? { ...dynamicContent, title: staticModuleContent.title, quiz: staticModuleContent.quiz } 
-        : staticModuleContent;
+    if (!dynamicContent) {
+        return (
+             <div className="container mx-auto p-4 md:p-8">
+                <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-lg text-center min-h-[50vh] flex flex-col justify-center">
+                    <h2 className="text-2xl font-bold text-neutral-700">{t.offline.notAvailable}</h2>
+                    <p className="text-neutral-500 mt-2">Please connect to the internet to view or download this lesson.</p>
+                </div>
+            </div>
+        )
+    }
+
+    const displayContent = { ...dynamicContent, title: staticModuleContent!.title, quiz: staticModuleContent!.quiz };
 
     const handleCompleteQuiz = async () => {
         if (activeModuleId && user && !user.completedModules.includes(activeModuleId)) {
@@ -142,6 +160,10 @@ export const Lesson: React.FC = () => {
         setCurrentPage(Page.Dashboard);
         setActiveModuleId(null);
     }
+    
+    const handleSpeak = (text: string) => {
+        speak(text, language);
+    };
 
     const renderContentWithTooltips = (text: string) => {
         const tooltips = t.tooltips;
@@ -149,7 +171,6 @@ export const Lesson: React.FC = () => {
         if (!tooltips || terms.length === 0) return text;
     
         const regex = new RegExp(`\\b(${terms.join('|')})\\b`, 'gi');
-        
         const parts = text.split(regex);
     
         return parts.map((part, index) => {
@@ -166,20 +187,29 @@ export const Lesson: React.FC = () => {
             {lessonState === 'complete' && <CompletionModal onAcknowledge={handleAcknowledgeCompletion} points={25} unlockedBadgeIds={unlockedBadgesOnComplete} />}
             <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-lg">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-neutral-800 mb-4">{displayContent.title}</h1>
-                <p className="text-lg md:text-xl text-neutral-600 italic mb-8 border-l-4 border-primary pl-4">{renderContentWithTooltips(displayContent.introduction)}</p>
+                <div className="group flex gap-2 items-start">
+                    <p className="text-lg md:text-xl text-neutral-600 italic border-l-4 border-primary pl-4">{renderContentWithTooltips(displayContent.introduction)}</p>
+                     {isVoiceModeEnabled && <button onClick={() => handleSpeak(displayContent.introduction)} className="opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400 hover:text-primary p-1" aria-label={t.lesson.readAloud}><Volume2/></button>}
+                </div>
 
-                <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed space-y-6">
+                <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed space-y-6 mt-8">
                     {displayContent.sections.map((section, index) => (
-                        <div key={index}>
-                            <h2 className="text-2xl md:text-3xl font-bold text-neutral-800 !mb-3">{section.heading}</h2>
+                        <div key={index} className="group">
+                             <div className="flex gap-2 items-center">
+                                <h2 className="text-2xl md:text-3xl font-bold text-neutral-800 !mb-3">{section.heading}</h2>
+                                {isVoiceModeEnabled && <button onClick={() => handleSpeak(section.heading + ". " + section.content)} className="opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400 hover:text-primary" aria-label={t.lesson.readAloud}><Volume2/></button>}
+                             </div>
                             <p className="whitespace-pre-line mt-6">{renderContentWithTooltips(section.content)}</p>
                         </div>
                     ))}
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-neutral-200">
+                <div className="mt-12 pt-8 border-t border-neutral-200 group">
                     <h3 className="text-xl font-bold text-neutral-800 mb-3">Key Takeaway</h3>
-                    <p className="bg-primary/10 text-primary-dark font-medium p-6 rounded-xl">{renderContentWithTooltips(displayContent.summary)}</p>
+                    <div className="flex gap-2 items-start">
+                        <p className="bg-primary/10 text-primary-dark font-medium p-6 rounded-xl flex-grow">{renderContentWithTooltips(displayContent.summary)}</p>
+                        {isVoiceModeEnabled && <button onClick={() => handleSpeak(displayContent.summary)} className="opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400 hover:text-primary p-1 mt-4" aria-label={t.lesson.readAloud}><Volume2/></button>}
+                    </div>
                 </div>
                 
                 {lessonState === 'reading' && (

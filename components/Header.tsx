@@ -1,7 +1,7 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { Language } from '../types';
-import { Award, GraduationCap, Languages, LogOut, UserCircle, Settings } from 'lucide-react';
+import { Award, GraduationCap, Languages, LogOut, UserCircle, Settings, Wifi, WifiOff, Mic } from 'lucide-react';
 import { useTranslations } from '../i18n';
 import { Page } from '../types';
 
@@ -16,7 +16,38 @@ const UserAvatar: React.FC<{ name: string; avatarUrl?: string }> = ({ name, avat
     );
 };
 
-export const Header: React.FC = () => {
+const OfflineIndicator: React.FC = () => {
+    const context = useContext(AppContext);
+    if (!context) return null;
+    const { isOnline } = context;
+    const t = useTranslations();
+    const title = isOnline ? t.offline.onlineIndicator : t.offline.offlineIndicator;
+
+    return (
+        <div title={title} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold ${isOnline ? 'bg-green-100 text-green-800' : 'bg-neutral-200 text-neutral-600'}`}>
+            {isOnline ? <Wifi size={16} /> : <WifiOff size={16} />}
+            <span className="hidden sm:inline">{isOnline ? "Online" : "Offline"}</span>
+        </div>
+    );
+}
+
+const VoiceIndicator: React.FC = () => {
+    const context = useContext(AppContext);
+    if (!context) return null;
+    const { isVoiceModeEnabled, isListening } = context;
+    const t = useTranslations();
+
+    if (!isVoiceModeEnabled) return null;
+
+    return (
+        <div title={isListening ? t.voice.listening : t.voice.voiceModeActive} className="p-2 text-primary">
+            <Mic size={24} className={isListening ? 'animate-pulse' : ''} />
+        </div>
+    );
+};
+
+
+export const Header: React.FC<{ onSettingsClick: () => void }> = ({ onSettingsClick }) => {
   const context = useContext(AppContext);
   if (!context) throw new Error('Header must be used within an AppProvider');
   const { user, language, setLanguage, setCurrentPage, logout } = context;
@@ -52,6 +83,7 @@ export const Header: React.FC = () => {
           <h1 className="text-xl md:text-2xl font-bold text-neutral-800"><span className="hidden sm:inline">AI </span>Kasahorow</h1>
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
+          <OfflineIndicator />
           <div className="flex items-center gap-1 md:gap-2">
             <Award className="text-accent" size={22} />
             <span className="font-bold text-neutral-700 text-base md:text-lg">{user.points} <span className="hidden sm:inline">{t.common.pointsAbbr}</span></span>
@@ -72,6 +104,11 @@ export const Header: React.FC = () => {
               ))}
             </select>
           </div>
+
+          <VoiceIndicator />
+          <button onClick={onSettingsClick} className="p-2 text-neutral-500 hover:text-primary transition-colors" aria-label={t.header.settings}>
+            <Settings size={24}/>
+          </button>
 
           <div className="relative" ref={dropdownRef}>
             <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="rounded-full ring-2 ring-offset-2 ring-transparent hover:ring-primary transition-all">

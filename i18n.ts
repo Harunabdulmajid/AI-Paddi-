@@ -36,7 +36,7 @@ function mergeDeep<T extends object>(target: T, source: DeepPartial<T>): T {
 }
 // --- End Utility --- //
 
-type Translation = {
+export type Translation = {
   onboarding: {
     ctaButton: string;
     signInButton: string;
@@ -68,6 +68,8 @@ type Translation = {
     profileDescription: string;
     leaderboardTitle: string;
     leaderboardDescription: string;
+    walletTitle: string;
+    walletDescription: string;
     learningPathTitle: string;
   };
   multiplayer: {
@@ -111,6 +113,7 @@ type Translation = {
     difficulty: string;
     easy: string;
     hard: string;
+    pointDescription: string;
   };
   profile: {
     title: string;
@@ -135,13 +138,14 @@ type Translation = {
     multiplayerStatsTitle: string;
     wins: string;
     gamesPlayed: string;
+    viewWallet: string;
   };
   lesson: {
     startQuizButton: string;
     completeLessonButton: string;
     returnToDashboardButton: string;
     quizTitle: string;
-    quizCorrect: string;
+    quizCorrect: (points: number) => string;
     quizIncorrect: string;
     nextQuestionButton: string;
     completionModalTitle: string;
@@ -150,6 +154,7 @@ type Translation = {
     quizStreak: (streak: number) => string;
     submitAnswer: string;
     yourAnswer: string;
+    readAloud: string;
   };
   leaderboard: {
     title: string;
@@ -159,9 +164,53 @@ type Translation = {
     points: string;
     you: string;
   };
+  wallet: {
+    title: string;
+    description: string;
+    currentBalance: string;
+    history: string;
+    send: string;
+    marketplace: string;
+    sendPoints: string;
+    sendTo: string;
+    recipientEmail: string;
+    amount: string;
+    messageOptional: string;
+    messagePlaceholder: string;
+    sendButton: string;
+    sending: string;
+    dailyLimit: (amount: number, limit: number) => string;
+    insufficientPoints: string;
+    userNotFound: string;
+    sendSuccess: (amount: number, name: string) => string;
+    sendError: string;
+    confirmationTitle: string;
+    confirmationSend: (amount: number, name: string) => string;
+    confirmationSpend: (amount: number, item: string) => string;
+    confirm: string;
+    noTransactions: string;
+  };
+  marketplace: {
+    title: string;
+    description: string;
+    categories: {
+        Recognition: string;
+        Customization: string;
+        'Learning Boosters': string;
+        'Social Play': string;
+        'Future Perks': string;
+    };
+    redeem: string;
+    redeeming: string;
+    owned: string;
+    comingSoon: string;
+    redeemSuccess: (item: string) => string;
+    redeemError: string;
+  };
   header: {
     profile: string;
     logout: string;
+    settings: string;
   };
   common: {
     backToDashboard: string;
@@ -184,6 +233,36 @@ type Translation = {
     submitting: string;
     successTitle: string;
     successDescription: string;
+  };
+  settings: {
+    title: string;
+    voiceMode: string;
+    voiceModeDescription: string;
+  };
+  offline: {
+    download: string;
+    downloaded: string;
+    downloading: string;
+    offlineIndicator: string;
+    onlineIndicator: string;
+    syncing: string;
+    notAvailable: string;
+  };
+  voice: {
+    listening: string;
+    voiceModeActive: string;
+    navigatingTo: {
+      dashboard: string;
+      profile: string;
+      leaderboard: string;
+      game: string;
+      multiplayer: string;
+      wallet: string;
+    },
+    startingModule: (moduleName: string) => string;
+    openingSettings: string;
+    closingSettings: string;
+    loggingOut: string;
   };
   curriculum: {
     [key: string]: {
@@ -239,6 +318,8 @@ export const englishTranslations: Translation = {
     profileDescription: "View your progress and earned certificates.",
     leaderboardTitle: "Community Leaderboard",
     leaderboardDescription: "See how you rank against other learners.",
+    walletTitle: "My Wallet",
+    walletDescription: "View, send, and spend your earned points.",
     learningPathTitle: "Your Learning Path",
   },
   multiplayer: {
@@ -282,6 +363,7 @@ export const englishTranslations: Translation = {
     difficulty: "Difficulty",
     easy: "Easy",
     hard: "Hard",
+    pointDescription: "Correct guess in AI vs. Human game",
   },
   profile: {
     title: "Your Profile & Progress",
@@ -306,13 +388,14 @@ export const englishTranslations: Translation = {
     multiplayerStatsTitle: "Multi-player Stats",
     wins: "Wins",
     gamesPlayed: "Games Played",
+    viewWallet: "View Wallet Details",
   },
   lesson: {
       startQuizButton: "Start Quiz to Test Your Knowledge",
       completeLessonButton: "Complete Lesson",
       returnToDashboardButton: "Return to Dashboard",
       quizTitle: "Knowledge Check",
-      quizCorrect: "That's correct!",
+      quizCorrect: (points) => `That's correct! (+${points} points)`,
       quizIncorrect: "Not quite. The correct answer is:",
       nextQuestionButton: "Next Question",
       completionModalTitle: "Lesson Complete!",
@@ -321,6 +404,7 @@ export const englishTranslations: Translation = {
       quizStreak: (streak: number) => `🔥 ${streak} in a row!`,
       submitAnswer: "Submit Answer",
       yourAnswer: "Your answer...",
+      readAloud: "Read Aloud",
   },
   leaderboard: {
     title: "Community Leaderboard",
@@ -330,9 +414,53 @@ export const englishTranslations: Translation = {
     points: "Points",
     you: "You",
   },
+  wallet: {
+    title: "My Wallet",
+    description: "Manage your points, view your transaction history, and redeem rewards.",
+    currentBalance: "Current Balance",
+    history: "History",
+    send: "Send",
+    marketplace: "Marketplace",
+    sendPoints: "Send Points",
+    sendTo: "Send to",
+    recipientEmail: "Recipient's Email",
+    amount: "Amount",
+    messageOptional: "Message (optional)",
+    messagePlaceholder: "For your project!",
+    sendButton: "Send Points",
+    sending: "Sending...",
+    dailyLimit: (amount, limit) => `You have sent ${amount} / ${limit} points today.`,
+    insufficientPoints: "You don't have enough points to make this transfer.",
+    userNotFound: "Could not find a user with that email.",
+    sendSuccess: (amount, name) => `Successfully sent ${amount} points to ${name}!`,
+    sendError: "An error occurred while sending points.",
+    confirmationTitle: "Please Confirm",
+    confirmationSend: (amount, name) => `Are you sure you want to send ${amount} points to ${name}?`,
+    confirmationSpend: (amount, item) => `Are you sure you want to spend ${amount} points on "${item}"?`,
+    confirm: "Confirm",
+    noTransactions: "You have no transactions yet. Start learning to earn points!",
+  },
+  marketplace: {
+    title: "Marketplace",
+    description: "Use your points to unlock exclusive rewards and customizations.",
+    categories: {
+        Recognition: "Recognition",
+        Customization: "Customization",
+        'Learning Boosters': "Learning Boosters",
+        'Social Play': "Social Play",
+        'Future Perks': "Future Perks",
+    },
+    redeem: "Redeem",
+    redeeming: "Redeeming...",
+    owned: "Owned",
+    comingSoon: "Coming Soon",
+    redeemSuccess: (item) => `Successfully redeemed "${item}"!`,
+    redeemError: "An error occurred during purchase.",
+  },
   header: {
     profile: "Profile",
     logout: "Logout",
+    settings: "Settings",
   },
   common: {
     backToDashboard: "Back to Dashboard",
@@ -357,6 +485,36 @@ export const englishTranslations: Translation = {
     submitting: "Submitting...",
     successTitle: "Thank You!",
     successDescription: "Your feedback has been received. We appreciate you helping us make AI Kasahorow better.",
+  },
+  settings: {
+    title: "Settings",
+    voiceMode: "Voice-First Mode",
+    voiceModeDescription: "Enable voice commands and narration.",
+  },
+  offline: {
+    download: "Download for Offline",
+    downloaded: "Available Offline",
+    downloading: "Downloading...",
+    offlineIndicator: "Offline Mode",
+    onlineIndicator: "You're online",
+    syncing: "Syncing your progress...",
+    notAvailable: "This content is not available offline.",
+  },
+  voice: {
+    listening: "Listening...",
+    voiceModeActive: "Voice mode is active",
+    navigatingTo: {
+      dashboard: "Going to dashboard.",
+      profile: "Opening your profile.",
+      leaderboard: "Showing the leaderboard.",
+      game: "Starting the AI versus Human game.",
+      multiplayer: "Opening multi-player.",
+      wallet: "Opening your wallet.",
+    },
+    startingModule: (moduleName) => `Starting module: ${moduleName}.`,
+    openingSettings: "Opening settings.",
+    closingSettings: "Closing settings.",
+    loggingOut: "Logging you out.",
   },
   curriculum: {
     'what-is-ai': { 
@@ -575,7 +733,7 @@ export const englishTranslations: Translation = {
                 question: "How is AI most likely to change jobs?",
                 options: [
                   "By replacing all human jobs.",
-                  "By creating new jobs and changing existing ones to work with AI.",
+                  "By changing existing ones to work with AI.",
                   "By making all jobs harder.",
                   "By having no effect on jobs."
                 ],
@@ -636,6 +794,18 @@ export const englishTranslations: Translation = {
         name: 'Multiplayer Maestro',
         description: 'Played 10 multiplayer matches.',
     },
+    'bronze-supporter': {
+        name: 'Bronze Supporter',
+        description: 'Show your support for AI literacy by purchasing this badge.',
+    },
+    'silver-patron': {
+        name: 'Silver Patron',
+        description: 'A badge for dedicated patrons of accessible education.',
+    },
+    'gold-champion': {
+        name: 'Gold Champion',
+        description: 'The highest honor for champions of our mission.',
+    },
   }
 };
 
@@ -691,6 +861,7 @@ const swahiliPartial: DeepPartial<Translation> = {
     difficulty: "Ugumu",
     easy: "Rahisi",
     hard: "Ngumu",
+    pointDescription: "Utabiri sahihi katika mchezo wa AI dhidi ya Binadamu",
   },
   profile: {
     title: "Wasifu na Maendeleo Yako",
@@ -720,11 +891,12 @@ const swahiliPartial: DeepPartial<Translation> = {
       startQuizButton: "Anza Jaribio la Kupima Ujuzi Wako",
       completeLessonButton: "Kamilisha Somo",
       quizTitle: "Pima Ujuzi",
-      quizCorrect: "Sahihi kabisa!",
+      quizCorrect: (points) => `Sahihi kabisa! (+${points} alama)`,
       quizIncorrect: "Sio sahihi. Jibu sahihi ni:",
       nextQuestionButton: "Swali Linalofuata",
       submitAnswer: "Tuma",
       yourAnswer: "Jibu lako...",
+      readAloud: "Soma kwa Sauti",
   },
   leaderboard: {
     title: "Ubao wa Wanaoongoza",
@@ -737,6 +909,7 @@ const swahiliPartial: DeepPartial<Translation> = {
   header: {
     profile: "Wasifu",
     logout: "Toka",
+    settings: "Mipangilio",
   },
   common: {
     backToDashboard: "Rudi kwenye Dashibodi",
@@ -761,6 +934,36 @@ const swahiliPartial: DeepPartial<Translation> = {
     submitting: "Inatuma...",
     successTitle: "Asante!",
     successDescription: "Maoni yako yamepokelewa. Tunashukuru kwa kutusaidia kuifanya AI Kasahorow kuwa bora zaidi.",
+  },
+  settings: {
+    title: "Mipangilio",
+    voiceMode: "Hali ya Sauti",
+    voiceModeDescription: "Washa amri za sauti na usimulizi.",
+  },
+  offline: {
+    download: "Pakua kwa Matumizi Nje ya Mtandao",
+    downloaded: "Inapatikana Nje ya Mtandao",
+    downloading: "Inapakua...",
+    offlineIndicator: "Hali ya Nje ya Mtandao",
+    onlineIndicator: "Uko Mtandaoni",
+    syncing: "Inasawazisha maendeleo yako...",
+    notAvailable: "Maudhui haya hayapatikani ukiwa nje ya mtandao.",
+  },
+  voice: {
+    listening: "Inasikiliza...",
+    voiceModeActive: "Hali ya sauti inatumika",
+    navigatingTo: {
+      dashboard: "Inaenda kwenye dashibodi.",
+      profile: "Inafungua wasifu wako.",
+      leaderboard: "Inaonyesha ubao wa wanaoongoza.",
+      game: "Inaanza mchezo wa AI dhidi ya Binadamu.",
+      multiplayer: "Inafungua wachezaji wengi.",
+      wallet: "Inafungua pochi yako.",
+    },
+    startingModule: (moduleName) => `Inaanza moduli: ${moduleName}.`,
+    openingSettings: "Inafungua mipangilio.",
+    closingSettings: "Inafunga mipangilio.",
+    loggingOut: "Unatoka.",
   },
   curriculum: {
     'what-is-ai': { 
@@ -843,6 +1046,7 @@ const hausaPartial: DeepPartial<Translation> = {
     difficulty: "Wahala",
     easy: "Sauki",
     hard: "Wahala",
+    pointDescription: "Hasashen daidai a wasan AI da Mutum",
   },
   profile: {
     title: "Bayanan Sirri & Ci Gabanka",
@@ -872,11 +1076,12 @@ const hausaPartial: DeepPartial<Translation> = {
       startQuizButton: "Fara Jarrabawa Don Gwada Iliminka",
       completeLessonButton: "Kammala Darasi",
       quizTitle: "Gwajin Ilimi",
-      quizCorrect: "Dai-dai kwarai!",
+      quizCorrect: (points) => `Dai-dai kwarai! (+${points} maki)`,
       quizIncorrect: "Ba haka ba. Amsar daidai ita ce:",
       nextQuestionButton: "Tambaya Ta Gaba",
       submitAnswer: "Aika",
       yourAnswer: "Amsarka...",
+      readAloud: "Karanta da Sauti",
   },
   leaderboard: {
     title: "Jerin Gwarzaye",
@@ -889,6 +1094,7 @@ const hausaPartial: DeepPartial<Translation> = {
   header: {
     profile: "Bayanan Sirri",
     logout: "Fita",
+    settings: "Saiti",
   },
   common: {
     backToDashboard: "Koma zuwa Dashboard",
@@ -913,6 +1119,36 @@ const hausaPartial: DeepPartial<Translation> = {
     submitting: "Ana Aikowa...",
     successTitle: "Mun Gode!",
     successDescription: "An karɓi ra'ayinka. Muna godiya da taimakon ka wajen inganta AI Kasahorow.",
+  },
+  settings: {
+    title: "Saiti",
+    voiceMode: "Yanayin Murya",
+    voiceModeDescription: "Kunna umarni da ba da labari na murya.",
+  },
+  offline: {
+    download: "Sauke don Amfani Ba tare da Intanet ba",
+    downloaded: "Akwai Ba tare da Intanet ba",
+    downloading: "Ana Saukewa...",
+    offlineIndicator: "Yanayin Ba da Intanet",
+    onlineIndicator: "Kuna kan layi",
+    syncing: "Ana daidaita ci gaban ku...",
+    notAvailable: "Wannan abun ciki ba ya samuwa a layi.",
+  },
+  voice: {
+    listening: "Ana sauraro...",
+    voiceModeActive: "Yanayin murya yana aiki",
+    navigatingTo: {
+      dashboard: "Ana zuwa dashboard.",
+      profile: "Ana bude bayanan ka.",
+      leaderboard: "Ana nuna jerin gwarzaye.",
+      game: "Ana fara wasan AI da Mutum.",
+      multiplayer: "Ana bude wasa da yawa.",
+      wallet: "Ana bude walat dinka.",
+    },
+    startingModule: (moduleName) => `Ana fara darasi: ${moduleName}.`,
+    openingSettings: "Ana bude saiti.",
+    closingSettings: "Ana rufe saiti.",
+    loggingOut: "Ana fitar da kai.",
   },
   curriculum: {
       'what-is-ai': { 
@@ -973,6 +1209,7 @@ const yorubaPartial: DeepPartial<Translation> = {
       difficulty: "Ipele",
       easy: "Rọrun",
       hard: "Lile",
+      pointDescription: "Idahun to tọ ninu ere AI vs Eniyan",
   },
   profile: {
       title: "Profaili Rẹ & Ilọsiwaju",
@@ -987,6 +1224,8 @@ const yorubaPartial: DeepPartial<Translation> = {
   lesson: {
       submitAnswer: "Fi silẹ",
       yourAnswer: "Idahun rẹ...",
+      readAloud: "Ka Soke",
+      quizCorrect: (points) => `Iyẹn tọ! (+${points} awọn aaye)`,
   },
   leaderboard: {
     title: "Igbimọ Awọn adari",
@@ -1015,6 +1254,36 @@ const yorubaPartial: DeepPartial<Translation> = {
     submitting: "Nfiranṣẹ...",
     successTitle: "O ṣeun!",
     successDescription: "A ti gba idahun rẹ. A dupẹ lọwọ rẹ fun iranlọwọ lati jẹ ki AI Kasahorow dara si.",
+  },
+  settings: {
+    title: "Ètò",
+    voiceMode: "Ipo Ohùn",
+    voiceModeDescription: "Muu ṣiṣẹ awọn aṣẹ ohun ati itan.",
+  },
+  offline: {
+    download: "Ṣe igbasilẹ fun Aisinipo",
+    downloaded: "Wa ni Aisinipo",
+    downloading: "Ngbaa silẹ...",
+    offlineIndicator: "Ipo Aisinipo",
+    onlineIndicator: "O wa lori ayelujara",
+    syncing: "Muu ilọsiwaju rẹ ṣiṣẹpọ...",
+    notAvailable: "Akoonu yii ko si ni aisinipo.",
+  },
+  voice: {
+    listening: "Ngbọ...",
+    voiceModeActive: "Ipo ohun ti nṣiṣẹ",
+    navigatingTo: {
+      dashboard: "Lilọ si dasibodu.",
+      profile: "Nsii profaili rẹ.",
+      leaderboard: "Nfihan igbimọ awọn adari.",
+      game: "Bẹrẹ ere AI dipo Eniyan.",
+      multiplayer: "Nsii elere-pupọ.",
+      wallet: "Nsii apamọwọ rẹ.",
+    },
+    startingModule: (moduleName) => `Bẹrẹ modulu: ${moduleName}.`,
+    openingSettings: "Nsii awọn eto.",
+    closingSettings: "Titiipa awọn eto.",
+    loggingOut: "N jade kuro.",
   },
   levels: {
     [LearningPath.Beginner]: 'Olùbẹ̀rẹ̀',
@@ -1055,6 +1324,7 @@ const igboPartial: DeepPartial<Translation> = {
     difficulty: "Ọkwa",
     easy: "Mfe",
     hard: "Siri ike",
+    pointDescription: "Azịza ziri ezi n'egwuregwu AI vs Human",
   },
   profile: {
       title: "Profaịlụ Gị & Ọganihu",
@@ -1069,6 +1339,8 @@ const igboPartial: DeepPartial<Translation> = {
   lesson: {
       submitAnswer: "Dobe",
       yourAnswer: "Azịza gị...",
+      readAloud: "Gụọ N'olu Dara Ụda",
+      quizCorrect: (points) => `Nke ahụ ziri ezi! (+${points} akara)`,
   },
   leaderboard: {
     title: "Bọọdụ Ndị ndu",
@@ -1097,6 +1369,36 @@ const igboPartial: DeepPartial<Translation> = {
     submitting: "Na-edobe...",
     successTitle: "Daalụ!",
     successDescription: "Anabatala nkwupụta gị. Anyị nwere ekele maka inyere anyị aka ime ka AI Kasahorow ka mma.",
+  },
+  settings: {
+    title: "Ntọala",
+    voiceMode: "Ụdị Olu",
+    voiceModeDescription: "Kwado iwu olu na nkọwa.",
+  },
+  offline: {
+    download: "Budata maka anọghị n'ịntanetị",
+    downloaded: "Dị na-anọghị n'ịntanetị",
+    downloading: "Na-ebudata...",
+    offlineIndicator: "Ụdị anọghị n'ịntanetị",
+    onlineIndicator: "Ị nọ n'ịntanetị",
+    syncing: "Na-emekọrịta ọganihu gị...",
+    notAvailable: "Ọdịnaya a adịghị na-anọghị n'ịntanetị.",
+  },
+  voice: {
+    listening: "Na-ege ntị...",
+    voiceModeActive: "Ụdị olu na-arụ ọrụ",
+    navigatingTo: {
+      dashboard: "Na-aga na dashboard.",
+      profile: "Na-emeghe profaịlụ gị.",
+      leaderboard: "Na-egosi bọọdụ ndị ndu.",
+      game: "Na-amalite egwuregwu AI megide Mmadụ.",
+      multiplayer: "Na-emeghe ọtụtụ onye ọkpụkpọ.",
+      wallet: "Na-emeghe obere akpa gị.",
+    },
+    startingModule: (moduleName) => `Na-amalite modulu: ${moduleName}.`,
+    openingSettings: "Na-emeghe ntọala.",
+    closingSettings: "Na-emechi ntọala.",
+    loggingOut: "Na-apụ apụ.",
   },
   levels: {
     [LearningPath.Beginner]: 'Onye mbido',
@@ -1137,6 +1439,7 @@ const pidginPartial: DeepPartial<Translation> = {
       difficulty: "Level",
       easy: "Easy",
       hard: "Hard",
+      pointDescription: "Correct guess for AI vs Human game",
   },
   profile: {
       title: "Your Profile & Progress",
@@ -1150,6 +1453,8 @@ const pidginPartial: DeepPartial<Translation> = {
   lesson: {
       submitAnswer: "Submit",
       yourAnswer: "Your answer...",
+      readAloud: "Read Am Aloud",
+      quizCorrect: (points) => `Na correct! (+${points} points)`,
   },
   leaderboard: {
     title: "Leaderboard",
@@ -1178,6 +1483,36 @@ const pidginPartial: DeepPartial<Translation> = {
     submitting: "Submitting...",
     successTitle: "Thank You!",
     successDescription: "We don receive your feedback. We appreciate say you dey help us make AI Kasahorow better.",
+  },
+  settings: {
+    title: "Settings",
+    voiceMode: "Voice-First Mode",
+    voiceModeDescription: "Enable voice commands and narration.",
+  },
+  offline: {
+    download: "Download for Offline",
+    downloaded: "Available Offline",
+    downloading: "Downloading...",
+    offlineIndicator: "Offline Mode",
+    onlineIndicator: "You dey online",
+    syncing: "Dey sync your progress...",
+    notAvailable: "This content no dey available offline.",
+  },
+  voice: {
+    listening: "Dey listen...",
+    voiceModeActive: "Voice mode dey active",
+    navigatingTo: {
+      dashboard: "I dey go dashboard.",
+      profile: "I dey open your profile.",
+      leaderboard: "I dey show leaderboard.",
+      game: "I dey start AI versus Human game.",
+      multiplayer: "I dey open multi-player.",
+      wallet: "I dey open your wallet.",
+    },
+    startingModule: (moduleName) => `I dey start module: ${moduleName}.`,
+    openingSettings: "I dey open settings.",
+    closingSettings: "I dey close settings.",
+    loggingOut: "I dey log you out.",
   },
   levels: {
     [LearningPath.Beginner]: 'Beginner',
@@ -1264,7 +1599,7 @@ const populateBadgeTranslations = (trans: Translation) => {
 }
 
 
-const translations: { [key in Language]: Translation } = {
+export const translations: { [key in Language]: Translation } = {
   [Language.English]: populateBadgeTranslations(englishTranslations),
   [Language.Swahili]: mergeDeep({ ...englishTranslations }, swahiliPartial),
   [Language.Hausa]: mergeDeep({ ...englishTranslations }, hausaPartial),

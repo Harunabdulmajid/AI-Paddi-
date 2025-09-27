@@ -1,4 +1,4 @@
-import { User, LearningPath, FeedbackType, Language, GameSession, Player } from '../types';
+import { User, LearningPath, FeedbackType, Language, GameSession, Player, Wallet, Transaction } from '../types';
 import { CURRICULUM_MODULES } from '../constants';
 // We import the english translations directly to act as a master question bank for consistency
 import { englishTranslations } from '../i18n'; 
@@ -8,6 +8,7 @@ const DB_KEY_USERS = 'alk_users_by_email';
 const DB_KEY_GAMES = 'alk_games_by_code';
 
 const SIMULATED_DELAY = 300; // ms
+const DAILY_TRANSFER_LIMIT = 200;
 
 // --- Helper Functions ---
 const readDb = <T>(key: string, defaultValue: T): T => {
@@ -23,19 +24,27 @@ const writeDb = <T>(key: string, data: T) => {
   localStorage.setItem(key, JSON.stringify(data));
 };
 
+const getTodayDateString = () => new Date().toISOString().split('T')[0];
+
+const initializeDefaultWallet = (points: number): Wallet => ({
+    balance: points,
+    transactions: [],
+    dailyTransfer: { date: getTodayDateString(), amount: 0 },
+});
+
 // Initialize with some mock data if empty
 const initializeDb = () => {
     let users = readDb<Record<string, User>>(DB_KEY_USERS, {});
     if (Object.keys(users).length === 0) {
-        const mockUsers: User[] = [
-            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', name: 'Amina', points: 250, level: LearningPath.Advanced, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 } },
-            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', name: 'Kwame', points: 190, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 } },
-            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', name: 'Fatou', points: 175, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 } },
-            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', name: 'Chinedu', points: 150, level: LearningPath.Beginner, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 } },
-            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', name: 'Zola', points: 120, level: LearningPath.Beginner, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 } },
+        const mockUsers: Omit<User, 'wallet'>[] = [
+            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', name: 'Amina', points: 250, level: LearningPath.Advanced, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
+            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', name: 'Kwame', points: 190, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
+            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', name: 'Fatou', points: 175, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
+            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', name: 'Chinedu', points: 150, level: LearningPath.Beginner, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
+            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', name: 'Zola', points: 120, level: LearningPath.Beginner, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
         ];
         const usersDb = mockUsers.reduce((acc, user) => {
-            acc[user.email] = user;
+            acc[user.email] = { ...user, wallet: initializeDefaultWallet(user.points) };
             return acc;
         }, {} as Record<string, User>);
         writeDb(DB_KEY_USERS, usersDb);
@@ -51,6 +60,66 @@ export const apiService = {
       setTimeout(() => {
         const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
         resolve(users[email.toLowerCase()] || null);
+      }, SIMULATED_DELAY);
+    });
+  },
+
+  async handleUserLogin(email: string): Promise<{ user: User, newTransactions: Transaction[] }> {
+    return new Promise((resolve, reject) => {
+      setTimeout(async () => {
+        const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+        let user = users[email.toLowerCase()];
+        if (!user) return reject(new Error("User not found"));
+
+        let newTransactions: Transaction[] = [];
+
+        // --- Backward compatibility & Initialization for old users ---
+        if (!user.wallet) user.wallet = initializeDefaultWallet(user.points);
+        if (!user.lastLoginDate) user.lastLoginDate = '';
+        if (!user.loginStreak) user.loginStreak = 0;
+        if (!user.certificateLevel) user.certificateLevel = 'basic';
+        if (!user.theme) user.theme = 'default';
+        if (!user.avatarId) user.avatarId = 'avatar-01';
+        if (!user.unlockedVoices) user.unlockedVoices = [];
+        // --- End Initialization ---
+
+        const today = getTodayDateString();
+        const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+        
+        // --- Daily Login Streak Logic ---
+        if (user.lastLoginDate !== today) {
+          let newStreak = 1;
+          if (user.lastLoginDate === yesterday) {
+            newStreak = user.loginStreak + 1;
+          }
+          
+          const pointsEarned = 10;
+          const streakTransaction: Transaction = {
+              id: `txn-${Date.now()}`,
+              type: 'earn',
+              description: `Daily login streak (${newStreak} day${newStreak > 1 ? 's' : ''})`,
+              amount: pointsEarned,
+              timestamp: Date.now(),
+          };
+
+          user.points += pointsEarned;
+          user.wallet.balance = user.points;
+          user.wallet.transactions.unshift(streakTransaction);
+          user.lastLoginDate = today;
+          user.loginStreak = newStreak;
+          newTransactions.push(streakTransaction);
+        }
+        
+        // --- Reset daily transfer limit if it's a new day ---
+        if (user.wallet.dailyTransfer.date !== today) {
+            user.wallet.dailyTransfer = { date: today, amount: 0 };
+        }
+        
+        // Update user in DB with login changes
+        users[email.toLowerCase()] = user;
+        writeDb(DB_KEY_USERS, users);
+        
+        resolve({ user, newTransactions });
       }, SIMULATED_DELAY);
     });
   },
@@ -76,6 +145,13 @@ export const apiService = {
           completedModules: [],
           badges: [],
           multiplayerStats: { wins: 0, gamesPlayed: 0 },
+          wallet: initializeDefaultWallet(0),
+          lastLoginDate: getTodayDateString(),
+          loginStreak: 1,
+          certificateLevel: 'basic',
+          theme: 'default',
+          avatarId: 'avatar-01',
+          unlockedVoices: [],
         };
         users[lowercasedEmail] = newUser;
         writeDb(DB_KEY_USERS, users);
@@ -89,19 +165,110 @@ export const apiService = {
       setTimeout(() => {
         const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
         const lowercasedEmail = email.toLowerCase();
-        if (users[lowercasedEmail]) {
-          // Ensure badges are unique
-          if (updates.badges) {
-            updates.badges = [...new Set(updates.badges)];
+        let user = users[lowercasedEmail];
+        if (user) {
+          // Ensure arrays are merged correctly and uniquely
+          if (updates.badges) updates.badges = [...new Set([...user.badges, ...updates.badges])];
+          if (updates.completedModules) updates.completedModules = [...new Set([...user.completedModules, ...updates.completedModules])];
+          if (updates.unlockedVoices) updates.unlockedVoices = [...new Set([...user.unlockedVoices, ...updates.unlockedVoices])];
+          
+          user = { ...user, ...updates };
+          
+          if(updates.wallet) {
+              user.wallet = { ...user.wallet, ...updates.wallet };
+              user.points = user.wallet.balance; // Sync points with wallet balance
           }
-          users[lowercasedEmail] = { ...users[lowercasedEmail], ...updates };
+          
+          users[lowercasedEmail] = user;
           writeDb(DB_KEY_USERS, users);
-          resolve(users[lowercasedEmail]);
+          resolve(user);
         } else {
           resolve(null);
         }
       }, SIMULATED_DELAY / 2); // Make updates faster
     });
+  },
+
+  async sendPoints(senderEmail: string, recipientEmail: string, amount: number, message: string): Promise<{ sender: User, recipient: User }> {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+              const sender = users[senderEmail.toLowerCase()];
+              const recipient = users[recipientEmail.toLowerCase()];
+
+              if (!sender) return reject(new Error("Sender not found."));
+              if (!recipient) return reject(new Error("Recipient not found."));
+              if (sender.email === recipient.email) return reject(new Error("You cannot send points to yourself."));
+              if (amount <= 0) return reject(new Error("Amount must be positive."));
+              if (sender.wallet.balance < amount) return reject(new Error("Insufficient points."));
+
+              const today = getTodayDateString();
+              if (sender.wallet.dailyTransfer.date !== today) {
+                  sender.wallet.dailyTransfer = { date: today, amount: 0 };
+              }
+              if (sender.wallet.dailyTransfer.amount + amount > DAILY_TRANSFER_LIMIT) {
+                  return reject(new Error(`Daily transfer limit of ${DAILY_TRANSFER_LIMIT} points exceeded.`));
+              }
+
+              // Perform transaction
+              sender.wallet.balance -= amount;
+              sender.points = sender.wallet.balance;
+              sender.wallet.dailyTransfer.amount += amount;
+              sender.wallet.transactions.unshift({
+                  id: `txn-${Date.now()}`,
+                  type: 'send',
+                  description: `To ${recipient.name}${message ? `: "${message}"` : ''}`,
+                  amount,
+                  timestamp: Date.now(),
+                  to: recipient.name,
+              });
+              
+              recipient.wallet.balance += amount;
+              recipient.points = recipient.wallet.balance;
+              recipient.wallet.transactions.unshift({
+                  id: `txn-${Date.now() + 1}`,
+                  type: 'receive',
+                  description: `From ${sender.name}${message ? `: "${message}"` : ''}`,
+                  amount,
+                  timestamp: Date.now(),
+                  from: sender.name,
+              });
+
+              writeDb(DB_KEY_USERS, users);
+              resolve({ sender, recipient });
+          }, SIMULATED_DELAY * 2);
+      });
+  },
+
+  async redeemItem(userEmail: string, itemId: string, cost: number, payload: any): Promise<User> {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+              const user = users[userEmail.toLowerCase()];
+
+              if (!user) return reject(new Error("User not found."));
+              if (user.wallet.balance < cost) return reject(new Error("Insufficient points."));
+
+              // Apply purchase effect
+              if (payload.badgeId) user.badges.push(payload.badgeId);
+              if (payload.certificateLevel) user.certificateLevel = payload.certificateLevel;
+              if (payload.theme) user.theme = payload.theme;
+              
+              // Perform transaction
+              user.wallet.balance -= cost;
+              user.points = user.wallet.balance;
+              user.wallet.transactions.unshift({
+                  id: `txn-${Date.now()}`,
+                  type: 'spend',
+                  description: `Purchased item: ${itemId}`,
+                  amount: cost,
+                  timestamp: Date.now(),
+              });
+              
+              writeDb(DB_KEY_USERS, users);
+              resolve(user);
+          }, SIMULATED_DELAY);
+      });
   },
   
   async getLeaderboard(): Promise<Array<Pick<User, 'name' | 'points'>>> {
@@ -129,7 +296,7 @@ export const apiService = {
       });
   },
 
-  // --- Multiplayer API ---
+  // --- Multiplayer API (Remains Unchanged) ---
   async createGameSession(host: User, language: Language): Promise<GameSession> {
     return new Promise((resolve) => {
       setTimeout(() => {

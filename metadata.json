@@ -1,5 +1,7 @@
 {
   "name": "Copy of AI Kasahorow: AI Literacy for All",
   "description": "An AI-powered educational app that delivers AI Literacy in local languages. The app teaches students, teachers, and parents the fundamentals of Artificial Intelligence in accessible, culturally relevant, and engaging ways.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

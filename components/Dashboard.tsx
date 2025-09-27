@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext';
 import { CURRICULUM_MODULES } from '../constants';
 import { ModuleCard } from './ModuleCard';
 import { Page, Module } from '../types';
-import { Sword, UserCircle, ArrowRight, BarChart3, BookCopy, Star, Users } from 'lucide-react';
+import { Sword, UserCircle, ArrowRight, BarChart3, BookCopy, Star, Users, Wallet } from 'lucide-react';
 import { useTranslations } from '../i18n';
 
 const FeatureButton: React.FC<{ icon: React.ReactNode; title: string; description: string; onClick: () => void }> = ({ icon, title, description, onClick }) => (
@@ -91,6 +91,12 @@ export const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        <FeatureButton 
+            icon={<Wallet size={32} />}
+            title={t.dashboard.walletTitle}
+            description={t.dashboard.walletDescription}
+            onClick={() => setCurrentPage(Page.Wallet)}
+        />
         <FeatureButton 
             icon={<Users size={32} />}
             title={t.dashboard.multiplayerTitle}
