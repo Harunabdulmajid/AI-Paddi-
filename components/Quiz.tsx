@@ -75,7 +75,7 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
           </div>
         )}
         
-        {isAnswered && isCorrect && (
+        {isAnswered && (
             <div className="mt-6 text-center">
                  <button
                     onClick={handleNext}

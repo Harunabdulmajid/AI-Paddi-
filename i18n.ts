@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import { AppContext } from './context/AppContext';
-import { Language, LearningPath, LessonContent } from './types';
+import { Language, LearningPath, LessonContent, FeedbackType } from './types';
+import { BADGES } from './constants';
 
 // --- Utility for deep merging translations --- //
 type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]>; } : T;
@@ -37,21 +38,20 @@ function mergeDeep<T extends object>(target: T, source: DeepPartial<T>): T {
 
 type Translation = {
   onboarding: {
-    welcome: string;
-    prompt: string;
-    thinking: string;
-    textAreaPlaceholder: string;
-    sendButtonLabel: string;
-    successTitle: string;
-    successMessage: string;
     ctaButton: string;
-    triviaQuestion: string;
+    signInButton: string;
+    pathAssignedTitle: string;
+    pathAssignedDescription: string;
   };
   dashboard: {
     greeting: (name: string) => string;
     subGreeting: string;
-    podcastTitle: string;
-    podcastDescription: string;
+    progressTitle: string;
+    progressDescription: (completed: number, total: number) => string;
+    continueLearningButton: string;
+    allModulesCompleted: string;
+    multiplayerTitle: string;
+    multiplayerDescription: string;
     gameTitle: string;
     gameDescription: string;
     profileTitle: string;
@@ -60,22 +60,31 @@ type Translation = {
     leaderboardDescription: string;
     learningPathTitle: string;
   };
-  podcast: {
+  multiplayer: {
     title: string;
     description: string;
-    step1: string;
-    generateButton: string;
-    generatingButton: string;
-    step2: string;
-    generatingText: string;
-    generatingSubtext: string;
-    nextSteps: string;
-    aiVoiceButton: string;
-    stopButton: string;
-    recordButton: string;
-    placeholderTitle: string;
-    noVoiceSupportTooltip: string;
-    recordTooltip: string;
+    createGame: string;
+    creating: string;
+    joinGame: string;
+    joining: string;
+    gameCodePlaceholder: string;
+    lobbyTitle: string;
+    shareCode: string;
+    copied: string;
+    players: string;
+    waitingForHost: string;
+    startGame: string;
+    starting: string;
+    question: (current: number, total: number) => string;
+    scoreboard: string;
+    finalResults: string;
+    winner: string;
+    rematch: string;
+    exit: string;
+    errorNotFound: string;
+    errorAlreadyStarted: string;
+    errorFull: string;
+    errorGeneric: string;
   };
   game: {
     title: string;
@@ -88,6 +97,9 @@ type Translation = {
     humanButton: string;
     aiButton: string;
     playAgainButton: string;
+    difficulty: string;
+    easy: string;
+    hard: string;
   };
   profile: {
     title: string;
@@ -96,6 +108,8 @@ type Translation = {
     points: string;
     progressTitle: string;
     progressDescription: (completed: number, total: number) => string;
+    badgesTitle: string;
+    noBadges: string;
     certificatesTitle: string;
     moreCertificates: string;
     certificateTitleSingle: string;
@@ -105,14 +119,22 @@ type Translation = {
     certificateId: string;
     downloadButton: string;
     shareButton: string;
+    feedbackButton: string;
+    multiplayerStatsTitle: string;
+    wins: string;
+    gamesPlayed: string;
   };
   lesson: {
     startQuizButton: string;
     completeLessonButton: string;
+    returnToDashboardButton: string;
     quizTitle: string;
     quizCorrect: string;
     quizIncorrect: string;
     nextQuestionButton: string;
+    completionModalTitle: string;
+    completionModalPoints: (points: number) => string;
+    badgeUnlocked: string;
   };
   leaderboard: {
     title: string;
@@ -122,10 +144,31 @@ type Translation = {
     points: string;
     you: string;
   };
+  header: {
+    profile: string;
+    logout: string;
+  };
   common: {
     backToDashboard: string;
     footer: (year: number) => string;
     pointsAbbr: string;
+    save: string;
+    cancel: string;
+    submit: string;
+    close: string;
+  };
+  feedback: {
+    title: string;
+    description: string;
+    typeLabel: string;
+    types: {
+      [key in FeedbackType]: string;
+    };
+    messageLabel: string;
+    messagePlaceholder: string;
+    submitting: string;
+    successTitle: string;
+    successDescription: string;
   };
   curriculum: {
     [key: string]: {
@@ -137,26 +180,34 @@ type Translation = {
   levels: {
     [key: string]: string;
   };
+  tooltips: {
+    [key: string]: string;
+  };
+  badges: {
+    [key: string]: {
+      name: string;
+      description: string;
+    };
+  };
 };
 
 // Base English translations - the single source of truth for the structure
-const englishTranslations: Translation = {
+export const englishTranslations: Translation = {
   onboarding: {
-    welcome: "Welcome to AI Kasahorow!",
-    prompt: "Let's start with a quick question to personalize your learning journey.",
-    thinking: "Thinking...",
-    textAreaPlaceholder: "Type your answer here...",
-    sendButtonLabel: "Send answer",
-    successTitle: "Great! We're creating your personalized learning path.",
-    successMessage: "Click the button below to go to your dashboard.",
-    ctaButton: "Let's Go!",
-    triviaQuestion: "What do you think Artificial Intelligence (AI) is? Explain it in your own words, like you're talking to a friend.",
+    ctaButton: "Start Learning!",
+    signInButton: "Get Started",
+    pathAssignedTitle: "Congratulations!",
+    pathAssignedDescription: "You're on your way! We've assigned you the perfect learning path to get started.",
   },
   dashboard: {
     greeting: (name) => `Hello, ${name}!`,
     subGreeting: "Ready to continue your AI adventure?",
-    podcastTitle: "Podcast Generator",
-    podcastDescription: "Create and share AI podcasts in your language.",
+    progressTitle: "Your Progress",
+    progressDescription: (completed, total) => `You've completed ${completed} of ${total} modules.`,
+    continueLearningButton: "Continue Learning",
+    allModulesCompleted: "All Modules Completed!",
+    multiplayerTitle: "Multi-player",
+    multiplayerDescription: "Challenge friends or others in a real-time quiz.",
     gameTitle: "AI vs. Human",
     gameDescription: "Can you tell who wrote it? Test your skills!",
     profileTitle: "Profile & Certificates",
@@ -165,22 +216,31 @@ const englishTranslations: Translation = {
     leaderboardDescription: "See how you rank against other learners.",
     learningPathTitle: "Your Learning Path",
   },
-  podcast: {
-      title: "Podcast Generator",
-      description: "Become an AI Champion! Create a short podcast to share with your community.",
-      step1: "Select a Topic",
-      generateButton: "Generate Script",
-      generatingButton: "Generating...",
-      step2: "Your Podcast",
-      generatingText: "Our AI is crafting your script...",
-      generatingSubtext: "This might take a moment.",
-      nextSteps: "Next Steps",
-      aiVoiceButton: "AI Voice",
-      stopButton: "Stop",
-      recordButton: "Record Yours",
-      placeholderTitle: "Your generated podcast script will appear here.",
-      noVoiceSupportTooltip: "AI voices not available for this language in your browser",
-      recordTooltip: "Recording feature coming soon!",
+  multiplayer: {
+    title: "Multi-player Challenge",
+    description: "Test your AI knowledge against others in a fun, real-time quiz.",
+    createGame: "Create Game",
+    creating: "Creating...",
+    joinGame: "Join Game",
+    joining: "Joining...",
+    gameCodePlaceholder: "Enter Game Code",
+    lobbyTitle: "Game Lobby",
+    shareCode: "Share this code with your friends:",
+    copied: "Copied!",
+    players: "Players",
+    waitingForHost: "Waiting for host to start...",
+    startGame: "Start Game",
+    starting: "Starting...",
+    question: (current, total) => `Question ${current} of ${total}`,
+    scoreboard: "Scoreboard",
+    finalResults: "Final Results",
+    winner: "Winner!",
+    rematch: "Rematch",
+    exit: "Exit",
+    errorNotFound: "Game not found. Please check the code.",
+    errorAlreadyStarted: "This game has already started.",
+    errorFull: "This game is full.",
+    errorGeneric: "An error occurred. Please try again.",
   },
   game: {
     title: "AI vs. Human",
@@ -193,6 +253,9 @@ const englishTranslations: Translation = {
     humanButton: "Human",
     aiButton: "AI",
     playAgainButton: "Play Again",
+    difficulty: "Difficulty",
+    easy: "Easy",
+    hard: "Hard",
   },
   profile: {
     title: "Your Profile & Progress",
@@ -201,6 +264,8 @@ const englishTranslations: Translation = {
     points: "Points",
     progressTitle: "Learning Progress",
     progressDescription: (completed, total) => `${completed} of ${total} modules completed`,
+    badgesTitle: "My Badges",
+    noBadges: "Complete modules and earn points to unlock badges!",
     certificatesTitle: "Your Certificates",
     moreCertificates: "Complete all modules in your learning path to earn a certificate.",
     certificateTitleSingle: "Certificate of Completion",
@@ -210,14 +275,22 @@ const englishTranslations: Translation = {
     certificateId: "Certificate ID",
     downloadButton: "Download",
     shareButton: "Share",
+    feedbackButton: "Send Feedback",
+    multiplayerStatsTitle: "Multi-player Stats",
+    wins: "Wins",
+    gamesPlayed: "Games Played",
   },
   lesson: {
       startQuizButton: "Start Quiz to Test Your Knowledge",
-      completeLessonButton: "Complete Lesson (+25 Points)",
+      completeLessonButton: "Complete Lesson",
+      returnToDashboardButton: "Return to Dashboard",
       quizTitle: "Knowledge Check",
       quizCorrect: "That's correct!",
       quizIncorrect: "Not quite. The correct answer is:",
       nextQuestionButton: "Next Question",
+      completionModalTitle: "Lesson Complete!",
+      completionModalPoints: (points) => `You've earned ${points} points!`,
+      badgeUnlocked: "Badge Unlocked!",
   },
   leaderboard: {
     title: "Community Leaderboard",
@@ -227,10 +300,33 @@ const englishTranslations: Translation = {
     points: "Points",
     you: "You",
   },
+  header: {
+    profile: "Profile",
+    logout: "Logout",
+  },
   common: {
     backToDashboard: "Back to Dashboard",
     footer: (year) => `AI Kasahorow © ${year} - Democratizing AI Literacy`,
     pointsAbbr: "pts",
+    save: "Save",
+    cancel: "Cancel",
+    submit: "Submit",
+    close: "Close",
+  },
+  feedback: {
+    title: "Share Your Feedback",
+    description: "We value your input! Let us know how we can improve.",
+    typeLabel: "Feedback Type",
+    types: {
+        [FeedbackType.Bug]: "Bug Report",
+        [FeedbackType.Suggestion]: "Suggestion",
+        [FeedbackType.General]: "General Feedback",
+    },
+    messageLabel: "Your Message",
+    messagePlaceholder: "Please describe the issue or your idea...",
+    submitting: "Submitting...",
+    successTitle: "Thank You!",
+    successDescription: "Your feedback has been received. We appreciate you helping us make AI Kasahorow better.",
   },
   curriculum: {
     'what-is-ai': { 
@@ -451,24 +547,55 @@ const englishTranslations: Translation = {
     [LearningPath.Intermediate]: 'Intermediate',
     [LearningPath.Advanced]: 'Advanced',
   },
+  tooltips: {
+    'artificial intelligence': 'The ability of a computer or machine to perform tasks that normally require human intelligence, like learning and problem-solving.',
+    'ai': 'Short for Artificial Intelligence. A field of computer science focused on creating smart machines.',
+    'algorithm': 'A set of rules or instructions, like a recipe, that a computer follows to complete a task.',
+    'machine learning': 'A type of AI that allows computers to learn from data without being explicitly programmed. It finds patterns to make predictions.',
+    'data': 'Information, such as facts, numbers, or pictures, that can be collected and analyzed by a computer.',
+    'ai bias': 'When an AI system produces unfair or prejudiced results because it was trained on incomplete or flawed data.',
+    'ai trainers': 'People who prepare and label data to teach AI systems how to perform specific tasks correctly.',
+    'ai ethicists': 'Specialists who study the moral and social impact of AI to ensure it is used responsibly and fairly.',
+    'prompt engineers': 'People who specialize in crafting effective questions and instructions (prompts) to get the best results from an AI model.',
+  },
+  badges: {
+    'first-step': {
+        name: 'First Step',
+        description: 'Completed your first lesson module.',
+    },
+    'ai-graduate': {
+        name: 'AI Graduate',
+        description: 'Completed the entire AI Literacy curriculum.',
+    },
+    'point-pioneer': {
+        name: 'Point Pioneer',
+        description: 'Earned your first 100 points.',
+    },
+    'top-contender': {
+        name: 'Top Contender',
+        description: 'Reached the Top 3 on the leaderboard.',
+    },
+    'first-win': {
+        name: 'First Win',
+        description: 'Won your first multiplayer match.',
+    },
+    'multiplayer-maestro': {
+        name: 'Multiplayer Maestro',
+        description: 'Played 10 multiplayer matches.',
+    },
+  }
 };
 
 const swahiliPartial: DeepPartial<Translation> = {
   onboarding: {
-    welcome: "Karibu AI Kasahorow!",
-    prompt: "Tuanze na swali fupi ili kubinafsisha safari yako ya kujifunza.",
-    thinking: "Inafikiri...",
-    textAreaPlaceholder: "Andika jibu lako hapa...",
-    successTitle: "Vizuri sana! Tunatayarisha njia yako ya kujifunza.",
-    successMessage: "Bofya kitufe hapa chini ili kwenda kwenye dashibodi yako.",
-    ctaButton: "Twende!",
-    triviaQuestion: "Unafikiri Akili Mnemba (AI) ni nini? Eleza kwa maneno yako mwenyewe, kama unazungumza na rafiki.",
+    ctaButton: "Anza Kujifunza!",
+    signInButton: "Anza Sasa",
   },
   dashboard: {
     greeting: (name) => `Habari, ${name}!`,
     subGreeting: "Uko tayari kuendelea na safari yako ya AI?",
-    podcastTitle: "Jenereta ya Podcast",
-    podcastDescription: "Tengeneza na shiriki podcast za AI kwa lugha yako.",
+    multiplayerTitle: "Wachezaji Wengi",
+    multiplayerDescription: "Shindana na marafiki katika jaribio la wakati halisi.",
     gameTitle: "AI dhidi ya Binadamu",
     gameDescription: "Je, unaweza kutambua ni nani aliyeandika? Jaribu ujuzi wako!",
     profileTitle: "Wasifu na Vyeti",
@@ -477,22 +604,22 @@ const swahiliPartial: DeepPartial<Translation> = {
     leaderboardDescription: "Tazama jinsi unavyopambana na wanafunzi wengine.",
     learningPathTitle: "Njia Yako ya Kujifunza",
   },
-  podcast: {
-      title: "Jenereta ya Podcast",
-      description: "Kuwa Bingwa wa AI! Tengeneza podcast fupi ili kushiriki na jamii yako.",
-      step1: "Chagua Mada",
-      generateButton: "Tengeneza Hati",
-      generatingButton: "Inatengeneza...",
-      step2: "Podcast Yako",
-      nextSteps: "Hatua Zinazofuata",
-      aiVoiceButton: "Sauti ya AI",
-      stopButton: "Simamisha",
-      recordButton: "Rekodi Yako",
-      placeholderTitle: "Hati yako ya podcast itaonekana hapa.",
+  multiplayer: {
+    title: "Changamoto ya Wachezaji Wengi",
+    description: "Pima maarifa yako ya AI dhidi ya wengine katika jaribio la kufurahisha la wakati halisi.",
+    createGame: "Anzisha Mchezo",
+    joinGame: "Jiunge na Mchezo",
+    gameCodePlaceholder: "Weka Nambari ya Mchezo",
+    lobbyTitle: "Ukumbi wa Mchezo",
+    shareCode: "Shiriki nambari hii na marafiki zako:",
+    copied: "Imenakiliwa!",
+    players: "Wachezaji",
+    waitingForHost: "Inasubiri mwenyeji aanze...",
+    startGame: "Anza Mchezo",
   },
   game: {
     title: "AI dhidi ya Binadamu",
-    description: "Je, unaweza kutofautisha methali iliyoandikwa na AI?",
+    description: "Je, unaweza kutofautisha methali iliyoandikوا na AI?",
     correct: "Sahihi! 🎉 (alama +10)",
     incorrect: "Sio sahihi kabisa!",
     writtenBy: (author) => `Methali hii iliandikwa na ${author}.`,
@@ -501,6 +628,9 @@ const swahiliPartial: DeepPartial<Translation> = {
     humanButton: "Binadamu",
     aiButton: "AI",
     playAgainButton: "Cheza Tena",
+    difficulty: "Ugumu",
+    easy: "Rahisi",
+    hard: "Ngumu",
   },
   profile: {
     title: "Wasifu na Maendeleo Yako",
@@ -509,6 +639,8 @@ const swahiliPartial: DeepPartial<Translation> = {
     points: "Alama",
     progressTitle: "Maendeleo ya Kujifunza",
     progressDescription: (completed, total) => `moduli ${completed} kati ya ${total} zimekamilika`,
+    badgesTitle: "Beji Zangu",
+    noBadges: "Kamilisha moduli na upate alama ili kufungua beji!",
     certificatesTitle: "Vyeti Vyako",
     moreCertificates: "Kamilisha moduli zote katika njia yako ya kujifunza ili kupata cheti.",
     certificateTitleSingle: "Cheti cha Kukamilisha",
@@ -518,10 +650,14 @@ const swahiliPartial: DeepPartial<Translation> = {
     certificateId: "Nambari ya Cheti",
     downloadButton: "Pakua",
     shareButton: "Shiriki",
+    feedbackButton: "Tuma Maoni",
+    multiplayerStatsTitle: "Takwimu za Wachezaji Wengi",
+    wins: "Ushindi",
+    gamesPlayed: "Michezo Iliyochezwa",
   },
   lesson: {
       startQuizButton: "Anza Jaribio la Kupima Ujuzi Wako",
-      completeLessonButton: "Kamilisha Somo (alama +25)",
+      completeLessonButton: "Kamilisha Somo",
       quizTitle: "Pima Ujuzi",
       quizCorrect: "Sahihi kabisa!",
       quizIncorrect: "Sio sahihi. Jibu sahihi ni:",
@@ -535,10 +671,33 @@ const swahiliPartial: DeepPartial<Translation> = {
     points: "Alama",
     you: "Wewe",
   },
+  header: {
+    profile: "Wasifu",
+    logout: "Toka",
+  },
   common: {
     backToDashboard: "Rudi kwenye Dashibodi",
     footer: (year) => `AI Kasahorow © ${year} - Kueneza Elimu ya AI kwa Wote`,
     pointsAbbr: "alama",
+    save: "Hifadhi",
+    cancel: "Ghairi",
+    submit: "Tuma",
+    close: "Funga",
+  },
+  feedback: {
+    title: "Shiriki Maoni Yako",
+    description: "Tunathamini mchango wako! Tujulishe jinsi tunavyoweza kuboresha.",
+    typeLabel: "Aina ya Maoni",
+    types: {
+        [FeedbackType.Bug]: "Ripoti ya Hitilafu",
+        [FeedbackType.Suggestion]: "Pendekezo",
+        [FeedbackType.General]: "Maoni ya Jumla",
+    },
+    messageLabel: "Ujumbe Wako",
+    messagePlaceholder: "Tafadhali eleza tatizo au wazo lako...",
+    submitting: "Inatuma...",
+    successTitle: "Asante!",
+    successDescription: "Maoni yako yamepokelewa. Tunashukuru kwa kutusaidia kuifanya AI Kasahorow kuwa bora zaidi.",
   },
   curriculum: {
     'what-is-ai': { 
@@ -572,24 +731,20 @@ const swahiliPartial: DeepPartial<Translation> = {
     [LearningPath.Intermediate]: 'Wastani',
     [LearningPath.Advanced]: 'Mtaalamu',
   },
+  tooltips: {},
+  badges: {}
 };
 
 const hausaPartial: DeepPartial<Translation> = {
   onboarding: {
-    welcome: "Barka da zuwa AI Kasahorow!",
-    prompt: "Bari mu fara da 'yar gajeriyar tambaya don tsara maka tafiyar karatunka.",
-    thinking: "Tunanin...",
-    textAreaPlaceholder: "Rubuta amsarka anan...",
-    successTitle: "Madalla! Muna kan kirkirar maka hanyar karatu ta musamman.",
-    successMessage: "Danna maballin da ke kasa don zuwa shafinka.",
-    ctaButton: "Mu Je!",
-    triviaQuestion: "A tunaninka, menene Hazakar Dan-Adam ta Rono (AI)? Yi bayani da kalaman ka, kamar kana magana da aboki.",
+    ctaButton: "Fara Karatu!",
+    signInButton: "Fara Yanzu",
   },
   dashboard: {
     greeting: (name) => `Sannu, ${name}!`,
     subGreeting: "A shirye kake ka ci gaba da kasadar ka ta AI?",
-    podcastTitle: "Mai Kirkirar Podcast",
-    podcastDescription: "Kirkiri kuma raba podcast na AI a yarenka.",
+    multiplayerTitle: "Wasa da yawa",
+    multiplayerDescription: "Kalubalanci abokai a cikin jarrabawar lokaci-gaske.",
     gameTitle: "AI vs. Mutum",
     gameDescription: "Za ka iya gane wanda ya rubuta? Gwada kwarewarka!",
     profileTitle: "Bayanan Sirri & Takaddun Shaida",
@@ -598,18 +753,11 @@ const hausaPartial: DeepPartial<Translation> = {
     leaderboardDescription: "Duba yadda ka ke tsere da sauran masu koyo.",
     learningPathTitle: "Hanyar Karatunka",
   },
-  podcast: {
-      title: "Mai Kirkirar Podcast",
-      description: "Zama Gwarzon AI! Kirkiri gajeren podcast don rabawa da al'ummarka.",
-      step1: "Zabi Jigo",
-      generateButton: "Kirkiri Rubutun",
-      generatingButton: "Ana Kirkirawa...",
-      step2: "Podcast Dinka",
-      nextSteps: "Matakai Na Gaba",
-      aiVoiceButton: "Muryar AI",
-      stopButton: "Dakata",
-      recordButton: "Nadi Naka",
-      placeholderTitle: "Rubutun podcast din da ka kirkira zai bayyana anan.",
+  multiplayer: {
+    title: "Kalubalen Wasa da yawa",
+    createGame: "Kirkiri Wasa",
+    joinGame: "Shiga Wasa",
+    gameCodePlaceholder: "Shigar da Lambar Wasa",
   },
   game: {
     title: "AI vs. Mutum",
@@ -622,6 +770,9 @@ const hausaPartial: DeepPartial<Translation> = {
     humanButton: "Mutum",
     aiButton: "AI",
     playAgainButton: "Sake Gwada",
+    difficulty: "Wahala",
+    easy: "Sauki",
+    hard: "Wahala",
   },
   profile: {
     title: "Bayanan Sirri & Ci Gabanka",
@@ -630,6 +781,8 @@ const hausaPartial: DeepPartial<Translation> = {
     points: "Maki",
     progressTitle: "Ci Gaban Karatu",
     progressDescription: (completed, total) => `An kammala darasi ${completed} daga cikin ${total}`,
+    badgesTitle: "Bajoji Na",
+    noBadges: "Kammala darussa kuma sami maki don buɗe bajoji!",
     certificatesTitle: "Takaddun Shaidarka",
     moreCertificates: "Kammala dukkan darussa a hanyar karatunka don samun takardar shaida.",
     certificateTitleSingle: "Takardar Shaida ta Kammalawa",
@@ -639,10 +792,14 @@ const hausaPartial: DeepPartial<Translation> = {
     certificateId: "Lambar Takardar Shaida",
     downloadButton: "Sauke",
     shareButton: "Raba",
+    feedbackButton: "Aika Ra'ayi",
+    multiplayerStatsTitle: "Kididdigar Wasa da yawa",
+    wins: "Nasarori",
+    gamesPlayed: "Wasannin da aka buga",
   },
   lesson: {
       startQuizButton: "Fara Jarrabawa Don Gwada Iliminka",
-      completeLessonButton: "Kammala Darasi (maki +25)",
+      completeLessonButton: "Kammala Darasi",
       quizTitle: "Gwajin Ilimi",
       quizCorrect: "Dai-dai kwarai!",
       quizIncorrect: "Ba haka ba. Amsar daidai ita ce:",
@@ -656,10 +813,33 @@ const hausaPartial: DeepPartial<Translation> = {
     points: "Maki",
     you: "Kai",
   },
+  header: {
+    profile: "Bayanan Sirri",
+    logout: "Fita",
+  },
   common: {
     backToDashboard: "Koma zuwa Dashboard",
     footer: (year) => `AI Kasahorow © ${year} - Bazuwar Ilimin AI ga Kowa`,
     pointsAbbr: "maki",
+    save: "Ajiye",
+    cancel: "Soke",
+    submit: "Aika",
+    close: "Rufe",
+  },
+  feedback: {
+    title: "Raba Ra'ayinka",
+    description: "Muna daraja ra'ayinka! Bari mu san yadda za mu inganta.",
+    typeLabel: "Nau'in Ra'ayi",
+    types: {
+        [FeedbackType.Bug]: "Rahoton Kwaro",
+        [FeedbackType.Suggestion]: "Shawara",
+        [FeedbackType.General]: "Ra'ayi na Gabaɗaya",
+    },
+    messageLabel: "Sakonka",
+    messagePlaceholder: "Da fatan za a bayyana matsalar ko ra'ayin ka...",
+    submitting: "Ana Aikowa...",
+    successTitle: "Mun Gode!",
+    successDescription: "An karɓi ra'ayinka. Muna godiya da taimakon ka wajen inganta AI Kasahorow.",
   },
   curriculum: {
       'what-is-ai': { 
@@ -693,18 +873,16 @@ const hausaPartial: DeepPartial<Translation> = {
     [LearningPath.Intermediate]: 'Matsakaici',
     [LearningPath.Advanced]: 'Kwararre',
   },
+  tooltips: {},
+  badges: {}
 };
 
 const yorubaPartial: DeepPartial<Translation> = {
-  onboarding: {
-    welcome: "Kaabọ si AI Kasahorow!",
-    prompt: "Jẹ ki a bẹrẹ pẹlu ibeere kiakia lati ṣe akanṣe irin-ajo ẹkọ rẹ.",
-    successTitle: "O tayọ! A n ṣẹda ipa-ọna ẹkọ ti ara ẹni rẹ.",
-    triviaQuestion: "Kini o ro pe Imọye Oríkĕ (AI) jẹ? Ṣe alaye rẹ ni awọn ọrọ tirẹ, bi ẹni pe o n ba ọrẹ sọrọ.",
-  },
   dashboard: {
     greeting: (name) => `Pẹlẹ o, ${name}!`,
     subGreeting: "Ṣetan lati tẹsiwaju ìrìn AI rẹ?",
+    multiplayerTitle: "Elere-pupọ",
+    multiplayerDescription: " koju awọn ọrẹ ni adanwo akoko gidi.",
     profileTitle: "Profaili & Awọn iwe-ẹri",
     leaderboardTitle: "Igbimọ Awọn adari",
     leaderboardDescription: "Wo bi o ṣe n ṣe afiwe si awọn akẹkọọ miiran.",
@@ -712,11 +890,18 @@ const yorubaPartial: DeepPartial<Translation> = {
   game: {
       title: "AI vs. Eniyan",
       description: "Ṣe o le sọ owe ti AI kọ?",
+      difficulty: "Ipele",
+      easy: "Rọrun",
+      hard: "Lile",
   },
   profile: {
       title: "Profaili Rẹ & Ilọsiwaju",
       learnerLevel: (level) => `Akẹ́kọ̀ọ́ ${level}`,
       points: "Awọn ojuami",
+      feedbackButton: "Firanṣẹ Idahun",
+      multiplayerStatsTitle: "Awọn iṣiro Elere-pupọ",
+      wins: "Iṣẹgun",
+      gamesPlayed: "Awọn ere ti aṣe",
   },
   leaderboard: {
     title: "Igbimọ Awọn adari",
@@ -728,6 +913,23 @@ const yorubaPartial: DeepPartial<Translation> = {
   },
   common: {
     backToDashboard: "Pada si Dasibodu",
+    submit: "Fi ranṣẹ",
+    close: "Paade",
+  },
+  feedback: {
+    title: "Pin Idahun Rẹ",
+    description: "A mọriri igbewọle rẹ! Jẹ ki a mọ bi a ṣe le ni ilọsiwaju.",
+    typeLabel: "Iru Idahun",
+    types: {
+        [FeedbackType.Bug]: "Ijabọ Kokoro",
+        [FeedbackType.Suggestion]: "Imọran",
+        [FeedbackType.General]: "Idahun Gbogbogbo",
+    },
+    messageLabel: "Ifiranṣẹ Rẹ",
+    messagePlaceholder: "Jọwọ ṣapejuwe ọran tabi imọran rẹ...",
+    submitting: "Nfiranṣẹ...",
+    successTitle: "O ṣeun!",
+    successDescription: "A ti gba idahun rẹ. A dupẹ lọwọ rẹ fun iranlọwọ lati jẹ ki AI Kasahorow dara si.",
   },
   levels: {
     [LearningPath.Beginner]: 'Olùbẹ̀rẹ̀',
@@ -740,18 +942,17 @@ const yorubaPartial: DeepPartial<Translation> = {
     'ai-in-daily-life': { title: 'AI ni Igbesi aye Ojoojumọ', description: 'Wo awọn apẹẹrẹ ti AI ni ayika rẹ.', lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
     'risks-and-bias': { title: 'Awọn Ewu & Ojusaju ninu AI', description: 'Loye awọn italaya ti AI.', lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
     'ai-and-jobs': { title: 'AI ati Ojo iwaju Awọn iṣẹ', description: 'Wo bi AI ṣe n yi iṣẹ pada.', lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  }
+  },
+  tooltips: {},
+  badges: {}
 };
 
 const igboPartial: DeepPartial<Translation> = {
-  onboarding: {
-    welcome: "Nnọọ na AI Kasahorow!",
-    prompt: "Ka anyị jiri ajụjụ ọsịịsọ malite iji hazie njem mmụta gị.",
-    triviaQuestion: "Gịnị ka i chere bụ Artificial Intelligence (AI)? Kọwaa ya n'okwu nke gị, dịka ị na-agwa enyi gị okwu.",
-  },
   dashboard: {
     greeting: (name) => `Ndewo, ${name}!`,
     subGreeting: "Ị dịla njikere ịga n'ihu na njem AI gị?",
+    multiplayerTitle: "Ọtụtụ Onye ọkpụkpọ",
+    multiplayerDescription: "maa ndị enyi aka n'ajụjụ ọnụ oge.",
     profileTitle: "Profaịlụ & Asambodo",
     leaderboardTitle: "Bọọdụ Ndị ndu",
     leaderboardDescription: "Hụ ka ị na-atụnyere ndị mmụta ndị ọzọ.",
@@ -759,11 +960,18 @@ const igboPartial: DeepPartial<Translation> = {
   game: {
     title: "AI vs. Mmadụ",
     description: "Ị nwere ike ịma ilu nke AI dere?",
+    difficulty: "Ọkwa",
+    easy: "Mfe",
+    hard: "Siri ike",
   },
   profile: {
       title: "Profaịlụ Gị & Ọganihu",
       learnerLevel: (level) => `Onye mmụta ${level}`,
       points: "Akara",
+      feedbackButton: "Zipu Nkwupụta",
+      multiplayerStatsTitle: "Ọnụọgụgụ Ọtụtụ Onye ọkpụkpọ",
+      wins: "Mmeri",
+      gamesPlayed: "Egwuregwu Egwuru",
   },
   leaderboard: {
     title: "Bọọdụ Ndị ndu",
@@ -775,6 +983,23 @@ const igboPartial: DeepPartial<Translation> = {
   },
   common: {
     backToDashboard: "Laghachi na Dashboard",
+    submit: "Dobe",
+    close: "Mechie",
+  },
+  feedback: {
+    title: "Kọọ Nkwupụta Gị",
+    description: "Anyị ji ntinye gị kpọrọ ihe! Mee ka anyị mara otu anyị nwere ike isi mee nke ọma.",
+    typeLabel: "Ụdị Nkwupụta",
+    types: {
+        [FeedbackType.Bug]: "Akụkọ Ahụhụ",
+        [FeedbackType.Suggestion]: "Ntụnye",
+        [FeedbackType.General]: "Nkwupụta Ozuruọnụ",
+    },
+    messageLabel: "Ozi Gị",
+    messagePlaceholder: "Biko kọwaa okwu ma ọ bụ echiche gị...",
+    submitting: "Na-edobe...",
+    successTitle: "Daalụ!",
+    successDescription: "Anabatala nkwupụta gị. Anyị nwere ekele maka inyere anyị aka ime ka AI Kasahorow ka mma.",
   },
   levels: {
     [LearningPath.Beginner]: 'Onye mbido',
@@ -787,18 +1012,17 @@ const igboPartial: DeepPartial<Translation> = {
     'ai-in-daily-life': { title: 'AI na ndụ kwa ụbọchị', description: 'Hụ ihe atụ nke AI gburugburu gị.', lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
     'risks-and-bias': { title: 'Ihe egwu & ele mmadụ anya n\'ihu na AI', description: 'Ghọta ihe ịma aka nke AI.', lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
     'ai-and-jobs': { title: 'AI na Ọdịnihu nke Ọrụ', description: 'Hụ ka AI si agbanwe ọrụ.', lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  }
+  },
+  tooltips: {},
+  badges: {}
 };
 
 const pidginPartial: DeepPartial<Translation> = {
-  onboarding: {
-    welcome: "Welcome to AI Kasahorow!",
-    prompt: "Make we start with one quick question to arrange your learning journey.",
-    triviaQuestion: "Wetin you think say Artificial Intelligence (AI) be? Explain am with your own words, like say you dey talk to your friend.",
-  },
   dashboard: {
     greeting: (name) => `How far, ${name}!`,
     subGreeting: "You ready to continue your AI adventure?",
+    multiplayerTitle: "Multi-player",
+    multiplayerDescription: "Challenge friends for real-time quiz.",
     profileTitle: "Profile & Certificates",
     leaderboardTitle: "Leaderboard",
     leaderboardDescription: "See how you dey rank with other learners.",
@@ -806,10 +1030,17 @@ const pidginPartial: DeepPartial<Translation> = {
   game: {
       title: "AI vs. Human",
       description: "You fit tell which proverb na AI write am?",
+      difficulty: "Level",
+      easy: "Easy",
+      hard: "Hard",
   },
   profile: {
       title: "Your Profile & Progress",
       learnerLevel: (level) => `Learner Level: ${level}`,
+      feedbackButton: "Send Feedback",
+      multiplayerStatsTitle: "Multi-player Stats",
+      wins: "Wins",
+      gamesPlayed: "Games Played",
   },
   leaderboard: {
     title: "Leaderboard",
@@ -821,6 +1052,23 @@ const pidginPartial: DeepPartial<Translation> = {
   },
   common: {
     backToDashboard: "Go Back to Dashboard",
+    submit: "Submit",
+    close: "Close",
+  },
+  feedback: {
+    title: "Share Your Feedback",
+    description: "We value your input! Let us know how we fit improve.",
+    typeLabel: "Feedback Type",
+    types: {
+        [FeedbackType.Bug]: "Bug Report",
+        [FeedbackType.Suggestion]: "Suggestion",
+        [FeedbackType.General]: "General Feedback",
+    },
+    messageLabel: "Your Message",
+    messagePlaceholder: "Abeg, describe the issue or your idea...",
+    submitting: "Submitting...",
+    successTitle: "Thank You!",
+    successDescription: "We don receive your feedback. We appreciate say you dey help us make AI Kasahorow better.",
   },
   levels: {
     [LearningPath.Beginner]: 'Beginner',
@@ -833,7 +1081,9 @@ const pidginPartial: DeepPartial<Translation> = {
     'ai-in-daily-life': { title: 'AI for Daily Life', description: 'See examples of AI around you.', lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
     'risks-and-bias': { title: 'Risks & Bias for AI', description: 'Understand the challenges of AI.', lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
     'ai-and-jobs': { title: 'AI and Future of Jobs', description: 'See how AI is changing work.', lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  }
+  },
+  tooltips: {},
+  badges: {}
 };
 
 const amharicPartial: DeepPartial<Translation> = {
@@ -845,7 +1095,9 @@ const amharicPartial: DeepPartial<Translation> = {
     'ai-in-daily-life': { lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
     'risks-and-bias': { lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
     'ai-and-jobs': { lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  }
+  },
+  tooltips: {},
+  badges: {}
 };
 const zuluPartial: DeepPartial<Translation> = {
   dashboard: { greeting: (name) => `Sawubona, ${name}!` },
@@ -856,7 +1108,9 @@ const zuluPartial: DeepPartial<Translation> = {
     'ai-in-daily-life': { lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
     'risks-and-bias': { lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
     'ai-and-jobs': { lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  }
+  },
+  tooltips: {},
+  badges: {}
 };
 const shonaPartial: DeepPartial<Translation> = {
   dashboard: { greeting: (name) => `Mhoro, ${name}!` },
@@ -867,7 +1121,9 @@ const shonaPartial: DeepPartial<Translation> = {
     'ai-in-daily-life': { lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
     'risks-and-bias': { lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
     'ai-and-jobs': { lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  }
+  },
+  tooltips: {},
+  badges: {}
 };
 const somaliPartial: DeepPartial<Translation> = {
   dashboard: { greeting: (name) => `Salaam, ${name}!` },
@@ -878,12 +1134,25 @@ const somaliPartial: DeepPartial<Translation> = {
     'ai-in-daily-life': { lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
     'risks-and-bias': { lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
     'ai-and-jobs': { lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  }
+  },
+  tooltips: {},
+  badges: {}
 };
+
+// This function dynamically populates badge translations from the constants
+const populateBadgeTranslations = (trans: Translation) => {
+    Object.keys(BADGES).forEach(badgeId => {
+        trans.badges[badgeId] = {
+            name: BADGES[badgeId].name,
+            description: BADGES[badgeId].description,
+        };
+    });
+    return trans;
+}
 
 
 const translations: { [key in Language]: Translation } = {
-  [Language.English]: englishTranslations,
+  [Language.English]: populateBadgeTranslations(englishTranslations),
   [Language.Swahili]: mergeDeep({ ...englishTranslations }, swahiliPartial),
   [Language.Hausa]: mergeDeep({ ...englishTranslations }, hausaPartial),
   [Language.Yoruba]: mergeDeep({ ...englishTranslations }, yorubaPartial),

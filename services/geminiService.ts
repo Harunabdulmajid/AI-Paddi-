@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { Language, LearningPath } from "../types";
+import { Language, LearningPath, Difficulty, LessonContent } from "../types";
 
 const API_KEY = process.env.API_KEY;
 
@@ -9,32 +9,113 @@ if (!API_KEY) {
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 
-const model = 'gemini-2.5-flash';
-
-interface OnboardingResponse {
-  level: LearningPath;
-  explanation: string;
-}
+const model: string = 'gemini-2.5-flash';
 
 export const geminiService = {
-  async evaluateOnboardingAnswer(question: string, answer: string, language: Language): Promise<OnboardingResponse> {
-    const prompt = `
-      A user is being onboarded to an AI literacy app. They are from a region where ${language} is spoken.
-      Their task was to answer the following question: "${question}"
-      Their answer is: "${answer}"
+  async generateAiVsHumanContentBatch(language: Language, difficulty: Difficulty): Promise<Array<{ text: string; isAi: boolean }>> {
+      const difficultyInstruction = difficulty === 'Easy' 
+        ? `
+        - For objects where "isAi" is true, create a NEW, wise-sounding proverb about modern technology or the internet. It should be fairly obvious it's modern.
+        - For objects where "isAi" is false, provide a very common, well-known, AUTHENTIC proverb from that culture.
+        `
+        : `
+        - For objects where "isAi" is true, create a NEW, subtle, and philosophical proverb about technology that sounds authentic and could be mistaken for a traditional one.
+        - For objects where "isAi" is false, provide a more obscure or less common, but still AUTHENTIC proverb from that culture.
+        `;
 
-      Your task is to:
-      1. Analyze their answer to gauge their understanding of AI.
-      2. Classify their understanding into one of three levels: "Beginner", "Intermediate", or "Advanced".
-      3. Write a short, encouraging, and culturally relevant explanation for them in ${language}.
-         - If they are correct, praise them and use a local analogy (like a recipe for an algorithm).
-         - If they are partially correct, gently guide them.
-         - If they are incorrect, provide a simple, non-technical correction.
-         - For any technical AI terms that do not have a direct translation, keep the English term but briefly explain its meaning in ${language} using a simple analogy.
+      const prompt = `
+        You are an expert in proverbs from ${language}-speaking cultures.
+        Your task is to generate a JSON array containing 5 proverb objects.
+        The difficulty level is ${difficulty}.
+
+        Each object in the array must have two keys: "text" (the proverb in ${language}) and "isAi" (a boolean).
+
+        ${difficultyInstruction}
+
+        The final array should contain a random mix of AI-generated and authentic proverbs.
+
+        Respond with ONLY a valid JSON array. Do not add any explanation or markdown formatting like \`\`\`json.
+      `;
+
+      try {
+          const response = await ai.models.generateContent({
+              model,
+              contents: prompt,
+              config: {
+                responseMimeType: "application/json",
+                responseSchema: {
+                    type: Type.ARRAY,
+                    items: {
+                        type: Type.OBJECT,
+                        properties: {
+                            text: { type: Type.STRING },
+                            isAi: { type: Type.BOOLEAN },
+                        },
+                        required: ["text", "isAi"],
+                    },
+                },
+            },
+          });
+          const jsonText = response.text.trim();
+          return JSON.parse(jsonText);
+      } catch (error) {
+          console.error("Error generating AI vs Human content:", error);
+          // Fallback to a hardcoded list of proverbs
+          return [
+            { text: "A journey of a thousand miles begins with a single step.", isAi: false },
+            { text: "A slow internet connection tests a person's patience more than any master.", isAi: true },
+            { text: "The same water that softens the yam can harden the egg.", isAi: false },
+            { text: "A wise man stores his knowledge in the cloud.", isAi: true },
+            { text: "He who asks a question is a fool for five minutes; he who does not ask a question remains a fool forever.", isAi: false },
+          ];
+      }
+  },
+
+  async generateImageForLesson(prompt: string): Promise<string> {
+    try {
+        const response = await ai.models.generateImages({
+            model: 'imagen-4.0-generate-001',
+            prompt: prompt,
+            config: {
+                numberOfImages: 1,
+                outputMimeType: 'image/png',
+                aspectRatio: '16:9',
+            },
+        });
+
+        if (response.generatedImages && response.generatedImages.length > 0) {
+            const base64ImageBytes = response.generatedImages[0].image.imageBytes;
+            return `data:image/png;base64,${base64ImageBytes}`;
+        } else {
+            throw new Error("No image generated");
+        }
+    } catch (error) {
+        console.error("Error generating image for lesson:", error);
+        throw error;
+    }
+  },
+
+  async generateDynamicLessonContent(englishContent: Omit<LessonContent, 'quiz' | 'title'>, language: Language): Promise<Omit<LessonContent, 'quiz' | 'title'>> {
+    const prompt = `
+      You are an expert curriculum developer specializing in AI literacy for diverse audiences.
+      Your task is to rewrite the following lesson content for a learner who speaks ${language}.
+      The goal is to make the content more engaging, culturally relevant, and easier to understand.
+
+      - Use simpler language and sentence structures.
+      - Where appropriate, use analogies or examples that would resonate in a ${language}-speaking region.
+      - Maintain the core educational message of each section.
+      - The response must be in ${language}.
+      - For any technical AI terms that do not have a direct translation, keep the English term but briefly explain its meaning in ${language} using a simple analogy.
       
+      Original English Content:
+      Introduction: "${englishContent.introduction}"
+      Sections:
+      ${englishContent.sections.map(s => `- ${s.heading}: ${s.content}`).join('\n')}
+      Summary: "${englishContent.summary}"
+
       Respond ONLY with a valid JSON object. Do not include any other text or markdown formatting.
     `;
-    
+
     try {
       const response = await ai.models.generateContent({
         model,
@@ -44,85 +125,30 @@ export const geminiService = {
           responseSchema: {
             type: Type.OBJECT,
             properties: {
-              level: { 
-                type: Type.STRING,
-                enum: [LearningPath.Beginner, LearningPath.Intermediate, LearningPath.Advanced]
+              introduction: { type: Type.STRING },
+              sections: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    heading: { type: Type.STRING },
+                    content: { type: Type.STRING },
+                  },
+                  required: ["heading", "content"],
+                },
               },
-              explanation: { type: Type.STRING },
+              summary: { type: Type.STRING },
             },
-            required: ["level", "explanation"],
+            required: ["introduction", "sections", "summary"],
           },
         },
       });
       const jsonText = response.text.trim();
-      return JSON.parse(jsonText) as OnboardingResponse;
+      return JSON.parse(jsonText);
     } catch (error) {
-      console.error("Error evaluating onboarding answer:", error);
-      return {
-        level: LearningPath.Beginner,
-        explanation: "Sorry, I had a little trouble understanding. Let's start with the basics together!",
-      };
+      console.error("Error generating dynamic lesson content:", error);
+      // Re-throw the error to allow the component to handle the fallback.
+      throw error;
     }
-  },
-
-  async generatePodcastScript(topic: string, language: Language): Promise<string> {
-    const prompt = `
-      Generate a script for a 2-minute educational podcast about "${topic}".
-      The target audience is new to technology.
-      The language must be ${language}.
-      The script should be a friendly, conversational dialogue between two hosts: a male host named Haruna and a female host named Fatima.
-
-      **Formatting Instructions:**
-      - Use 'Haruna:' and 'Fatima:' as speaker labels.
-      - Indicate sound effects or music cues in parentheses (e.g., "(Upbeat intro music fades in)").
-      - Keep paragraphs short and easy to read.
-
-      **Content Instructions:**
-      - The tone should be conversational and encouraging.
-      - Use simple terms and at least one local proverb or analogy relevant to a ${language}-speaking culture to explain the concept.
-      - For any technical AI terms that do not have a direct translation (like 'algorithm' or 'neural network'), keep the English term but briefly explain its meaning in ${language} using a simple analogy.
-      - Start with a friendly greeting and end with a thought-provoking question.
-      
-      Respond with ONLY the script text.
-    `;
-    try {
-      const response = await ai.models.generateContent({
-        model,
-        contents: prompt
-      });
-      return response.text;
-    } catch (error) {
-      console.error("Error generating podcast script:", error);
-      return "I'm sorry, I couldn't create a script right now. Please try again later.";
-    }
-  },
-
-  async generateAiVsHumanContent(language: Language): Promise<{ text: string; isAi: boolean }> {
-      const isAi = Math.random() > 0.5;
-      const topic = isAi ? "a short, wise-sounding proverb about technology" : "a well-known, authentic proverb";
-
-      const prompt = `
-        You are an expert in proverbs from ${language}-speaking cultures.
-        Your task is to provide a single proverb based on the following instruction:
-        Instruction: "${topic}".
-        The proverb must be in ${language}.
-
-        If the instruction is to create a NEW proverb about technology, make it sound authentic and wise, but it must be original. If you need to use a technical term without a direct translation, keep the English term.
-        If the instruction is to provide an AUTHENTIC proverb, choose a real, common proverb from that culture.
-
-        Respond with ONLY the proverb text in ${language}. Do not add any explanation or quotation marks.
-      `;
-
-      try {
-          const response = await ai.models.generateContent({
-              model,
-              contents: prompt
-          });
-          return { text: response.text.trim(), isAi };
-      } catch (error) {
-          console.error("Error generating AI vs Human content:", error);
-          // Fallback to a simple English proverb
-          return { text: "A journey of a thousand miles begins with a single step.", isAi: false };
-      }
   },
 };
