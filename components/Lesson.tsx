@@ -56,8 +56,6 @@ export const Lesson: React.FC = () => {
     const [dynamicContent, setDynamicContent] = useState<Omit<LessonContent, 'quiz' | 'title'> | null>(null);
     const [isLoadingContent, setIsLoadingContent] = useState(true);
 
-    const [sectionImages, setSectionImages] = useState<Record<string, string | null>>({});
-
     const initialBadges = user?.badges || [];
     const staticModuleContent = activeModuleId ? t.curriculum[activeModuleId]?.lessonContent : null;
     const englishModuleContent = activeModuleId ? englishTranslations.curriculum[activeModuleId]?.lessonContent : null;
@@ -106,43 +104,6 @@ export const Lesson: React.FC = () => {
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lessonState, user?.badges]);
-
-    useEffect(() => {
-        const generateImages = async () => {
-            if (!activeModuleId || isLoadingContent || !dynamicContent) return;
-    
-            if (!englishModuleContent) return;
-    
-            const sections = dynamicContent.sections;
-            const initialImageState = sections.reduce((acc, section) => {
-                acc[section.heading] = null; // null indicates loading
-                return acc;
-            }, {} as Record<string, string | null>);
-            setSectionImages(initialImageState);
-    
-            for (let i = 0; i < sections.length; i++) {
-                const currentSection = sections[i];
-                // Use the English source text for the image prompt for consistency and better results.
-                const englishSection = englishModuleContent.sections[i];
-    
-                if (!englishSection) continue;
-
-                try {
-                    const prompt = `A simple, flat, colorful illustration for an educational app about AI. The topic is "${englishSection.heading}". The image should visually represent the concept of: "${englishSection.content.substring(0, 150)}...". The style should be clean, modern, and engaging for learners. No text in the image.`;
-                    const imageDataUrl = await geminiService.generateImageForLesson(prompt);
-                    setSectionImages(prev => ({ ...prev, [currentSection.heading]: imageDataUrl }));
-                } catch (error) {
-                    console.error(`Failed to generate image for section "${currentSection.heading}":`, error);
-                    setSectionImages(prev => ({ ...prev, [currentSection.heading]: '' })); // Empty string indicates error
-                }
-            }
-        };
-    
-        if (!isLoadingContent) {
-            generateImages();
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [activeModuleId, isLoadingContent, dynamicContent]);
 
     if (!activeModuleId) {
         // Fallback to prevent crashing if the page is loaded without a module
@@ -211,23 +172,7 @@ export const Lesson: React.FC = () => {
                     {displayContent.sections.map((section, index) => (
                         <div key={index}>
                             <h2 className="text-2xl md:text-3xl font-bold text-neutral-800 !mb-3">{section.heading}</h2>
-                             <div className="my-6 aspect-video bg-neutral-100 rounded-xl flex items-center justify-center overflow-hidden border border-neutral-200">
-                                {sectionImages[section.heading] === null && (
-                                    <div className="animate-pulse w-full h-full bg-neutral-200 flex flex-col items-center justify-center">
-                                        <Loader2 className="animate-spin text-neutral-500" size={32} />
-                                        <span className="mt-3 text-neutral-500 font-semibold">Generating illustration...</span>
-                                    </div>
-                                )}
-                                {sectionImages[section.heading] && (
-                                    <img src={sectionImages[section.heading]} alt={`Illustration for ${section.heading}`} className="w-full h-full object-cover" />
-                                )}
-                                {sectionImages[section.heading] === '' && (
-                                    <div className="w-full h-full bg-neutral-100 flex items-center justify-center">
-                                        <span className="text-neutral-500">Could not load image.</span>
-                                    </div>
-                                )}
-                            </div>
-                            <p className="whitespace-pre-line">{renderContentWithTooltips(section.content)}</p>
+                            <p className="whitespace-pre-line mt-6">{renderContentWithTooltips(section.content)}</p>
                         </div>
                     ))}
                 </div>

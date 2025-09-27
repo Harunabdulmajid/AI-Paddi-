@@ -25,7 +25,8 @@ const Certificate: React.FC<{ userName: string, certificateRef: React.RefObject<
                   <ShieldCheck className="text-primary" size={40} />
                   <h3 className="text-2xl md:text-3xl font-bold text-primary">{t.profile.certificateTitleSingle}</h3>
                 </div>
-                <p className="text-neutral-500 mt-2">{t.profile.certificateFor}</p>
+                <p className="text-neutral-500 mt-1 font-semibold">{t.profile.certificateIssuedBy('AI Paddi')}</p>
+                <p className="text-neutral-500 mt-4">{t.profile.certificateFor}</p>
                 <p className="text-3xl md:text-4xl font-extrabold text-neutral-800 my-4 md:my-6 border-y-2 border-neutral-200 py-4">{userName}</p>
                 <p className="text-base md:text-lg text-neutral-600 font-medium">{t.profile.certificateCourseName}</p>
                 <div className="flex justify-center items-center gap-2 mt-4 text-secondary">

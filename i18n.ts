@@ -117,6 +117,7 @@ type Translation = {
     certificateCourseName: string;
     certificateCompletedOn: (date: string) => string;
     certificateId: string;
+    certificateIssuedBy: (orgName: string) => string;
     downloadButton: string;
     shareButton: string;
     feedbackButton: string;
@@ -273,6 +274,7 @@ export const englishTranslations: Translation = {
     certificateCourseName: "AI Literacy Fundamentals",
     certificateCompletedOn: (date) => `Completed on ${date}`,
     certificateId: "Certificate ID",
+    certificateIssuedBy: (orgName) => `Issued by ${orgName}`,
     downloadButton: "Download",
     shareButton: "Share",
     feedbackButton: "Send Feedback",
@@ -648,6 +650,7 @@ const swahiliPartial: DeepPartial<Translation> = {
     certificateCourseName: "Misingi ya Elimu ya AI",
     certificateCompletedOn: (date) => `Imekamilika tarehe ${date}`,
     certificateId: "Nambari ya Cheti",
+    certificateIssuedBy: (orgName) => `Imetolewa na ${orgName}`,
     downloadButton: "Pakua",
     shareButton: "Shiriki",
     feedbackButton: "Tuma Maoni",
@@ -790,6 +793,7 @@ const hausaPartial: DeepPartial<Translation> = {
     certificateCourseName: "Tushen Ilimin AI",
     certificateCompletedOn: (date) => `An kammala a ranar ${date}`,
     certificateId: "Lambar Takardar Shaida",
+    certificateIssuedBy: (orgName) => `Daga ${orgName}`,
     downloadButton: "Sauke",
     shareButton: "Raba",
     feedbackButton: "Aika Ra'ayi",
@@ -902,6 +906,7 @@ const yorubaPartial: DeepPartial<Translation> = {
       multiplayerStatsTitle: "Awọn iṣiro Elere-pupọ",
       wins: "Iṣẹgun",
       gamesPlayed: "Awọn ere ti aṣe",
+      certificateIssuedBy: (orgName) => `Láti ọwọ́ ${orgName}`,
   },
   leaderboard: {
     title: "Igbimọ Awọn adari",
@@ -972,6 +977,7 @@ const igboPartial: DeepPartial<Translation> = {
       multiplayerStatsTitle: "Ọnụọgụgụ Ọtụtụ Onye ọkpụkpọ",
       wins: "Mmeri",
       gamesPlayed: "Egwuregwu Egwuru",
+      certificateIssuedBy: (orgName) => `Nke ${orgName} nyere`,
   },
   leaderboard: {
     title: "Bọọdụ Ndị ndu",
@@ -1041,6 +1047,7 @@ const pidginPartial: DeepPartial<Translation> = {
       multiplayerStatsTitle: "Multi-player Stats",
       wins: "Wins",
       gamesPlayed: "Games Played",
+      certificateIssuedBy: (orgName) => `From ${orgName}`,
   },
   leaderboard: {
     title: "Leaderboard",

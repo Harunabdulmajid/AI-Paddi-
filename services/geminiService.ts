@@ -71,30 +71,6 @@ export const geminiService = {
       }
   },
 
-  async generateImageForLesson(prompt: string): Promise<string> {
-    try {
-        const response = await ai.models.generateImages({
-            model: 'imagen-4.0-generate-001',
-            prompt: prompt,
-            config: {
-                numberOfImages: 1,
-                outputMimeType: 'image/png',
-                aspectRatio: '16:9',
-            },
-        });
-
-        if (response.generatedImages && response.generatedImages.length > 0) {
-            const base64ImageBytes = response.generatedImages[0].image.imageBytes;
-            return `data:image/png;base64,${base64ImageBytes}`;
-        } else {
-            throw new Error("No image generated");
-        }
-    } catch (error) {
-        console.error("Error generating image for lesson:", error);
-        throw error;
-    }
-  },
-
   async generateDynamicLessonContent(englishContent: Omit<LessonContent, 'quiz' | 'title'>, language: Language): Promise<Omit<LessonContent, 'quiz' | 'title'>> {
     const prompt = `
       You are an expert curriculum developer specializing in AI literacy for diverse audiences.
