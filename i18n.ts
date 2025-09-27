@@ -40,8 +40,18 @@ type Translation = {
   onboarding: {
     ctaButton: string;
     signInButton: string;
+    signUpButton: string;
     pathAssignedTitle: string;
     pathAssignedDescription: string;
+    signInTitle: string;
+    signUpTitle: string;
+    emailPlaceholder: string;
+    namePlaceholder: string;
+    switchToSignUp: string;
+    switchToSignIn: string;
+    errorUserNotFound: string;
+    errorUserExists: string;
+    errorGeneric: string;
   };
   dashboard: {
     greeting: (name: string) => string;
@@ -73,6 +83,7 @@ type Translation = {
     copied: string;
     players: string;
     waitingForHost: string;
+    waitingForPlayers: string;
     startGame: string;
     starting: string;
     question: (current: number, total: number) => string;
@@ -136,6 +147,9 @@ type Translation = {
     completionModalTitle: string;
     completionModalPoints: (points: number) => string;
     badgeUnlocked: string;
+    quizStreak: (streak: number) => string;
+    submitAnswer: string;
+    yourAnswer: string;
   };
   leaderboard: {
     title: string;
@@ -196,9 +210,19 @@ type Translation = {
 export const englishTranslations: Translation = {
   onboarding: {
     ctaButton: "Start Learning!",
-    signInButton: "Get Started",
+    signInButton: "Sign In",
+    signUpButton: "Create Account",
     pathAssignedTitle: "Congratulations!",
     pathAssignedDescription: "You're on your way! We've assigned you the perfect learning path to get started.",
+    signInTitle: "Welcome Back!",
+    signUpTitle: "Create Your Account",
+    emailPlaceholder: "Your Email",
+    namePlaceholder: "Your Name",
+    switchToSignUp: "Don't have an account? Sign Up",
+    switchToSignIn: "Already have an account? Sign In",
+    errorUserNotFound: "No account found with this email. Please sign up.",
+    errorUserExists: "An account with this email already exists. Please sign in.",
+    errorGeneric: "An unexpected error occurred. Please try again.",
   },
   dashboard: {
     greeting: (name) => `Hello, ${name}!`,
@@ -230,6 +254,7 @@ export const englishTranslations: Translation = {
     copied: "Copied!",
     players: "Players",
     waitingForHost: "Waiting for host to start...",
+    waitingForPlayers: "Waiting for other players...",
     startGame: "Start Game",
     starting: "Starting...",
     question: (current, total) => `Question ${current} of ${total}`,
@@ -293,6 +318,9 @@ export const englishTranslations: Translation = {
       completionModalTitle: "Lesson Complete!",
       completionModalPoints: (points) => `You've earned ${points} points!`,
       badgeUnlocked: "Badge Unlocked!",
+      quizStreak: (streak: number) => `🔥 ${streak} in a row!`,
+      submitAnswer: "Submit Answer",
+      yourAnswer: "Your answer...",
   },
   leaderboard: {
     title: "Community Leaderboard",
@@ -355,6 +383,7 @@ export const englishTranslations: Translation = {
           quiz: {
             questions: [
               {
+                type: 'multiple-choice',
                 question: "Which of these is the BEST description of AI?",
                 options: [
                   "A physical robot that can walk and talk.",
@@ -366,15 +395,12 @@ export const englishTranslations: Translation = {
                 explanation: "AI is the 'brain' or software, not the physical body of a robot. It's about intelligent behavior."
               },
               {
-                question: "Where can you find AI working?",
-                options: [
-                  "Only in science labs.",
-                  "Only in robots.",
-                  "In your phone, in hospitals, and on farms.",
-                  "Only on the internet."
-                ],
-                correctAnswerIndex: 2,
-                explanation: "AI is all around us, from the face unlock on our phones to tools used by doctors and farmers."
+                type: 'fill-in-the-blank',
+                question: "The 'brain' software that is not a physical body is called Artificial ___________.",
+                options: [],
+                correctAnswerIndex: -1,
+                answer: "Intelligence",
+                explanation: "Artificial Intelligence (AI) is the 'brain' or software, not the physical body of a robot."
               }
             ]
           }
@@ -404,6 +430,7 @@ export const englishTranslations: Translation = {
           quiz: {
             questions: [
               {
+                type: 'multiple-choice',
                 question: "What is 'Machine Learning'?",
                 options: [
                   "A robot building another robot.",
@@ -415,14 +442,11 @@ export const englishTranslations: Translation = {
                 explanation: "Machine Learning is the core process where an AI system is trained on data to recognize patterns and make decisions."
               },
               {
-                question: "What is an 'algorithm' in the context of AI?",
-                options: [
-                  "The data the AI uses.",
-                  "The physical computer chip.",
-                  "A problem the AI cannot solve.",
-                  "A set of rules or instructions for the AI, like a recipe."
-                ],
-                correctAnswerIndex: 3,
+                type: 'fill-in-the-blank',
+                question: "A set of rules the AI uses to learn, similar to a recipe, is called an ___________.",
+                options: [],
+                correctAnswerIndex: -1,
+                answer: "algorithm",
                 explanation: "An algorithm provides the step-by-step instructions that tell the AI how to learn from the data it's given."
               }
             ]
@@ -453,6 +477,7 @@ export const englishTranslations: Translation = {
           quiz: {
             questions: [
               {
+                type: 'multiple-choice',
                 question: "Which of these is an example of AI in daily life?",
                 options: [
                   "Boiling water for tea.",
@@ -463,6 +488,14 @@ export const englishTranslations: Translation = {
                 correctAnswerIndex: 1,
                 explanation: "Map apps use AI to analyze real-time data from many users to predict traffic and find the best routes."
               },
+              {
+                type: 'fill-in-the-blank',
+                question: "When a music streaming service creates a personalized playlist for you, it is using ___ to learn your taste in music.",
+                options: [],
+                correctAnswerIndex: -1,
+                answer: "AI",
+                explanation: "Personalized recommendations for music, shopping, and entertainment are common applications of AI."
+              }
             ]
           }
       }
@@ -491,6 +524,7 @@ export const englishTranslations: Translation = {
           quiz: {
             questions: [
               {
+                type: 'multiple-choice',
                 question: "How can an AI become biased?",
                 options: [
                   "It gets tired.",
@@ -500,6 +534,14 @@ export const englishTranslations: Translation = {
                 ],
                 correctAnswerIndex: 2,
                 explanation: "AI bias comes from the data it learns from. If the data reflects historical biases (like hiring practices), the AI will learn and repeat those biases."
+              },
+              {
+                type: 'fill-in-the-blank',
+                question: "A common saying that applies to AI bias is 'Garbage in, garbage ____.'",
+                options: [],
+                correctAnswerIndex: -1,
+                answer: "out",
+                explanation: "This highlights the importance of using high-quality, unbiased data to train AI models to get fair and accurate results."
               }
             ]
           }
@@ -529,6 +571,7 @@ export const englishTranslations: Translation = {
           quiz: {
             questions: [
               {
+                type: 'multiple-choice',
                 question: "How is AI most likely to change jobs?",
                 options: [
                   "By replacing all human jobs.",
@@ -538,6 +581,14 @@ export const englishTranslations: Translation = {
                 ],
                 correctAnswerIndex: 1,
                 explanation: "AI is a tool that will automate certain tasks, leading to the evolution of current jobs and the creation of entirely new roles focused on managing and working with AI."
+              },
+              {
+                type: 'fill-in-the-blank',
+                question: "The most important skill in the age of AI is the ability to ________ and adapt.",
+                options: [],
+                correctAnswerIndex: -1,
+                answer: "learn",
+                explanation: "As technology changes rapidly, lifelong learning and adaptability are crucial skills to stay relevant and work effectively with new tools like AI."
               }
             ]
           }
@@ -590,8 +641,14 @@ export const englishTranslations: Translation = {
 
 const swahiliPartial: DeepPartial<Translation> = {
   onboarding: {
-    ctaButton: "Anza Kujifunza!",
-    signInButton: "Anza Sasa",
+    signInButton: "Ingia",
+    signUpButton: "Fungua Akaunti",
+    emailPlaceholder: "Barua pepe Yako",
+    namePlaceholder: "Jina Lako",
+    switchToSignUp: "Huna akaunti? Jisajili",
+    switchToSignIn: "Tayari una akaunti? Ingia",
+    errorUserNotFound: "Hakuna akaunti iliyopatikana na barua pepe hii. Tafadhali jisajili.",
+    errorUserExists: "Akaunti yenye barua pepe hii tayari ipo. Tafadhali ingia.",
   },
   dashboard: {
     greeting: (name) => `Habari, ${name}!`,
@@ -617,6 +674,7 @@ const swahiliPartial: DeepPartial<Translation> = {
     copied: "Imenakiliwa!",
     players: "Wachezaji",
     waitingForHost: "Inasubiri mwenyeji aanze...",
+    waitingForPlayers: "Inasubiri wachezaji wengine...",
     startGame: "Anza Mchezo",
   },
   game: {
@@ -665,6 +723,8 @@ const swahiliPartial: DeepPartial<Translation> = {
       quizCorrect: "Sahihi kabisa!",
       quizIncorrect: "Sio sahihi. Jibu sahihi ni:",
       nextQuestionButton: "Swali Linalofuata",
+      submitAnswer: "Tuma",
+      yourAnswer: "Jibu lako...",
   },
   leaderboard: {
     title: "Ubao wa Wanaoongoza",
@@ -740,8 +800,14 @@ const swahiliPartial: DeepPartial<Translation> = {
 
 const hausaPartial: DeepPartial<Translation> = {
   onboarding: {
-    ctaButton: "Fara Karatu!",
-    signInButton: "Fara Yanzu",
+    signInButton: "Shiga",
+    signUpButton: "Bude Asusun",
+    emailPlaceholder: "Imel Dinka",
+    namePlaceholder: "Sunanka",
+    switchToSignUp: "Ba ka da asusu? Bude Asusun",
+    switchToSignIn: "Ka na da asusu? Shiga",
+    errorUserNotFound: "Ba a sami asusu da wannan imel ba. Da fatan za a bude asusun.",
+    errorUserExists: "Akwai asusu da wannan imel. Da fatan za a shiga.",
   },
   dashboard: {
     greeting: (name) => `Sannu, ${name}!`,
@@ -761,6 +827,7 @@ const hausaPartial: DeepPartial<Translation> = {
     createGame: "Kirkiri Wasa",
     joinGame: "Shiga Wasa",
     gameCodePlaceholder: "Shigar da Lambar Wasa",
+    waitingForPlayers: "Ana jiran sauran 'yan wasa...",
   },
   game: {
     title: "AI vs. Mutum",
@@ -808,6 +875,8 @@ const hausaPartial: DeepPartial<Translation> = {
       quizCorrect: "Dai-dai kwarai!",
       quizIncorrect: "Ba haka ba. Amsar daidai ita ce:",
       nextQuestionButton: "Tambaya Ta Gaba",
+      submitAnswer: "Aika",
+      yourAnswer: "Amsarka...",
   },
   leaderboard: {
     title: "Jerin Gwarzaye",
@@ -882,6 +951,10 @@ const hausaPartial: DeepPartial<Translation> = {
 };
 
 const yorubaPartial: DeepPartial<Translation> = {
+  onboarding: {
+    signInButton: "Wọlé",
+    signUpButton: "Forukọsilẹ",
+  },
   dashboard: {
     greeting: (name) => `Pẹlẹ o, ${name}!`,
     subGreeting: "Ṣetan lati tẹsiwaju ìrìn AI rẹ?",
@@ -890,6 +963,9 @@ const yorubaPartial: DeepPartial<Translation> = {
     profileTitle: "Profaili & Awọn iwe-ẹri",
     leaderboardTitle: "Igbimọ Awọn adari",
     leaderboardDescription: "Wo bi o ṣe n ṣe afiwe si awọn akẹkọọ miiran.",
+  },
+  multiplayer: {
+    waitingForPlayers: "Nduro de awọn oṣere miiran...",
   },
   game: {
       title: "AI vs. Eniyan",
@@ -907,6 +983,10 @@ const yorubaPartial: DeepPartial<Translation> = {
       wins: "Iṣẹgun",
       gamesPlayed: "Awọn ere ti aṣe",
       certificateIssuedBy: (orgName) => `Láti ọwọ́ ${orgName}`,
+  },
+  lesson: {
+      submitAnswer: "Fi silẹ",
+      yourAnswer: "Idahun rẹ...",
   },
   leaderboard: {
     title: "Igbimọ Awọn adari",
@@ -953,6 +1033,10 @@ const yorubaPartial: DeepPartial<Translation> = {
 };
 
 const igboPartial: DeepPartial<Translation> = {
+  onboarding: {
+    signInButton: "Banye",
+    signUpButton: "Debanye aha",
+  },
   dashboard: {
     greeting: (name) => `Ndewo, ${name}!`,
     subGreeting: "Ị dịla njikere ịga n'ihu na njem AI gị?",
@@ -961,6 +1045,9 @@ const igboPartial: DeepPartial<Translation> = {
     profileTitle: "Profaịlụ & Asambodo",
     leaderboardTitle: "Bọọdụ Ndị ndu",
     leaderboardDescription: "Hụ ka ị na-atụnyere ndị mmụta ndị ọzọ.",
+  },
+  multiplayer: {
+    waitingForPlayers: "Na-eche ndị egwuregwu ndị ọzọ...",
   },
   game: {
     title: "AI vs. Mmadụ",
@@ -978,6 +1065,10 @@ const igboPartial: DeepPartial<Translation> = {
       wins: "Mmeri",
       gamesPlayed: "Egwuregwu Egwuru",
       certificateIssuedBy: (orgName) => `Nke ${orgName} nyere`,
+  },
+  lesson: {
+      submitAnswer: "Dobe",
+      yourAnswer: "Azịza gị...",
   },
   leaderboard: {
     title: "Bọọdụ Ndị ndu",
@@ -1024,6 +1115,10 @@ const igboPartial: DeepPartial<Translation> = {
 };
 
 const pidginPartial: DeepPartial<Translation> = {
+  onboarding: {
+    signInButton: "Sign In",
+    signUpButton: "Create Account",
+  },
   dashboard: {
     greeting: (name) => `How far, ${name}!`,
     subGreeting: "You ready to continue your AI adventure?",
@@ -1032,6 +1127,9 @@ const pidginPartial: DeepPartial<Translation> = {
     profileTitle: "Profile & Certificates",
     leaderboardTitle: "Leaderboard",
     leaderboardDescription: "See how you dey rank with other learners.",
+  },
+  multiplayer: {
+    waitingForPlayers: "Dey wait for other players...",
   },
   game: {
       title: "AI vs. Human",
@@ -1048,6 +1146,10 @@ const pidginPartial: DeepPartial<Translation> = {
       wins: "Wins",
       gamesPlayed: "Games Played",
       certificateIssuedBy: (orgName) => `From ${orgName}`,
+  },
+  lesson: {
+      submitAnswer: "Submit",
+      yourAnswer: "Your answer...",
   },
   leaderboard: {
     title: "Leaderboard",
@@ -1095,6 +1197,7 @@ const pidginPartial: DeepPartial<Translation> = {
 
 const amharicPartial: DeepPartial<Translation> = {
   dashboard: { greeting: (name) => `ሰላም, ${name}!` },
+  multiplayer: { waitingForPlayers: "ሌሎች ተጫዋቾችን በመጠበቅ ላይ..." },
   levels: { [LearningPath.Beginner]: 'ጀማሪ', [LearningPath.Intermediate]: 'መካከለኛ', [LearningPath.Advanced]: 'ከፍተኛ' },
   curriculum: {
     'what-is-ai': { lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
@@ -1108,6 +1211,7 @@ const amharicPartial: DeepPartial<Translation> = {
 };
 const zuluPartial: DeepPartial<Translation> = {
   dashboard: { greeting: (name) => `Sawubona, ${name}!` },
+  multiplayer: { waitingForPlayers: "Kulindwe abanye abadlali..." },
   levels: { [LearningPath.Beginner]: 'Osaqalayo', [LearningPath.Intermediate]: 'Ophakathi', [LearningPath.Advanced]: 'Othuthukile' },
    curriculum: {
     'what-is-ai': { lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
@@ -1121,6 +1225,7 @@ const zuluPartial: DeepPartial<Translation> = {
 };
 const shonaPartial: DeepPartial<Translation> = {
   dashboard: { greeting: (name) => `Mhoro, ${name}!` },
+  multiplayer: { waitingForPlayers: "Kumirira vamwe vatambi..." },
   levels: { [LearningPath.Beginner]: 'Anotanga', [LearningPath.Intermediate]: 'Yepakati', [LearningPath.Advanced]: 'Yepamusoro' },
    curriculum: {
     'what-is-ai': { lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
@@ -1134,6 +1239,7 @@ const shonaPartial: DeepPartial<Translation> = {
 };
 const somaliPartial: DeepPartial<Translation> = {
   dashboard: { greeting: (name) => `Salaam, ${name}!` },
+  multiplayer: { waitingForPlayers: "Sugitaanka ciyaartoyda kale..." },
   levels: { [LearningPath.Beginner]: 'Bilow', [LearningPath.Intermediate]: 'Dhexdhexaad', [LearningPath.Advanced]: 'Sare' },
    curriculum: {
     'what-is-ai': { lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },

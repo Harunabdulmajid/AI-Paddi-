@@ -62,11 +62,14 @@ export interface User {
 }
 
 export interface Question {
+  type: 'multiple-choice' | 'fill-in-the-blank';
   question: string;
   options: string[];
-  correctAnswerIndex: number;
+  correctAnswerIndex: number; // Unused for fill-in-the-blank
+  answer?: string; // For fill-in-the-blank questions
   explanation: string;
 }
+
 
 export interface Quiz {
   questions: Question[];
@@ -95,7 +98,7 @@ export interface Player {
     id: string;
     name: string;
     score: number;
-    currentQuestionIndex: number;
+    progressIndex: number;
     language: Language;
     streak: number;
 }
@@ -113,6 +116,7 @@ export interface GameSession {
     players: Player[];
     questions: MultiplayerQuestion[];
     createdAt: number;
+    currentQuestionIndex: number;
 }
 // --- End Multiplayer Types ---
 

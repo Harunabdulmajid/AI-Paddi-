@@ -31,12 +31,13 @@ export const MultiplayerGame: React.FC = () => {
     const t = useTranslations();
 
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-    const [isAnswered, setIsAnswered] = useState(false);
     const [startTime, setStartTime] = useState(Date.now());
     
     const currentPlayer = gameSession?.players.find(p => p.id === user?.id);
-    const currentQuestionIndex = currentPlayer?.currentQuestionIndex ?? 0;
+    const currentQuestionIndex = gameSession?.currentQuestionIndex ?? 0;
     const currentQuestionInfo = gameSession?.questions[currentQuestionIndex];
+    
+    const isAnswered = !!(currentPlayer && currentPlayer.progressIndex > currentQuestionIndex);
     
     const questionContent = currentQuestionInfo 
         ? t.curriculum[currentQuestionInfo.moduleId].lessonContent.quiz.questions[currentQuestionInfo.questionIndexInModule] 
@@ -60,7 +61,6 @@ export const MultiplayerGame: React.FC = () => {
     // Reset for next question
     useEffect(() => {
         setSelectedAnswer(null);
-        setIsAnswered(false);
         setStartTime(Date.now());
     }, [currentQuestionIndex]);
 
@@ -71,7 +71,6 @@ export const MultiplayerGame: React.FC = () => {
     const handleAnswer = async (answerIndex: number) => {
         if (isAnswered || !currentQuestionInfo) return;
 
-        setIsAnswered(true);
         setSelectedAnswer(answerIndex);
         const timeTakenMs = Date.now() - startTime;
         
@@ -119,9 +118,9 @@ export const MultiplayerGame: React.FC = () => {
                         );
                     })}
                 </div>
-                 {isAnswered && (
+                 {isAnswered && gameSession.status === 'in-progress' && (
                      <div className="text-center p-4 mt-6">
-                        <p className="text-neutral-500 font-semibold">Waiting for other players...</p>
+                        <p className="text-neutral-500 font-semibold">{t.multiplayer.waitingForPlayers}</p>
                         <Loader2 className="animate-spin text-primary mx-auto mt-2"/>
                      </div>
                  )}

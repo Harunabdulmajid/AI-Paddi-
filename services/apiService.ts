@@ -140,7 +140,7 @@ export const apiService = {
           id: host.id,
           name: host.name,
           score: 0,
-          currentQuestionIndex: 0,
+          progressIndex: 0,
           language: language,
           streak: 0,
         };
@@ -152,6 +152,7 @@ export const apiService = {
           players: [hostPlayer],
           questions: [], // Questions will be added when the game starts
           createdAt: Date.now(),
+          currentQuestionIndex: 0,
         };
 
         games[gameCode] = newSession;
@@ -178,7 +179,7 @@ export const apiService = {
                 id: user.id,
                 name: user.name,
                 score: 0,
-                currentQuestionIndex: 0,
+                progressIndex: 0,
                 language: language,
                 streak: 0,
             };
@@ -215,18 +216,27 @@ export const apiService = {
             if (session.status !== 'waiting') return reject(new Error('Game already in progress.'));
             
             // --- Generate Questions ---
-            const allQuestions = CURRICULUM_MODULES.flatMap(module =>
-                englishTranslations.curriculum[module.id].lessonContent.quiz.questions.map((q, index) => ({
-                    id: `${module.id}-q${index}`,
-                    moduleId: module.id,
-                    questionIndexInModule: index,
-                }))
-            );
+            const allQuestions = CURRICULUM_MODULES.flatMap(module => {
+                const moduleQuestions = englishTranslations.curriculum[module.id].lessonContent.quiz.questions;
+                const multiplayerQuestions = [];
+                for (let i = 0; i < moduleQuestions.length; i++) {
+                    if (moduleQuestions[i].type === 'multiple-choice') {
+                        multiplayerQuestions.push({
+                            id: `${module.id}-q${i}`,
+                            moduleId: module.id,
+                            questionIndexInModule: i,
+                        });
+                    }
+                }
+                return multiplayerQuestions;
+            });
             
             // Select 5 random questions
             const shuffled = allQuestions.sort(() => 0.5 - Math.random());
             session.questions = shuffled.slice(0, 5);
             session.status = 'in-progress';
+            session.currentQuestionIndex = 0;
+            session.players.forEach(p => p.progressIndex = 0);
             // ---
 
             writeDb(DB_KEY_GAMES, games);
@@ -244,10 +254,14 @@ export const apiService = {
             if (!session) return reject(new Error('Game not found.'));
             
             const player = session.players.find(p => p.id === userId);
-            const question = session.questions.find(q => q.id === questionId);
+            const question = session.questions[session.currentQuestionIndex];
 
-            if (!player || !question || player.currentQuestionIndex !== session.questions.indexOf(question)) {
-                return reject(new Error('Invalid action.'));
+            if (!player || !question || player.progressIndex > session.currentQuestionIndex) {
+                 // Player has already answered this question, probably a duplicate request
+                return resolve(session);
+            }
+            if(question.id !== questionId) {
+                return reject(new Error('Question mismatch.'));
             }
 
             const questionContent = englishTranslations.curriculum[question.moduleId].lessonContent.quiz.questions[question.questionIndexInModule];
@@ -262,46 +276,53 @@ export const apiService = {
                 player.streak = 0;
             }
 
-            player.currentQuestionIndex += 1;
+            player.progressIndex = session.currentQuestionIndex + 1;
 
-            // Check if game is finished
-            const allPlayersFinished = session.players.every(p => p.currentQuestionIndex >= session.questions.length);
-            if (allPlayersFinished) {
-                session.status = 'finished';
-                
-                // Update user profiles
-                const winner = session.players.sort((a,b) => b.score - a.score)[0];
-                for (const p of session.players) {
-                    const usersInDb = readDb<Record<string, User>>(DB_KEY_USERS, {});
-                    const userFromDb = Object.values(usersInDb).find(u => u.id === p.id);
-                    if (userFromDb) {
-                        const updates: Partial<Omit<User, 'id' | 'email' | 'googleId'>> = {};
+            // Check if all players have answered the current question
+            const allPlayersAnswered = session.players.every(p => p.progressIndex > session.currentQuestionIndex);
+            
+            if (allPlayersAnswered) {
+                const isLastQuestion = session.currentQuestionIndex === session.questions.length - 1;
 
-                        // Calculate new stats
-                        const newStats = {
-                            wins: userFromDb.multiplayerStats.wins + (p.id === winner.id ? 1 : 0),
-                            gamesPlayed: userFromDb.multiplayerStats.gamesPlayed + 1,
-                        };
-                        updates.multiplayerStats = newStats;
+                if (isLastQuestion) {
+                    session.status = 'finished';
+                    
+                    // Update user profiles
+                    const winner = session.players.sort((a,b) => b.score - a.score)[0];
+                    for (const p of session.players) {
+                        const usersInDb = readDb<Record<string, User>>(DB_KEY_USERS, {});
+                        const userFromDb = Object.values(usersInDb).find(u => u.id === p.id);
+                        if (userFromDb) {
+                            const updates: Partial<Omit<User, 'id' | 'email' | 'googleId'>> = {};
 
-                        // Calculate new points
-                        updates.points = userFromDb.points + p.score;
-                        
-                        // Calculate new badges
-                        const newBadges = [...userFromDb.badges];
-                        if (p.id === winner.id && !newBadges.includes('first-win')) {
-                           newBadges.push('first-win');
+                            // Calculate new stats
+                            const newStats = {
+                                wins: userFromDb.multiplayerStats.wins + (p.id === winner.id ? 1 : 0),
+                                gamesPlayed: userFromDb.multiplayerStats.gamesPlayed + 1,
+                            };
+                            updates.multiplayerStats = newStats;
+
+                            // Calculate new points
+                            updates.points = userFromDb.points + p.score;
+                            
+                            // Calculate new badges
+                            const newBadges = [...userFromDb.badges];
+                            if (p.id === winner.id && !newBadges.includes('first-win')) {
+                               newBadges.push('first-win');
+                            }
+                            if (newStats.gamesPlayed >= 10 && !newBadges.includes('multiplayer-maestro')) {
+                               newBadges.push('multiplayer-maestro');
+                            }
+                            if (newBadges.length > userFromDb.badges.length) {
+                               updates.badges = newBadges;
+                            }
+
+                            // Perform a single, consolidated update for the player
+                            await apiService.updateUser(userFromDb.email, updates);
                         }
-                        if (newStats.gamesPlayed >= 10 && !newBadges.includes('multiplayer-maestro')) {
-                           newBadges.push('multiplayer-maestro');
-                        }
-                        if (newBadges.length > userFromDb.badges.length) {
-                           updates.badges = newBadges;
-                        }
-
-                        // Perform a single, consolidated update for the player
-                        await apiService.updateUser(userFromDb.email, updates);
                     }
+                } else {
+                     session.currentQuestionIndex += 1;
                 }
             }
 
