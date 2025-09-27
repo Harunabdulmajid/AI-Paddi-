@@ -9,19 +9,22 @@ function isObject(item: any): item is { [key: string]: any } {
   return (item && typeof item === 'object' && !Array.isArray(item));
 }
 
-// Fix: Restructured the logic to resolve a TypeScript error where a property's type was not correctly inferred as 'object' before a recursive call.
+// Fix: Restructured the logic to resolve TypeScript errors with deep recursive types.
+// The use of `any` is a pragmatic approach to handle limitations in TypeScript's
+// type inference for generic, dynamically keyed objects.
 function mergeDeep<T extends object>(target: T, source: DeepPartial<T>): T {
   const output = { ...target };
   if (isObject(target) && isObject(source)) {
+    // Iterate over source keys
     Object.keys(source).forEach(key => {
-      const k = key as keyof T;
-      const sourceValue = source[k];
-      const targetValue = target[k];
+      const sourceValue = (source as any)[key];
+      const targetValue = (target as any)[key];
       
       // If both the target and source values for a key are objects, merge them recursively.
       if (isObject(sourceValue) && isObject(targetValue)) {
-        // The `isObject(targetValue)` check acts as a type guard, satisfying the `object` constraint for `mergeDeep`'s first argument.
-        (output as any)[key] = mergeDeep(targetValue, sourceValue as any);
+        // The isObject guard ensures we're passing an object to the recursive call,
+        // satisfying the generic constraint of mergeDeep.
+        (output as any)[key] = mergeDeep(targetValue, sourceValue);
       } else {
         // Otherwise, the source value (even if it's an object and target is not) overwrites the target value.
         (output as any)[key] = sourceValue;
@@ -53,6 +56,8 @@ type Translation = {
     gameDescription: string;
     profileTitle: string;
     profileDescription: string;
+    leaderboardTitle: string;
+    leaderboardDescription: string;
     learningPathTitle: string;
   };
   podcast: {
@@ -109,6 +114,14 @@ type Translation = {
     quizIncorrect: string;
     nextQuestionButton: string;
   };
+  leaderboard: {
+    title: string;
+    description: string;
+    rank: string;
+    player: string;
+    points: string;
+    you: string;
+  };
   common: {
     backToDashboard: string;
     footer: (year: number) => string;
@@ -148,6 +161,8 @@ const englishTranslations: Translation = {
     gameDescription: "Can you tell who wrote it? Test your skills!",
     profileTitle: "Profile & Certificates",
     profileDescription: "View your progress and earned certificates.",
+    leaderboardTitle: "Community Leaderboard",
+    leaderboardDescription: "See how you rank against other learners.",
     learningPathTitle: "Your Learning Path",
   },
   podcast: {
@@ -203,6 +218,14 @@ const englishTranslations: Translation = {
       quizCorrect: "That's correct!",
       quizIncorrect: "Not quite. The correct answer is:",
       nextQuestionButton: "Next Question",
+  },
+  leaderboard: {
+    title: "Community Leaderboard",
+    description: "See how your learning progress compares to others in the community!",
+    rank: "Rank",
+    player: "Player",
+    points: "Points",
+    you: "You",
   },
   common: {
     backToDashboard: "Back to Dashboard",
@@ -450,6 +473,8 @@ const swahiliPartial: DeepPartial<Translation> = {
     gameDescription: "Je, unaweza kutambua ni nani aliyeandika? Jaribu ujuzi wako!",
     profileTitle: "Wasifu na Vyeti",
     profileDescription: "Tazama maendeleo yako na vyeti ulivyopata.",
+    leaderboardTitle: "Ubao wa Wanaoongoza",
+    leaderboardDescription: "Tazama jinsi unavyopambana na wanafunzi wengine.",
     learningPathTitle: "Njia Yako ya Kujifunza",
   },
   podcast: {
@@ -501,6 +526,14 @@ const swahiliPartial: DeepPartial<Translation> = {
       quizCorrect: "Sahihi kabisa!",
       quizIncorrect: "Sio sahihi. Jibu sahihi ni:",
       nextQuestionButton: "Swali Linalofuata",
+  },
+  leaderboard: {
+    title: "Ubao wa Wanaoongoza",
+    description: "Tazama jinsi maendeleo yako ya kujifunza yanavyolinganishwa na wengine katika jamii!",
+    rank: "Nafasi",
+    player: "Mchezaji",
+    points: "Alama",
+    you: "Wewe",
   },
   common: {
     backToDashboard: "Rudi kwenye Dashibodi",
@@ -561,6 +594,8 @@ const hausaPartial: DeepPartial<Translation> = {
     gameDescription: "Za ka iya gane wanda ya rubuta? Gwada kwarewarka!",
     profileTitle: "Bayanan Sirri & Takaddun Shaida",
     profileDescription: "Duba ci gabanka da takaddun shaidar da ka samu.",
+    leaderboardTitle: "Jerin Gwarzaye",
+    leaderboardDescription: "Duba yadda ka ke tsere da sauran masu koyo.",
     learningPathTitle: "Hanyar Karatunka",
   },
   podcast: {
@@ -613,6 +648,14 @@ const hausaPartial: DeepPartial<Translation> = {
       quizIncorrect: "Ba haka ba. Amsar daidai ita ce:",
       nextQuestionButton: "Tambaya Ta Gaba",
   },
+  leaderboard: {
+    title: "Jerin Gwarzaye",
+    description: "Duba yadda ci gaban karatunka yake idan aka kwatanta da sauran mutane a cikin al'umma!",
+    rank: "Matsayi",
+    player: "Dan Wasa",
+    points: "Maki",
+    you: "Kai",
+  },
   common: {
     backToDashboard: "Koma zuwa Dashboard",
     footer: (year) => `AI Kasahorow © ${year} - Bazuwar Ilimin AI ga Kowa`,
@@ -663,6 +706,8 @@ const yorubaPartial: DeepPartial<Translation> = {
     greeting: (name) => `Pẹlẹ o, ${name}!`,
     subGreeting: "Ṣetan lati tẹsiwaju ìrìn AI rẹ?",
     profileTitle: "Profaili & Awọn iwe-ẹri",
+    leaderboardTitle: "Igbimọ Awọn adari",
+    leaderboardDescription: "Wo bi o ṣe n ṣe afiwe si awọn akẹkọọ miiran.",
   },
   game: {
       title: "AI vs. Eniyan",
@@ -672,6 +717,14 @@ const yorubaPartial: DeepPartial<Translation> = {
       title: "Profaili Rẹ & Ilọsiwaju",
       learnerLevel: (level) => `Akẹ́kọ̀ọ́ ${level}`,
       points: "Awọn ojuami",
+  },
+  leaderboard: {
+    title: "Igbimọ Awọn adari",
+    description: "Wo bi ilọsiwaju ẹkọ rẹ ṣe n ṣe afiwe si awọn miiran ninu agbegbe!",
+    rank: "Ipo",
+    player: "Oṣere",
+    points: "Awọn ojuami",
+    you: "Iwọ",
   },
   common: {
     backToDashboard: "Pada si Dasibodu",
@@ -700,6 +753,8 @@ const igboPartial: DeepPartial<Translation> = {
     greeting: (name) => `Ndewo, ${name}!`,
     subGreeting: "Ị dịla njikere ịga n'ihu na njem AI gị?",
     profileTitle: "Profaịlụ & Asambodo",
+    leaderboardTitle: "Bọọdụ Ndị ndu",
+    leaderboardDescription: "Hụ ka ị na-atụnyere ndị mmụta ndị ọzọ.",
   },
   game: {
     title: "AI vs. Mmadụ",
@@ -709,6 +764,14 @@ const igboPartial: DeepPartial<Translation> = {
       title: "Profaịlụ Gị & Ọganihu",
       learnerLevel: (level) => `Onye mmụta ${level}`,
       points: "Akara",
+  },
+  leaderboard: {
+    title: "Bọọdụ Ndị ndu",
+    description: "Hụ ka ọganihu mmụta gị si atụnyere ndị ọzọ na obodo!",
+    rank: "Ọnọdụ",
+    player: "Onye ọkpụkpọ",
+    points: "Akara",
+    you: "Gị",
   },
   common: {
     backToDashboard: "Laghachi na Dashboard",
@@ -737,6 +800,8 @@ const pidginPartial: DeepPartial<Translation> = {
     greeting: (name) => `How far, ${name}!`,
     subGreeting: "You ready to continue your AI adventure?",
     profileTitle: "Profile & Certificates",
+    leaderboardTitle: "Leaderboard",
+    leaderboardDescription: "See how you dey rank with other learners.",
   },
   game: {
       title: "AI vs. Human",
@@ -745,6 +810,14 @@ const pidginPartial: DeepPartial<Translation> = {
   profile: {
       title: "Your Profile & Progress",
       learnerLevel: (level) => `Learner Level: ${level}`,
+  },
+  leaderboard: {
+    title: "Leaderboard",
+    description: "See how your learning progress dey compare to others for the community!",
+    rank: "Rank",
+    player: "Player",
+    points: "Points",
+    you: "You",
   },
   common: {
     backToDashboard: "Go Back to Dashboard",

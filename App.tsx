@@ -11,6 +11,7 @@ import { useTranslations } from './i18n';
 import { Lesson } from './components/Lesson';
 import { AppContext } from './context/AppContext';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { Leaderboard } from './components/Leaderboard';
 
 const App: React.FC = () => {
   const [user, setUser] = useLocalStorage<User>('user', {
@@ -49,6 +50,8 @@ const App: React.FC = () => {
             return <Profile />;
         case Page.Lesson:
             return <Lesson />;
+        case Page.Leaderboard:
+            return <Leaderboard />;
         default:
             return <Dashboard />;
     }

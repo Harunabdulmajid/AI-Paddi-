@@ -25,6 +25,7 @@ export enum Page {
   AiVsHuman = 'AI vs Human',
   Profile = 'Profile & Certificates',
   Lesson = 'Lesson',
+  Leaderboard = 'Leaderboard',
 }
 
 export interface User {

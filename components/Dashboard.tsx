@@ -1,10 +1,9 @@
-
 import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { CURRICULUM_MODULES } from '../constants';
 import { ModuleCard } from './ModuleCard';
 import { Page, Module } from '../types';
-import { Mic, Sword, UserCircle, ArrowRight } from 'lucide-react';
+import { Mic, Sword, UserCircle, ArrowRight, BarChart3 } from 'lucide-react';
 import { useTranslations } from '../i18n';
 
 const FeatureButton: React.FC<{ icon: React.ReactNode; title: string; description: string; onClick: () => void }> = ({ icon, title, description, onClick }) => (
@@ -40,7 +39,7 @@ export const Dashboard: React.FC = () => {
         <p className="text-neutral-500 mt-2 text-xl">{t.dashboard.subGreeting}</p>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
         <FeatureButton 
             icon={<Mic size={32} />}
             title={t.dashboard.podcastTitle}
@@ -58,6 +57,12 @@ export const Dashboard: React.FC = () => {
             title={t.dashboard.profileTitle}
             description={t.dashboard.profileDescription}
             onClick={() => setCurrentPage(Page.Profile)}
+        />
+        <FeatureButton 
+            icon={<BarChart3 size={32} />}
+            title={t.dashboard.leaderboardTitle}
+            description={t.dashboard.leaderboardDescription}
+            onClick={() => setCurrentPage(Page.Leaderboard)}
         />
       </div>
 
