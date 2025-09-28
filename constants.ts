@@ -1,5 +1,5 @@
-import { BrainCircuit, BookOpen, Bot, ShieldCheck, Briefcase, Star, Award, Trophy, Swords, Zap, Paintbrush, Medal, GraduationCap, Users } from 'lucide-react';
-import { Badge, MarketplaceItem, User } from './types';
+import { BrainCircuit, BookOpen, Bot, ShieldCheck, Briefcase, Star, Award, Trophy, Swords, Zap, Paintbrush, Medal, GraduationCap, Users, MessageSquarePlus, RotateCcw, Image as ImageIcon, Palette, Gift, HeartHandshake } from 'lucide-react';
+import { Badge, MarketplaceItem, User, Language } from './types';
 
 export const CURRICULUM_MODULES = [
   {
@@ -134,21 +134,89 @@ export const MARKETPLACE_ITEMS: MarketplaceItem[] = [
         description: 'Give your eyes a rest with a sleek and stylish dark theme.',
         cost: 150,
         icon: Paintbrush,
-        isOwned: (user: User) => user.theme === 'dark',
-        payload: { theme: 'dark' },
+        isOwned: (user: User) => user.unlockedThemes.includes('dark'),
+        payload: { unlockTheme: 'dark' },
+    },
+    {
+        id: 'theme-savanna',
+        category: 'Customization',
+        title: 'Savanna Sunset Theme',
+        description: 'A warm and vibrant theme inspired by the colors of the African savanna.',
+        cost: 150,
+        icon: Palette,
+        isOwned: (user: User) => user.unlockedThemes.includes('savanna'),
+        payload: { unlockTheme: 'savanna' },
+    },
+    {
+        id: 'banner-afro',
+        category: 'Customization',
+        title: 'Afrofuturist Profile Banner',
+        description: 'Give your profile a cool, futuristic look with this unique banner.',
+        cost: 200,
+        icon: ImageIcon,
+        isOwned: (user: User) => user.unlockedBanners.includes('afrofuturist-banner'),
+        payload: { unlockBanner: 'afrofuturist-banner' },
+    },
+    {
+        id: 'voice-swahili',
+        category: 'Customization',
+        title: 'Unlock Swahili AI Voice',
+        description: 'Experience the app with a natural-sounding Swahili narrator for the "Read Aloud" feature.',
+        cost: 300,
+        icon: Users,
+        isOwned: (user: User) => user.unlockedVoices.includes(Language.Swahili),
+        payload: { unlockVoice: Language.Swahili },
     },
     // Learning Boosters
     {
-        id: 'booster-extra-quiz',
+        id: 'booster-tutor-tokens',
         category: 'Learning Boosters',
-        title: 'Bonus Quiz Pack',
-        description: 'Unlock a special set of challenging questions for each module.',
+        title: 'AI Tutor Session Pass (x3)',
+        description: 'Get three passes to ask our AI Tutor a complex follow-up question on any lesson.',
+        cost: 250,
+        icon: MessageSquarePlus,
+        payload: { addTutorTokens: 3 },
+    },
+    {
+        id: 'booster-quiz-rewind',
+        category: 'Learning Boosters',
+        title: 'Quiz Rewind Tokens (x5)',
+        description: 'Get five tokens that let you immediately retake a quiz you failed.',
+        cost: 100,
+        icon: RotateCcw,
+        payload: { addQuizRewinds: 5 },
+    },
+    {
+        id: 'booster-case-study',
+        category: 'Learning Boosters',
+        title: 'Unlock a Real-World Case Study',
+        description: 'Purchase access to a special lesson on how AI is being used in your region.',
         cost: 300,
         icon: Zap,
         isComingSoon: true,
-        payload: { packId: 'quiz-pack-1' },
+        payload: { packId: 'case-study-1' },
     },
     // Social Play
+    {
+        id: 'social-gift-item',
+        category: 'Social Play',
+        title: 'Gift an Item to a Friend',
+        description: 'Purchase an item from the marketplace and send it to a fellow learner.',
+        cost: 10,
+        icon: Gift,
+        isComingSoon: true,
+        payload: {},
+    },
+     {
+        id: 'social-cheer-friend',
+        category: 'Social Play',
+        title: 'Cheer a Friend',
+        description: 'Send a small point bonus and a positive message to someone on the leaderboard.',
+        cost: 25,
+        icon: HeartHandshake,
+        isComingSoon: true,
+        payload: {},
+    },
     {
         id: 'social-sponsor-leaderboard',
         category: 'Social Play',

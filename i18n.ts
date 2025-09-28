@@ -522,43 +522,59 @@ export const englishTranslations: Translation = {
       description: 'Learn the basic definition of AI and what it means for a machine to be "intelligent".',
       lessonContent: {
           title: "Module 1: What is Artificial Intelligence?",
-          introduction: "Have you ever wondered how your phone knows your face, or how a navigation app finds the fastest route? The answer is often Artificial Intelligence, or AI. Let's explore what this powerful technology really is.",
+          introduction: "Imagine a teammate who can sort through a mountain of information in seconds, spot patterns invisible to the human eye, and help you make smarter decisions. This isn't science fiction; it's the reality of Artificial Intelligence (AI). Let's dive into what AI truly is, beyond the movie robots.",
           sections: [
               {
-                  heading: "Thinking Like Humans",
-                  content: "At its core, AI is about creating computer systems that can perform tasks that usually require human intelligence. This includes things like learning from experience, solving problems, understanding language, and recognizing objects and sounds. Think of it like teaching a machine to think, not with a brain, but with computer code."
+                  heading: "More Than Just 'Thinking'",
+                  content: "At its heart, AI is about creating computer systems that can perform tasks that usually require human intelligence. This includes learning from experience, solving puzzles, understanding the meaning behind words, and recognizing objects or sounds. The goal is to teach a machine to reason and act, not with a brain, but with powerful algorithms and data."
               },
               {
-                  heading: "AI is Not a Robot",
-                  content: "When people hear 'AI', they often picture walking, talking robots from movies. While robots can use AI, AI itself is the 'brain' software, not the physical body. It can exist in your phone, your car, or on the internet. It’s the invisible helper working behind the scenes."
+                  heading: "Narrow AI: The Specialist We Use Today",
+                  content: "It's crucial to know that almost all AI in the world today is 'Narrow AI'. This means it's designed to be very good at one specific task. An AI that plays chess can't drive a car. An AI that recommends music can't diagnose a disease. Think of them as highly trained specialists. They are incredibly powerful, but only in their specific field."
               },
               {
-                  heading: "The Goal: A Smart Assistant",
-                  content: "The goal of most AI today is not to replace humans, but to help us. An AI can sort through massive amounts of information much faster than a person can. For example, a doctor can use AI to help spot diseases in medical scans, or a farmer can use AI to check on the health of their crops. It's a tool to make our jobs and lives easier."
+                  heading: "General AI: The Dream of a Human-Like Mind",
+                  content: "The AI you see in movies—a single system with the flexible, creative, and common-sense intelligence of a human—is called 'Artificial General Intelligence' or AGI. AGI is the long-term dream of some researchers, but it doesn't exist today. Understanding the difference between the specialized 'Narrow AI' we have and the hypothetical 'AGI' is key to understanding the technology's real-world capabilities and limits."
+              },
+              {
+                  heading: "AI, ML, and Data Science: What's the Difference?",
+                  content: "You might hear these terms used together. Think of it like this: AI is the overall goal of creating intelligent machines. Machine Learning (ML) is the most common *method* used to achieve AI, by teaching machines to learn from data. Data Science is the broader field of extracting knowledge and insights from data, which often uses ML techniques."
               }
           ],
-          summary: "AI is the science of making computers do tasks that normally require human intelligence. It's the 'brain' software that helps us solve problems, not just a physical robot.",
+          summary: "AI is the broad field of creating intelligent machines. The AI we use daily is 'Narrow AI', which excels at specific tasks. This is different from the human-like 'General AI' of science fiction, which does not yet exist. AI is often achieved through Machine Learning, a process of learning from data.",
           quiz: {
             questions: [
               {
                 type: 'multiple-choice',
-                question: "Which of these is the BEST description of AI?",
+                question: "Which of these is the BEST description of the AI we use today?",
                 options: [
-                  "A physical robot that can walk and talk.",
-                  "Software that can perform tasks requiring human-like intelligence.",
-                  "The internet.",
-                  "A new type of computer."
+                  "A single AI that can do any task a human can.",
+                  "Specialized AI that is very good at one specific task.",
+                  "Physical robots that can walk and talk.",
+                  "The internet."
                 ],
                 correctAnswerIndex: 1,
-                explanation: "AI is the 'brain' or software, not the physical body of a robot. It's about intelligent behavior."
+                explanation: "Today's AI is 'Narrow AI', meaning it's trained for specific jobs like playing a game or recommending a song, but it can't transfer that knowledge to other tasks."
               },
               {
                 type: 'fill-in-the-blank',
-                question: "The 'brain' software that is not a physical body is called Artificial ___________.",
+                question: "The dream of a human-like AI with common sense and creativity is called Artificial _________ Intelligence.",
                 options: [],
                 correctAnswerIndex: -1,
-                answer: "Intelligence",
-                explanation: "Artificial Intelligence (AI) is the 'brain' or software, not the physical body of a robot."
+                answer: "General",
+                explanation: "Artificial General Intelligence (AGI) is the term for a hypothetical AI with the flexible intelligence of a human. This is still in the realm of research and theory."
+              },
+              {
+                type: 'multiple-choice',
+                question: "What is the relationship between AI and Machine Learning (ML)?",
+                options: [
+                  "They are the same thing.",
+                  "AI is a type of Machine Learning.",
+                  "Machine Learning is the most common way to achieve AI.",
+                  "AI is only for robots, and ML is for software."
+                ],
+                correctAnswerIndex: 2,
+                explanation: "AI is the broad concept. Machine Learning is a primary technique within the field of AI that allows systems to learn from data."
               }
             ]
           }
@@ -569,43 +585,59 @@ export const englishTranslations: Translation = {
       description: 'Discover how machines learn from data, similar to how we learn from experience.',
       lessonContent: {
           title: "Module 2: How Does AI Actually Learn?",
-          introduction: "We know AI can be 'smart', but how does it get that way? It's not magic! AI systems learn through a process called 'Machine Learning', which is a bit like how we learn, but with data instead of life experiences.",
+          introduction: "We know AI can be 'smart', but how does it get that way? It's not magic! AI systems learn through a process called 'Machine Learning'. Think of it like learning to ride a bike: you try, you fall, you adjust, and with enough practice (data) and feedback, you get better and better.",
           sections: [
               {
-                  heading: "Learning from Examples",
-                  content: "Imagine you want to teach a child to recognize a cat. You'd show them many pictures of cats. After seeing enough examples, they learn the patterns: pointy ears, whiskers, a tail. Machine Learning works the same way. We feed an AI thousands of pictures labeled 'cat', and it learns to identify the patterns of what makes a cat."
+                  heading: "The Three Ingredients of Learning",
+                  content: "Every machine learning process needs three key things: \n1. **Data:** This is the 'experience' for the AI. Just like we need books or lessons, an AI needs data—images, text, numbers—to learn from. The more high-quality data, the better. \n2. **Model:** This is the 'student'. It's a complex mathematical structure (like a neural network) that can be trained. Initially, it knows nothing. \n3. **Training Process:** This is the 'studying'. The model looks at the data, makes a guess (a prediction), checks how wrong it was, and adjusts itself slightly to be more accurate next time. This process is repeated millions of times."
               },
               {
-                  heading: "The 'Recipe' is an Algorithm",
-                  content: "The set of rules the AI uses to learn is called an algorithm. It's like a recipe. The data (pictures of cats) are the ingredients, and the algorithm is the instructions on how to process those ingredients to get the final dish: a system that can recognize cats."
+                  heading: "Supervised Learning: Learning with a Teacher",
+                  content: "This is the most common type of machine learning. It uses 'labeled' data. Imagine showing a model thousands of pictures, each one with a label: 'cat', 'dog', 'car'. The model learns to connect the patterns in the pictures to the correct labels. This is 'supervised' because the labels act like a teacher, telling the model the right answers during training."
               },
               {
-                  heading: "Getting Better Over Time",
-                  content: "The more data an AI sees, the better it gets. If it makes a mistake, it adjusts its internal patterns to be more accurate next time. This is why AI is so powerful—it can constantly improve and adapt as it gets more information, making it a powerful tool for complex problems."
+                  heading: "Unsupervised Learning: Finding Patterns on Its Own",
+                  content: "What if you don't have labels? In unsupervised learning, the model is given a huge amount of data and its task is to find hidden patterns or structures on its own. For example, it could group customers into different purchasing habit groups, or find topics in a collection of news articles, all without being told what to look for. It's like sorting a pile of different fruits into groups based on their similarities."
+              },
+              {
+                  heading: "Reinforcement Learning: Learning from Trial and Error",
+                  content: "This is how AIs learn to play games. The model (called an 'agent') takes actions in an environment (the game). It receives 'rewards' for good actions (like winning a point) and 'penalties' for bad ones. Its goal is to figure out a strategy to maximize its total reward. It learns through trial and error, just like a pet learns a trick by getting a treat for doing it right."
               }
           ],
-          summary: "AI learns through a process called Machine Learning. By feeding it lots of example data (like pictures or text), it uses an algorithm (a recipe) to recognize patterns and make decisions, getting smarter over time.",
+          summary: "AI learns through Machine Learning, which requires three things: Data (experience), a Model (the student), and a Training process (studying). The main learning methods are Supervised (with labeled data), Unsupervised (finding hidden patterns), and Reinforcement (learning from rewards and penalties).",
           quiz: {
             questions: [
               {
                 type: 'multiple-choice',
-                question: "What is 'Machine Learning'?",
+                question: "You give an AI thousands of medical scans, some labeled 'healthy' and some 'sick', to teach it to identify diseases. What type of learning is this?",
                 options: [
-                  "A robot building another robot.",
-                  "A process where AI learns from large amounts of data.",
-                  "A computer that never makes mistakes.",
-                  "A special type of calculator."
+                  "Unsupervised Learning",
+                  "Reinforcement Learning",
+                  "Supervised Learning",
+                  "General Learning"
                 ],
-                correctAnswerIndex: 1,
-                explanation: "Machine Learning is the core process where an AI system is trained on data to recognize patterns and make decisions."
+                correctAnswerIndex: 2,
+                explanation: "This is Supervised Learning because the data is 'labeled' with the correct answers ('healthy' or 'sick'), acting as a teacher for the model."
               },
               {
                 type: 'fill-in-the-blank',
-                question: "A set of rules the AI uses to learn, similar to a recipe, is called an ___________.",
+                question: "The 'student' in the machine learning process, which is a complex mathematical structure, is called a ________.",
                 options: [],
                 correctAnswerIndex: -1,
-                answer: "algorithm",
-                explanation: "An algorithm provides the step-by-step instructions that tell the AI how to learn from the data it's given."
+                answer: "model",
+                explanation: "The model is the part of the AI system that is trained on data to make predictions. A common type of model is a neural network."
+              },
+              {
+                type: 'multiple-choice',
+                question: "An AI learning to play chess by getting points for good moves and losing points for bad ones is an example of what?",
+                options: [
+                    "Supervised Learning",
+                    "Reinforcement Learning",
+                    "Unsupervised Learning",
+                    "Data Mining"
+                ],
+                correctAnswerIndex: 1,
+                explanation: "This is Reinforcement Learning, as the AI learns a strategy by taking actions and receiving feedback in the form of rewards (points)."
               }
             ]
           }
@@ -616,43 +648,59 @@ export const englishTranslations: Translation = {
       description: 'Explore examples of AI in farming, health, and on your phone.',
       lessonContent: {
           title: "Module 3: AI is All Around Us",
-          introduction: "You might not realize it, but you probably use AI every single day. It's integrated into many tools we rely on, making them smarter and more helpful. Let's look at a few examples.",
+          introduction: "You might not realize it, but you interact with AI dozens of times every day. It's the silent partner in many of the tools we use, making them smarter, more personal, and more helpful. Let's pull back the curtain and see where AI is working behind the scenes.",
           sections: [
               {
-                  heading: "On Your Phone",
-                  content: "Your smartphone is a great example. When you use face unlock, that's AI recognizing you. When your map app predicts traffic, that's AI analyzing data from other cars. Even the suggestions for the next word to type in a message come from an AI that has learned how people communicate."
+                  heading: "The Brain in Your Pocket",
+                  content: "Your smartphone is an AI powerhouse. When you use face unlock, a 'computer vision' model recognizes your unique facial features. When your keyboard suggests the next word, a 'language model' is predicting what you'll type. When you ask a voice assistant a question, it uses 'natural language processing' to understand you and find an answer. These specialized AIs make your device feel intuitive and personal."
               },
               {
-                  heading: "In Farming and Health",
-                  content: "AI is also making a big impact in important fields. In agriculture, drones with AI can fly over a farm and identify which plants are sick, helping farmers save their crops. In healthcare, AI can analyze medical records to help doctors predict which patients are at high risk for certain diseases, allowing for earlier treatment."
+                  heading: "Transforming Industries: Health and Farming",
+                  content: "AI's impact goes far beyond convenience. In healthcare, AI helps doctors analyze medical scans like X-rays with greater accuracy and can even help researchers discover new medicines by simulating how molecules interact. In agriculture, AI-powered drones monitor crop health from the sky, identifying sick plants or dry soil, which helps farmers use water and fertilizer more efficiently, leading to better harvests."
               },
               {
-                  heading: "For Shopping and Entertainment",
-                  content: "When an online store recommends a product you might like, that's AI looking at your past purchases. When a music streaming service creates a personalized playlist for you, that's AI learning your taste in music. It's constantly working to make your experience more personal and convenient."
+                  heading: "The Power of Recommendation Engines",
+                  content: "When an online store recommends a product or a streaming service suggests a movie, it's an AI 'recommendation engine' at work. It analyzes your past behavior (what you've bought, watched, or liked) and compares it to millions of other users to predict what you might enjoy next. This is a form of unsupervised learning that powers much of the modern internet."
+              },
+              {
+                  heading: "The Rise of Generative AI",
+                  content: "One of the most exciting recent developments is 'Generative AI'. This is AI that can *create* new things, not just analyze existing data. You've seen this in advanced chatbots that can write poems, or in image generators that can create amazing art from a simple text description. This creative capability is opening up brand new possibilities in art, design, writing, and programming."
               }
           ],
-          summary: "From unlocking your phone and navigating traffic to helping doctors and farmers, AI is a powerful tool that is already a part of our daily lives, often working quietly in the background to help us.",
+          summary: "AI is a part of our daily lives, from 'computer vision' in our phones to 'recommendation engines' on shopping sites. It's transforming major industries like health and farming. The newest frontier is 'Generative AI', which can create new text, images, and ideas, changing the way we interact with technology.",
           quiz: {
             questions: [
               {
                 type: 'multiple-choice',
-                question: "Which of these is an example of AI in daily life?",
+                question: "When a streaming service suggests a new show for you to watch based on your viewing history, what is this an example of?",
                 options: [
-                  "Boiling water for tea.",
-                  "A map app predicting traffic.",
-                  "Writing a letter with a pen.",
-                  "Reading a printed book."
+                  "Computer Vision",
+                  "A Recommendation Engine",
+                  "Generative AI",
+                  "A Voice Assistant"
                 ],
                 correctAnswerIndex: 1,
-                explanation: "Map apps use AI to analyze real-time data from many users to predict traffic and find the best routes."
+                explanation: "Recommendation engines are AIs that analyze your past behavior to predict what you might like in the future, personalizing your experience."
               },
               {
                 type: 'fill-in-the-blank',
-                question: "When a music streaming service creates a personalized playlist for you, it is using ___ to learn your taste in music.",
+                question: "An AI that can create a new image from a text description is known as ___________ AI.",
                 options: [],
                 correctAnswerIndex: -1,
-                answer: "AI",
-                explanation: "Personalized recommendations for music, shopping, and entertainment are common applications of AI."
+                answer: "Generative",
+                explanation: "Generative AI is a type of AI focused on creating new, original content, such as text, images, or music."
+              },
+              {
+                type: 'multiple-choice',
+                question: "The technology that allows your phone to understand your spoken commands is called:",
+                options: [
+                    "Natural Language Processing",
+                    "Computer Vision",
+                    "Recommendation Engine",
+                    "Generative AI"
+                ],
+                correctAnswerIndex: 0,
+                explanation: "Natural Language Processing (NLP) is the field of AI that deals with helping computers understand, interpret, and generate human language."
               }
             ]
           }
@@ -663,43 +711,57 @@ export const englishTranslations: Translation = {
       description: 'Understand the challenges of AI, including fairness and safety.',
       lessonContent: {
           title: "Module 4: The Challenges: Bias and Safety",
-          introduction: "While AI is an incredible tool, it's not perfect. It's important to understand the risks and challenges, especially when it comes to fairness and making sure AI is used responsibly.",
+          introduction: "AI is a powerful tool, but like any tool, it must be used with care and wisdom. It's not perfect, and it reflects the data—and the society—it learns from. Understanding the risks of AI is the first step toward building a future where it is used responsibly and for the benefit of everyone.",
           sections: [
               {
-                  heading: "What is AI Bias?",
-                  content: "An AI system learns from the data we give it. If that data is biased, the AI will be biased too. For example, if an AI is trained to hire people using data from a company that mostly hired men in the past, it might learn to unfairly favor male candidates. It's like learning from a biased teacher—you pick up their biases."
+                  heading: "Where Does AI Bias Come From?",
+                  content: "AI bias occurs when an AI system produces unfair or prejudiced results. This isn't because the AI is 'evil'; it's because it learned from biased data. For example, if facial recognition software is mostly trained on pictures of one demographic, it may be less accurate for others. If a loan approval AI is trained on historical data from a time when certain groups were unfairly denied loans, it might learn to repeat those same unfair patterns."
               },
               {
-                  heading: "The Importance of Good Data",
-                  content: "This is why having fair and diverse data is so important. A proverb says, 'Garbage in, garbage out.' If we feed the AI incomplete or unfair data, we will get unfair results. We need to be very careful about the 'ingredients' we use to train AI systems."
+                  heading: "The 'Black Box' Problem",
+                  content: "Some complex AI models, especially deep learning networks, can be a 'black box'. This means that even the people who created it may not be able to fully explain *why* it made a specific decision. If an AI denies someone a job or a medical diagnosis, not knowing the reason is a serious problem. Researchers are working hard on 'Explainable AI' (XAI) to make these models more transparent and trustworthy."
               },
               {
-                  heading: "Using AI Safely and Ethically",
-                  content: "We must also think about how AI is used. Who is responsible if an AI makes a mistake? How do we protect people's privacy when AI uses their data? These are important questions that developers, communities, and governments are working on to ensure AI is used for good, helping everyone, not just a few."
+                  heading: "Privacy and Security Risks",
+                  content: "AI systems often require vast amounts of data to learn, which raises privacy concerns. We need strong rules to protect our personal information. Additionally, AI systems can be tricked. Researchers have shown it's possible to make tiny, invisible changes to an image (like a stop sign) that can fool an AI into seeing something completely different. This is called an 'adversarial attack' and highlights the need for secure and robust AI."
+              },
+              {
+                  heading: "Building Responsible AI",
+                  content: "To combat these risks, the global tech community is focusing on 'Responsible AI'. This involves several key principles: Fairness (checking for and correcting bias), Accountability (knowing who is responsible if an AI makes a mistake), and Transparency (being open about how an AI works and the data it uses). It requires a team effort from developers, companies, and users like you to demand and build ethical AI."
               }
           ],
-          summary: "AI systems can be biased if the data used to train them is unfair or incomplete. It's our responsibility to use diverse data and create rules to ensure AI is used safely, ethically, and for the benefit of all.",
+          summary: "AI is not neutral; it can inherit human biases from its training data. Key challenges include the 'black box' problem, where AI decisions are hard to explain, as well as privacy and security risks. The solution lies in building 'Responsible AI' based on principles of Fairness, Accountability, and Transparency.",
           quiz: {
             questions: [
               {
                 type: 'multiple-choice',
-                question: "How can an AI become biased?",
+                question: "What is the 'black box' problem in AI?",
                 options: [
-                  "It gets tired.",
-                  "It decides to be unfair on its own.",
-                  "It is trained on data that is unfair or incomplete.",
-                  "It runs out of electricity."
+                  "When an AI system overheats.",
+                  "When it's difficult to understand why an AI made a specific decision.",
+                  "When an AI is used for secret government projects.",
+                  "When an AI runs out of data."
                 ],
-                correctAnswerIndex: 2,
-                explanation: "AI bias comes from the data it learns from. If the data reflects historical biases (like hiring practices), the AI will learn and repeat those biases."
+                correctAnswerIndex: 1,
+                explanation: "The 'black box' problem refers to our inability to fully interpret the internal workings and reasoning of some complex AI models."
+              },
+              {
+                type: 'multiple-choice',
+                question: "AI bias is most often caused by the AI's own bad intentions.",
+                options: [
+                  "True",
+                  "False"
+                ],
+                correctAnswerIndex: 1,
+                explanation: "False. AI bias is not a result of intention. It's a reflection of biases present in the data it was trained on."
               },
               {
                 type: 'fill-in-the-blank',
-                question: "A common saying that applies to AI bias is 'Garbage in, garbage ____.'",
+                question: "The idea of making sure AI is used fairly and ethically is called ___________ AI.",
                 options: [],
                 correctAnswerIndex: -1,
-                answer: "out",
-                explanation: "This highlights the importance of using high-quality, unbiased data to train AI models to get fair and accurate results."
+                answer: "Responsible",
+                explanation: "Responsible AI is an approach to developing and using artificial intelligence that puts ethical principles like fairness, accountability, and transparency at the forefront."
               }
             ]
           }
@@ -710,43 +772,59 @@ export const englishTranslations: Translation = {
       description: 'See how AI is changing work and what new opportunities are emerging.',
       lessonContent: {
           title: "Module 5: How AI is Changing Work",
-          introduction: "Every major technology, from the printing press to the internet, has changed the way people work. AI is no different. It's creating new opportunities while also changing existing jobs. Let's see how.",
+          introduction: "Every major technology, from the printing press to the internet, has changed the way we work. AI is the next chapter in this story. It's not just about what jobs will disappear; it's about how current jobs will change and what new, exciting roles will be created. Let's explore the future of work.",
           sections: [
               {
-                  heading: "A Tool to Help, Not Just Replace",
-                  content: "AI is very good at repetitive tasks. Think about a factory worker who has to check thousands of items for defects. An AI-powered camera can do that job faster and more accurately, freeing up the human worker to focus on more complex problems, like improving the factory process. AI becomes a co-worker, handling the boring tasks."
+                  heading: "Augmentation: Your New AI Teammate",
+                  content: "The biggest change from AI won't be replacement, but 'augmentation'—AI working alongside humans to make us better at our jobs. Think of it as a co-pilot. A writer can use AI to brainstorm ideas and check for errors. A programmer can use AI to write routine code and find bugs faster. A doctor can use AI to analyze patient data to suggest possible diagnoses. AI handles the repetitive tasks, freeing up our minds for strategy and creativity."
               },
               {
-                  heading: "New Jobs are Being Created",
-                  content: "The rise of AI is also creating brand new jobs that didn't exist before. We now need 'AI Trainers' who prepare data for AI systems, 'AI Ethicists' who make sure AI is used responsibly, and 'Prompt Engineers' who specialize in writing instructions for AI. Learning about AI opens the door to these new career paths."
+                  heading: "The New Collar: Jobs of the Future",
+                  content: "AI is creating entirely new job categories. 'Prompt Engineers' are experts at writing instructions to get the best results from AI models. 'AI Trainers' help fine-tune AI systems by providing high-quality data and feedback. 'AI Ethicists' are hired to ensure that a company's AI is used responsibly. As technology evolves, so will the opportunities for people who understand it."
               },
               {
-                  heading: "The Importance of Lifelong Learning",
-                  content: "The most important skill in the age of AI is the ability to learn. As technology changes, we will all need to adapt and learn new skills. By understanding how AI works, you are taking the first step towards being ready for the jobs of the future, where humans and AI work together to achieve more than ever before."
+                  heading: "Human Skills are More Valuable Than Ever",
+                  content: "In a world with AI, our uniquely human skills become our superpowers. AI is good at calculation, but not so good at common sense. It can process data, but it lacks true creativity and emotional intelligence. Skills like critical thinking, complex problem-solving, collaboration with others, and leadership are becoming *more* valuable, not less. The future is about combining the analytical power of machines with the wisdom and creativity of humans."
+              },
+              {
+                  heading: "Embracing Lifelong Learning",
+                  content: "The most important skill for the future is the ability to keep learning. Technology will change, and the jobs of tomorrow might not even exist today. By staying curious, being adaptable, and building a strong foundation of AI literacy, you are preparing yourself not just for one job, but for a lifetime of success in a changing world."
               }
           ],
-          summary: "AI is changing the job market by automating repetitive tasks and creating new roles. It acts as a powerful tool to assist human workers. The key to success is to embrace lifelong learning and adapt to working alongside this new technology.",
+          summary: "AI is changing work by 'augmenting' human abilities, acting as a helpful co-pilot for many tasks. This is creating new jobs like 'Prompt Engineer' and making uniquely human skills—like creativity, critical thinking, and emotional intelligence—more valuable than ever. The key to thriving is to embrace lifelong learning.",
           quiz: {
             questions: [
               {
                 type: 'multiple-choice',
-                question: "How is AI most likely to change jobs?",
+                question: "The idea that AI will work alongside people to make them better at their jobs is called:",
                 options: [
-                  "By replacing all human jobs.",
-                  "By changing existing ones to work with AI.",
-                  "By making all jobs harder.",
-                  "By having no effect on jobs."
+                  "Replacement",
+                  "Automation",
+                  "Augmentation",
+                  "Elimination"
                 ],
-                correctAnswerIndex: 1,
-                explanation: "AI is a tool that will automate certain tasks, leading to the evolution of current jobs and the creation of entirely new roles focused on managing and working with AI."
+                correctAnswerIndex: 2,
+                explanation: "Augmentation is about enhancing human capabilities with AI, not replacing them. The AI becomes a tool or a teammate."
+              },
+              {
+                type: 'multiple-choice',
+                question: "Which of these skills becomes MORE important in a world with powerful AI?",
+                options: [
+                  "Memorizing facts",
+                  "Performing repetitive calculations",
+                  "Emotional intelligence and creativity",
+                  "Following simple instructions"
+                ],
+                correctAnswerIndex: 2,
+                explanation: "As AI handles routine data and calculation tasks, skills that AI struggles with—like creativity, critical thinking, and emotional intelligence—become more valuable for humans."
               },
               {
                 type: 'fill-in-the-blank',
-                question: "The most important skill in the age of AI is the ability to ________ and adapt.",
+                question: "A person who specializes in writing instructions to get the best results from an AI is called a ________ Engineer.",
                 options: [],
                 correctAnswerIndex: -1,
-                answer: "learn",
-                explanation: "As technology changes rapidly, lifelong learning and adaptability are crucial skills to stay relevant and work effectively with new tools like AI."
+                answer: "Prompt",
+                explanation: "Prompt engineering is a new and important skill focused on effectively communicating with AI models to guide them toward the desired output."
               }
             ]
           }
@@ -759,15 +837,15 @@ export const englishTranslations: Translation = {
     [LearningPath.Advanced]: 'Advanced',
   },
   tooltips: {
-    'artificial intelligence': 'The ability of a computer or machine to perform tasks that normally require human intelligence, like learning and problem-solving.',
-    'ai': 'Short for Artificial Intelligence. A field of computer science focused on creating smart machines.',
-    'algorithm': 'A set of rules or instructions, like a recipe, that a computer follows to complete a task.',
-    'machine learning': 'A type of AI that allows computers to learn from data without being explicitly programmed. It finds patterns to make predictions.',
-    'data': 'Information, such as facts, numbers, or pictures, that can be collected and analyzed by a computer.',
-    'ai bias': 'When an AI system produces unfair or prejudiced results because it was trained on incomplete or flawed data.',
-    'ai trainers': 'People who prepare and label data to teach AI systems how to perform specific tasks correctly.',
-    'ai ethicists': 'Specialists who study the moral and social impact of AI to ensure it is used responsibly and fairly.',
-    'prompt engineers': 'People who specialize in crafting effective questions and instructions (prompts) to get the best results from an AI model.',
+    'artificial intelligence': 'The ability of a computer to perform tasks that normally require human intelligence, like understanding language, recognizing images, and making decisions.',
+    'ai': 'Short for Artificial Intelligence. The field of science focused on creating smart machines that can learn and solve problems.',
+    'algorithm': 'A set of step-by-step instructions, like a recipe, that a computer follows to complete a task or solve a problem.',
+    'machine learning': 'The main way AI learns. Instead of being given instructions, the machine learns by looking at lots of examples (data) to find patterns, just like we learn from experience.',
+    'data': 'The \'books\' or \'experience\' that an AI learns from. It can be text, images, sounds, or numbers that a computer can process.',
+    'ai bias': 'Unfairness in an AI\'s results that comes from biased training data. If an AI only sees pictures of one type of fruit, it may not recognize others correctly.',
+    'ai trainers': 'The \'teachers\' for an AI. They carefully prepare and label data (the \'lessons\') to help the AI learn accurately and avoid bias.',
+    'ai ethicists': 'Like a referee for technology, they help make sure AI is designed and used in a safe, fair, and responsible way for everyone.',
+    'prompt engineers': 'An expert at \'talking\' to an AI. They know how to ask questions and give instructions (prompts) in just the right way to get the most helpful and creative answers.',
   },
   badges: {
     'first-step': {

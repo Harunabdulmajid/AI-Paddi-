@@ -1,13 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Language, LearningPath, Difficulty, LessonContent } from "../types";
 
-const API_KEY = process.env.API_KEY;
-
-if (!API_KEY) {
-  throw new Error("API_KEY environment variable is not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+// FIX: Per @google/genai guidelines, initialize the SDK with process.env.API_KEY directly
+// and assume it's set in the environment.
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
 const model: string = 'gemini-2.5-flash';
 

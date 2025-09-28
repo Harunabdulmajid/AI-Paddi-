@@ -31,6 +31,7 @@ try {
 export const useSpeech = () => {
     const [isListening, setIsListening] = useState(false);
     const synthRef = useRef(window.speechSynthesis);
+    const isListeningRef = useRef(false);
 
     // Use a ref to store state that shouldn't trigger re-renders but needs to be
     // accessed by event handlers without stale closures.
@@ -43,7 +44,10 @@ export const useSpeech = () => {
     useEffect(() => {
         if (!recognition) return;
 
-        const handleStart = () => setIsListening(true);
+        const handleStart = () => {
+            isListeningRef.current = true;
+            setIsListening(true);
+        };
         
         const handleResult = (event: any) => {
             const transcript = event.results[event.results.length - 1][0].transcript.trim();
@@ -53,28 +57,35 @@ export const useSpeech = () => {
         };
 
         const handleError = (event: any) => {
-            // "aborted" is a normal event when we call stop(). "no-speech" happens on silence.
-            // We can ignore these to avoid flooding the console with non-critical errors.
-            if (event.error !== 'aborted' && event.error !== 'no-speech') {
-                console.error('Speech recognition error:', event.error);
+            const error = event.error;
+            if (error === 'network') {
+                console.warn('Speech recognition network error. Attempting to recover.');
+                // We don't disable continuous listening for network errors, `onend` will handle restart.
+            } else if (error !== 'aborted' && error !== 'no-speech') {
+                console.error('Speech recognition error:', error);
+                // For other errors (like 'not-allowed' or 'audio-capture'), stop trying to restart.
+                listeningStateRef.current.isContinuous = false;
             }
+            isListeningRef.current = false;
             setIsListening(false);
-            // On a real error, prevent a restart loop.
-            listeningStateRef.current.isContinuous = false;
         };
         
         const handleEnd = () => {
+            isListeningRef.current = false;
             setIsListening(false);
-            // If it was a continuous session that ended (e.g., due to browser timeout),
-            // and we still want it to be listening, restart it.
+            // If it was a continuous session that ended (e.g., due to browser timeout or a recoverable network error),
+            // and we still want it to be listening, restart it after a short delay.
             if (listeningStateRef.current.isContinuous) {
-                try {
-                    recognition.start();
-                } catch(err) {
-                    // This can happen if start() is called too soon after a stop.
-                    // The isContinuous flag check should mostly prevent this.
-                    console.error("Error restarting speech recognition:", err);
-                }
+                setTimeout(() => {
+                    // Check again in case stopListening was called during the timeout
+                    if (listeningStateRef.current.isContinuous && !isListeningRef.current) {
+                        try {
+                            recognition.start();
+                        } catch(err) {
+                            console.error("Error restarting speech recognition:", err);
+                        }
+                    }
+                }, 1000); // 1-second delay to prevent spamming on persistent network issues.
             }
         };
 
@@ -89,6 +100,7 @@ export const useSpeech = () => {
             if (recognition) {
                 recognition.abort();
             }
+            isListeningRef.current = false;
         };
     }, []); // Empty array ensures this effect runs only once.
 
@@ -103,7 +115,7 @@ export const useSpeech = () => {
 
     // For single-shot recognition (like in the Quiz)
     const startListening = useCallback((callback: (transcript: string) => void, lang: Language) => {
-        if (!recognition || isListening) return;
+        if (!recognition || isListeningRef.current) return;
         
         listeningStateRef.current = {
             isContinuous: false,
@@ -113,13 +125,16 @@ export const useSpeech = () => {
         recognition.lang = languageMap[lang] || 'en-US';
         recognition.continuous = false;
         recognition.interimResults = false;
-        recognition.start();
-
-    }, [isListening]);
+        try {
+            recognition.start();
+        } catch (e) {
+            console.error("Error starting speech recognition:", e);
+        }
+    }, []);
 
     // For continuous recognition (global navigation)
     const startContinuousListening = useCallback((callback: (transcript: string) => void, lang: Language) => {
-        if (!recognition || isListening) return;
+        if (!recognition || isListeningRef.current) return;
 
         listeningStateRef.current = {
             isContinuous: true,
@@ -129,20 +144,25 @@ export const useSpeech = () => {
         recognition.lang = languageMap[lang] || 'en-US';
         recognition.continuous = true;
         recognition.interimResults = false;
-        recognition.start();
-    }, [isListening]);
+         try {
+            recognition.start();
+        } catch (e) {
+            console.error("Error starting continuous speech recognition:", e);
+        }
+    }, []);
 
     const stopListening = useCallback(() => {
         // This is the key part: we signal that we no longer want to be listening.
         // The onend handler will then see isContinuous is false and won't restart.
         listeningStateRef.current.isContinuous = false;
-        if (recognition && isListening) {
+        if (recognition && isListeningRef.current) {
             recognition.stop();
         } else {
             // If it's not listening but we call stop, ensure the state is correct.
+            isListeningRef.current = false;
             setIsListening(false);
         }
-    }, [isListening]);
+    }, []);
 
     return { isListening, speak, startListening, startContinuousListening, stopListening };
 };

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Quiz as QuizType } from '../types';
 import { CheckCircle, XCircle, ArrowRight, Mic } from 'lucide-react';
 import { useTranslations } from '../i18n';
@@ -24,7 +24,12 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
   const [streak, setStreak] = useState(0);
   const t = useTranslations();
 
+  // For Keyboard Navigation
+  const [focusedIndex, setFocusedIndex] = useState(0);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  
   const currentQuestion = quiz.questions[currentQuestionIndex];
+  const questionId = `quiz-question-${currentQuestionIndex}`;
 
   useEffect(() => {
     if (isVoiceModeEnabled && !isAnswered) {
@@ -35,6 +40,20 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
       speak(textToSpeak, language);
     }
   }, [currentQuestion, isVoiceModeEnabled, isAnswered, speak, language]);
+
+  // Reset focus when question changes for keyboard navigation
+  useEffect(() => {
+      setFocusedIndex(0);
+      optionRefs.current = [];
+  }, [currentQuestionIndex]);
+  
+  // Set focus on the active element for keyboard navigation
+  useEffect(() => {
+    if (currentQuestion.type === 'multiple-choice' && !isAnswered && optionRefs.current[focusedIndex]) {
+        optionRefs.current[focusedIndex]?.focus();
+    }
+  }, [focusedIndex, currentQuestion.type, isAnswered]);
+
 
   const handleVoiceAnswer = (transcript: string) => {
     const lowerTranscript = transcript.toLowerCase();
@@ -95,6 +114,26 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
       onComplete();
     }
   };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (currentQuestion.type !== 'multiple-choice' || isAnswered) return;
+
+    const optionsCount = currentQuestion.options.length;
+    let newIndex = focusedIndex;
+
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      newIndex = (focusedIndex + 1) % optionsCount;
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      newIndex = (focusedIndex - 1 + optionsCount) % optionsCount;
+    } else if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      handleSubmitAnswer(focusedIndex);
+    }
+    
+    setFocusedIndex(newIndex);
+  };
 
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
 
@@ -110,16 +149,16 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
       </div>
       <div className="bg-neutral-50 p-6 rounded-xl">
         <div className="flex justify-between items-start">
-            <p className="text-lg font-semibold text-neutral-700 mb-5 flex-grow">{currentQuestion.question}</p>
+            <p id={questionId} className="text-lg font-semibold text-neutral-700 mb-5 flex-grow">{currentQuestion.question}</p>
             {isVoiceModeEnabled && !isAnswered && (
-                <button onClick={() => startListening(handleVoiceAnswer, language)} disabled={isListening} className="ml-4 p-2 rounded-full bg-primary/10 text-primary disabled:opacity-50">
+                <button onClick={() => startListening(handleVoiceAnswer, language)} disabled={isListening} className="ml-4 p-2 rounded-full bg-primary/10 text-primary disabled:opacity-50" aria-label="Answer with voice">
                     <Mic className={isListening ? 'animate-pulse' : ''}/>
                 </button>
             )}
         </div>
         
         {currentQuestion.type === 'multiple-choice' ? (
-             <div className="space-y-3">
+             <div role="radiogroup" aria-labelledby={questionId} onKeyDown={handleKeyDown} className="space-y-3">
                 {currentQuestion.options.map((option, index) => {
                     let buttonClass = 'bg-white hover:bg-neutral-100 border-neutral-300';
                     if (isAnswered) {
@@ -135,7 +174,15 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
                     return (
                     <button
                         key={index}
-                        onClick={() => handleSubmitAnswer(index)}
+                        // FIX: Ensure callback ref does not return a value.
+                        ref={(el) => { optionRefs.current[index] = el; }}
+                        role="radio"
+                        aria-checked={selectedAnswer === index}
+                        tabIndex={focusedIndex === index && !isAnswered ? 0 : -1}
+                        onClick={() => {
+                            setFocusedIndex(index);
+                            handleSubmitAnswer(index);
+                        }}
                         disabled={isAnswered}
                         className={`w-full text-left p-4 rounded-lg border-2 transition-all text-md flex items-center justify-between ${buttonClass}`}
                     >
@@ -155,6 +202,7 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
                     disabled={isAnswered}
                     className="w-full p-4 border-2 border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary bg-white text-neutral-900 placeholder:text-neutral-400 text-lg disabled:bg-neutral-100"
                     autoFocus
+                    aria-labelledby={questionId}
                 />
                 {!isAnswered && (
                      <button

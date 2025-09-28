@@ -87,6 +87,10 @@ export interface User {
   theme: string; // e.g., 'default', 'dark'
   avatarId: string; // e.g., 'avatar-01'
   unlockedVoices: Language[];
+  tutorTokens: number;
+  quizRewinds: number;
+  unlockedBanners: string[];
+  unlockedThemes: string[];
 }
 
 export interface Question {
@@ -175,6 +179,8 @@ export interface AppContextType {
   setActiveModuleId: React.Dispatch<React.SetStateAction<string | null>>;
   addTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => Promise<void>;
   awardBadge: (badgeId: string) => Promise<void>;
+  // FIX: Add missing `completeModule` to the context type to fix error in `Lesson.tsx`.
+  completeModule: (moduleId: string) => Promise<void>;
   gameSession: GameSession | null;
   setGameSession: React.Dispatch<React.SetStateAction<GameSession | null>>;
   // Offline and Voice Features

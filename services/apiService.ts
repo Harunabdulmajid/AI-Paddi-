@@ -37,11 +37,11 @@ const initializeDb = () => {
     let users = readDb<Record<string, User>>(DB_KEY_USERS, {});
     if (Object.keys(users).length === 0) {
         const mockUsers: Omit<User, 'wallet'>[] = [
-            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', name: 'Amina', points: 250, level: LearningPath.Advanced, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
-            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', name: 'Kwame', points: 190, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
-            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', name: 'Fatou', points: 175, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
-            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', name: 'Chinedu', points: 150, level: LearningPath.Beginner, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
-            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', name: 'Zola', points: 120, level: LearningPath.Beginner, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [] },
+            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', name: 'Amina', points: 250, level: LearningPath.Advanced, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 2, quizRewinds: 5, unlockedBanners: [], unlockedThemes: ['default'] },
+            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', name: 'Kwame', points: 190, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 1, unlockedBanners: [], unlockedThemes: ['default'] },
+            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', name: 'Fatou', points: 175, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
+            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', name: 'Chinedu', points: 150, level: LearningPath.Beginner, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
+            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', name: 'Zola', points: 120, level: LearningPath.Beginner, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
         ];
         const usersDb = mockUsers.reduce((acc, user) => {
             acc[user.email] = { ...user, wallet: initializeDefaultWallet(user.points) };
@@ -81,6 +81,10 @@ export const apiService = {
         if (!user.theme) user.theme = 'default';
         if (!user.avatarId) user.avatarId = 'avatar-01';
         if (!user.unlockedVoices) user.unlockedVoices = [];
+        if (user.tutorTokens === undefined) user.tutorTokens = 0;
+        if (user.quizRewinds === undefined) user.quizRewinds = 0;
+        if (!user.unlockedBanners) user.unlockedBanners = [];
+        if (!user.unlockedThemes) user.unlockedThemes = ['default'];
         // --- End Initialization ---
 
         const today = getTodayDateString();
@@ -152,6 +156,10 @@ export const apiService = {
           theme: 'default',
           avatarId: 'avatar-01',
           unlockedVoices: [],
+          tutorTokens: 0,
+          quizRewinds: 0,
+          unlockedBanners: [],
+          unlockedThemes: ['default'],
         };
         users[lowercasedEmail] = newUser;
         writeDb(DB_KEY_USERS, users);
@@ -171,6 +179,8 @@ export const apiService = {
           if (updates.badges) updates.badges = [...new Set([...user.badges, ...updates.badges])];
           if (updates.completedModules) updates.completedModules = [...new Set([...user.completedModules, ...updates.completedModules])];
           if (updates.unlockedVoices) updates.unlockedVoices = [...new Set([...user.unlockedVoices, ...updates.unlockedVoices])];
+          if (updates.unlockedBanners) updates.unlockedBanners = [...new Set([...user.unlockedBanners, ...updates.unlockedBanners])];
+          if (updates.unlockedThemes) updates.unlockedThemes = [...new Set([...user.unlockedThemes, ...updates.unlockedThemes])];
           
           user = { ...user, ...updates };
           
@@ -252,7 +262,25 @@ export const apiService = {
               // Apply purchase effect
               if (payload.badgeId) user.badges.push(payload.badgeId);
               if (payload.certificateLevel) user.certificateLevel = payload.certificateLevel;
-              if (payload.theme) user.theme = payload.theme;
+              
+              if (payload.unlockTheme) {
+                if (!user.unlockedThemes) user.unlockedThemes = ['default'];
+                user.unlockedThemes.push(payload.unlockTheme);
+              }
+              if (payload.addTutorTokens) {
+                  user.tutorTokens = (user.tutorTokens || 0) + payload.addTutorTokens;
+              }
+              if (payload.addQuizRewinds) {
+                  user.quizRewinds = (user.quizRewinds || 0) + payload.addQuizRewinds;
+              }
+              if (payload.unlockBanner) {
+                  if (!user.unlockedBanners) user.unlockedBanners = [];
+                  user.unlockedBanners.push(payload.unlockBanner);
+              }
+              if (payload.unlockVoice) {
+                  if (!user.unlockedVoices) user.unlockedVoices = [];
+                  user.unlockedVoices.push(payload.unlockVoice);
+              }
               
               // Perform transaction
               user.wallet.balance -= cost;

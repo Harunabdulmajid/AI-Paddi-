@@ -57,6 +57,9 @@ export const Marketplace: React.FC = () => {
     const context = useContext(AppContext);
     const t = useTranslations();
     
+    const categories = [...new Set(MARKETPLACE_ITEMS.map(item => item.category))] as MarketplaceCategory[];
+    const [activeCategory, setActiveCategory] = useState<MarketplaceCategory>(categories[0]);
+    
     const [selectedItem, setSelectedItem] = useState<MarketplaceItem | null>(null);
     const [isConfirming, setIsConfirming] = useState(false);
     const [error, setError] = useState('');
@@ -86,8 +89,8 @@ export const Marketplace: React.FC = () => {
             setSelectedItem(null);
         }
     };
-
-    const categories = [...new Set(MARKETPLACE_ITEMS.map(item => item.category))] as MarketplaceCategory[];
+    
+    const filteredItems = MARKETPLACE_ITEMS.filter(item => item.category === activeCategory);
 
     return (
         <div>
@@ -104,16 +107,25 @@ export const Marketplace: React.FC = () => {
                 confirmText={t.wallet.confirm}
             />
 
-            <div className="space-y-8">
+            {/* Category Tabs */}
+            <div className="flex border-b border-neutral-200 mb-6 overflow-x-auto">
                 {categories.map(category => (
-                    <div key={category}>
-                        <h3 className="text-xl font-bold text-neutral-700 mb-4">{t.marketplace.categories[category]}</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {MARKETPLACE_ITEMS.filter(item => item.category === category).map(item => (
-                                <MarketplaceCard key={item.id} item={item} onRedeem={handleRedeem} />
-                            ))}
-                        </div>
-                    </div>
+                    <button
+                        key={category}
+                        onClick={() => setActiveCategory(category)}
+                        className={`flex-shrink-0 px-4 py-3 font-bold text-sm sm:text-base transition-colors ${activeCategory === category 
+                            ? 'border-b-2 border-primary text-primary' 
+                            : 'text-neutral-500 hover:text-neutral-800 border-b-2 border-transparent'}`}
+                    >
+                        {t.marketplace.categories[category]}
+                    </button>
+                ))}
+            </div>
+
+            {/* Items Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredItems.map(item => (
+                    <MarketplaceCard key={item.id} item={item} onRedeem={handleRedeem} />
                 ))}
             </div>
         </div>

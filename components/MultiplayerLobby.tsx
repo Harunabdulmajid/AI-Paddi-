@@ -106,7 +106,8 @@ export const MultiplayerLobby: React.FC = () => {
                     {gameSession.players.map(p => (
                         <div key={p.id} className="flex items-center justify-between bg-neutral-50 p-3 rounded-lg">
                             <span className="font-semibold text-neutral-800">{p.name}</span>
-                            {p.id === gameSession.hostId && <Crown size={20} className="text-accent" title="Host"/>}
+                            {/* FIX: Wrap lucide-react icon in a span with a title attribute for tooltips, as the icon component itself doesn't support it. */}
+                            {p.id === gameSession.hostId && <span title="Host"><Crown size={20} className="text-accent" /></span>}
                         </div>
                     ))}
                 </div>
