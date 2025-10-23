@@ -1,4 +1,4 @@
-import { User, LearningPath, FeedbackType, Language, GameSession, Player, Wallet, Transaction } from '../types';
+import { User, LearningPath, FeedbackType, Language, GameSession, Player, Wallet, Transaction, UserRole, SchoolClass, StudentProgress } from '../types';
 import { CURRICULUM_MODULES } from '../constants';
 // We import the english translations directly to act as a master question bank for consistency
 import { englishTranslations } from '../i18n'; 
@@ -6,6 +6,8 @@ import { englishTranslations } from '../i18n';
 // Use localStorage to simulate a persistent database
 const DB_KEY_USERS = 'alk_users_by_email';
 const DB_KEY_GAMES = 'alk_games_by_code';
+const DB_KEY_CLASSES = 'alk_classes_by_id';
+
 
 const SIMULATED_DELAY = 300; // ms
 const DAILY_TRANSFER_LIMIT = 200;
@@ -37,11 +39,11 @@ const initializeDb = () => {
     let users = readDb<Record<string, User>>(DB_KEY_USERS, {});
     if (Object.keys(users).length === 0) {
         const mockUsers: Omit<User, 'wallet'>[] = [
-            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', name: 'Amina', points: 250, level: LearningPath.Advanced, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 2, quizRewinds: 5, unlockedBanners: [], unlockedThemes: ['default'] },
-            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', name: 'Kwame', points: 190, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 1, unlockedBanners: [], unlockedThemes: ['default'] },
-            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', name: 'Fatou', points: 175, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
-            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', name: 'Chinedu', points: 150, level: LearningPath.Beginner, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
-            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', name: 'Zola', points: 120, level: LearningPath.Beginner, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
+            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', name: 'Amina', role: UserRole.Student, points: 250, level: LearningPath.Advanced, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 2, quizRewinds: 5, unlockedBanners: [], unlockedThemes: ['default'] },
+            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', name: 'Kwame', role: UserRole.Student, points: 190, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 1, unlockedBanners: [], unlockedThemes: ['default'] },
+            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', name: 'Fatou', role: UserRole.Teacher, points: 175, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
+            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', name: 'Chinedu', role: UserRole.Parent, points: 150, level: LearningPath.Beginner, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], childEmail: 'zola@example.com' },
+            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', name: 'Zola', role: UserRole.Student, points: 120, level: LearningPath.Beginner, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
         ];
         const usersDb = mockUsers.reduce((acc, user) => {
             acc[user.email] = { ...user, wallet: initializeDefaultWallet(user.points) };
@@ -85,6 +87,7 @@ export const apiService = {
         if (user.quizRewinds === undefined) user.quizRewinds = 0;
         if (!user.unlockedBanners) user.unlockedBanners = [];
         if (!user.unlockedThemes) user.unlockedThemes = ['default'];
+        if (!user.role) user.role = UserRole.Student; // Add default role
         // --- End Initialization ---
 
         const today = getTodayDateString();
@@ -128,7 +131,7 @@ export const apiService = {
     });
   },
 
-  async createUser(details: { name: string, email: string, level: LearningPath, googleId: string }): Promise<User> {
+  async createUser(details: { name: string, email: string, level: LearningPath, role: UserRole, googleId: string }): Promise<User> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
@@ -145,6 +148,7 @@ export const apiService = {
           email: lowercasedEmail,
           name: details.name,
           level: details.level,
+          role: details.role,
           points: 0,
           completedModules: [],
           badges: [],
@@ -197,6 +201,28 @@ export const apiService = {
         }
       }, SIMULATED_DELAY / 2); // Make updates faster
     });
+  },
+
+  async linkChildAccount(parentEmail: string, childEmail: string): Promise<User> {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+              const parent = users[parentEmail.toLowerCase()];
+              const child = users[childEmail.toLowerCase()];
+
+              if (!parent) return reject(new Error("Parent account not found."));
+              if (!child) return reject(new Error("No student account found with that email."));
+              if (child.role !== UserRole.Student) return reject(new Error("The provided email does not belong to a student account."));
+              if (Object.values(users).some(u => u.role === UserRole.Parent && u.childEmail === child.email)) {
+                  return reject(new Error("This student account is already linked to another parent."));
+              }
+
+              parent.childEmail = child.email;
+              users[parent.email] = parent;
+              writeDb(DB_KEY_USERS, users);
+              resolve(parent);
+          }, SIMULATED_DELAY);
+      });
   },
 
   async sendPoints(senderEmail: string, recipientEmail: string, amount: number, message: string): Promise<{ sender: User, recipient: User }> {
@@ -321,6 +347,81 @@ export const apiService = {
               console.log("--------------------------");
               resolve({ success: true });
           }, SIMULATED_DELAY * 2);
+      });
+  },
+
+  // --- Class Management API ---
+  async createClass(teacherId: string, name: string): Promise<SchoolClass> {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const classes = readDb<Record<string, SchoolClass>>(DB_KEY_CLASSES, {});
+            const classId = `cls-${Date.now()}`;
+            const joinCode = `AIP-${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+            const newClass: SchoolClass = {
+                id: classId,
+                teacherId,
+                name,
+                joinCode,
+                students: [],
+                assignedModules: [],
+            };
+            classes[classId] = newClass;
+            writeDb(DB_KEY_CLASSES, classes);
+            resolve(newClass);
+        }, SIMULATED_DELAY);
+    });
+  },
+
+  async getClassesForTeacher(teacherId: string): Promise<SchoolClass[]> {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            const classes = readDb<Record<string, SchoolClass>>(DB_KEY_CLASSES, {});
+            const teacherClasses = Object.values(classes).filter(c => c.teacherId === teacherId);
+            resolve(teacherClasses);
+        }, SIMULATED_DELAY);
+    });
+  },
+  
+  async getClassDetails(classId: string): Promise<SchoolClass | null> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const classes = readDb<Record<string, SchoolClass>>(DB_KEY_CLASSES, {});
+        const schoolClass = classes[classId];
+        
+        // For demonstration, if a class has no students, populate it with mock students.
+        if (schoolClass && schoolClass.students.length === 0) {
+            const mockStudentNames = ['Abubakar', 'Bola', 'Chiamaka', 'David', 'Efe', 'Funke', 'Gozie'];
+            const mockStudents: StudentProgress[] = mockStudentNames.map((name, i) => {
+                const completedCount = Math.floor(Math.random() * (CURRICULUM_MODULES.length + 1));
+                return {
+                    studentId: `mock-student-${i}`,
+                    studentName: name,
+                    avatarId: `avatar-0${(i % 6) + 1}`,
+                    completedModules: CURRICULUM_MODULES.slice(0, completedCount).map(m => m.id),
+                };
+            });
+            schoolClass.students = mockStudents;
+            classes[classId] = schoolClass;
+            writeDb(DB_KEY_CLASSES, classes);
+        }
+
+        resolve(schoolClass || null);
+      }, SIMULATED_DELAY);
+    });
+  },
+
+  async assignModulesToClass(classId: string, moduleIds: string[]): Promise<SchoolClass> {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              const classes = readDb<Record<string, SchoolClass>>(DB_KEY_CLASSES, {});
+              const schoolClass = classes[classId];
+              if (!schoolClass) return reject(new Error("Class not found."));
+
+              schoolClass.assignedModules = moduleIds;
+              classes[classId] = schoolClass;
+              writeDb(DB_KEY_CLASSES, classes);
+              resolve(schoolClass);
+          }, SIMULATED_DELAY);
       });
   },
 
@@ -463,9 +564,7 @@ export const apiService = {
             const isCorrect = questionContent.correctAnswerIndex === answerIndex;
 
             if (isCorrect) {
-                const timeBonus = Math.max(0, 10 - Math.floor(timeTakenMs / 1000)); // Max 10 bonus points
-                const streakBonus = player.streak >= 2 ? 5 : 0;
-                player.score += 10 + timeBonus + streakBonus;
+                player.score += 10; // Flat 10 points, no time/streak bonus
                 player.streak += 1;
             } else {
                 player.streak = 0;
@@ -483,16 +582,15 @@ export const apiService = {
                     session.status = 'finished';
                     
                     // Update user profiles
-                    const winner = session.players.sort((a,b) => b.score - a.score)[0];
                     for (const p of session.players) {
                         const usersInDb = readDb<Record<string, User>>(DB_KEY_USERS, {});
                         const userFromDb = Object.values(usersInDb).find(u => u.id === p.id);
                         if (userFromDb) {
                             const updates: Partial<Omit<User, 'id' | 'email' | 'googleId'>> = {};
 
-                            // Calculate new stats
+                            // Calculate new stats - don't track wins
                             const newStats = {
-                                wins: userFromDb.multiplayerStats.wins + (p.id === winner.id ? 1 : 0),
+                                wins: userFromDb.multiplayerStats.wins,
                                 gamesPlayed: userFromDb.multiplayerStats.gamesPlayed + 1,
                             };
                             updates.multiplayerStats = newStats;
@@ -502,7 +600,8 @@ export const apiService = {
                             
                             // Calculate new badges
                             const newBadges = [...userFromDb.badges];
-                            if (p.id === winner.id && !newBadges.includes('first-win')) {
+                            // Award badge for first session completion, not for winning
+                            if (userFromDb.multiplayerStats.gamesPlayed === 0 && !newBadges.includes('first-win')) {
                                newBadges.push('first-win');
                             }
                             if (newStats.gamesPlayed >= 10 && !newBadges.includes('multiplayer-maestro')) {

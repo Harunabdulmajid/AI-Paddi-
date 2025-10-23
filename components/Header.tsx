@@ -5,12 +5,70 @@ import { Award, GraduationCap, Languages, LogOut, UserCircle, Settings, Wifi, Wi
 import { useTranslations } from '../i18n';
 import { Page } from '../types';
 
-const UserAvatar: React.FC<{ name: string; avatarUrl?: string }> = ({ name, avatarUrl }) => {
+// --- Avatars ---
+const Avatar1: React.FC<{ className?: string }> = ({ className }) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <circle cx="50" cy="50" r="50" fill="#60a5fa"/>
+        <circle cx="50" cy="50" r="35" fill="#3b82f6"/>
+        <circle cx="50" cy="50" r="20" fill="#1d4ed8"/>
+    </svg>
+);
+const Avatar2: React.FC<{ className?: string }> = ({ className }) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <rect width="100" height="100" rx="50" fill="#818cf8"/>
+        <path d="M25 75L50 25L75 75H25Z" fill="#4f46e5"/>
+    </svg>
+);
+const Avatar3: React.FC<{ className?: string }> = ({ className }) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <circle cx="50" cy="50" r="50" fill="#facc15"/>
+        <path d="M50 15L62.5 37.5L87.5 37.5L68.75 56.25L75 81.25L50 62.5L25 81.25L31.25 56.25L12.5 37.5L37.5 37.5L50 15Z" fill="#eab308"/>
+    </svg>
+);
+const Avatar4: React.FC<{ className?: string }> = ({ className }) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <circle cx="50" cy="50" r="50" fill="#4ade80"/>
+        <path d="M25 25H75V75H25V25Z" fill="#22c55e" transform="rotate(45 50 50)"/>
+    </svg>
+);
+const Avatar5: React.FC<{ className?: string }> = ({ className }) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <circle cx="50" cy="50" r="50" fill="#fb923c"/>
+        <path d="M50 20C20 50 80 50 50 80C80 50 20 50 50 20Z" fill="#f97316"/>
+    </svg>
+);
+const Avatar6: React.FC<{ className?: string }> = ({ className }) => (
+    <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+        <circle cx="50" cy="50" r="50" fill="#f472b6"/>
+        <rect x="25" y="25" width="50" height="50" rx="10" fill="#ec4899"/>
+    </svg>
+);
+
+export const AVATARS: Record<string, React.ComponentType<{ className?: string }>> = {
+  'avatar-01': Avatar1,
+  'avatar-02': Avatar2,
+  'avatar-03': Avatar3,
+  'avatar-04': Avatar4,
+  'avatar-05': Avatar5,
+  'avatar-06': Avatar6,
+};
+
+export const UserAvatar: React.FC<{ name: string; avatarUrl?: string; avatarId?: string; className?: string }> = ({ name, avatarUrl, avatarId, className }) => {
+    const baseClasses = "rounded-full";
+    const finalClassName = `${className || 'w-10 h-10 text-lg'} ${baseClasses}`;
+    
     if (avatarUrl) {
-        return <img src={avatarUrl} alt={name} className="w-10 h-10 rounded-full" />;
+        return <img src={avatarUrl} alt={name} className={`${finalClassName} object-cover`} />;
     }
+    
+    const AvatarComponent = avatarId ? AVATARS[avatarId] : null;
+
+    if (AvatarComponent) {
+        return <AvatarComponent className={finalClassName} />;
+    }
+    
     return (
-        <div className="w-10 h-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-lg">
+        <div className={`${finalClassName} bg-primary/20 text-primary flex items-center justify-center font-bold`}>
             {name?.charAt(0).toUpperCase()}
         </div>
     );
@@ -112,7 +170,7 @@ export const Header: React.FC<{ onSettingsClick: () => void }> = ({ onSettingsCl
 
           <div className="relative" ref={dropdownRef}>
             <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="rounded-full ring-2 ring-offset-2 ring-transparent hover:ring-primary transition-all">
-                <UserAvatar name={user.name} />
+                <UserAvatar name={user.name} avatarId={user.avatarId} avatarUrl={user.avatarUrl} />
             </button>
             {isDropdownOpen && (
                 <div className="absolute top-14 right-0 w-64 sm:w-56 bg-white rounded-lg shadow-xl border border-neutral-200 py-2 z-30">

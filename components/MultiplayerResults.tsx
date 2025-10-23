@@ -2,12 +2,12 @@ import React, { useContext, useMemo, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
 import { useTranslations } from '../i18n';
 import { Page, User } from '../types';
-import { Trophy, Award, RotateCw, LogOut } from 'lucide-react';
+import { Trophy, Award, RotateCw, LogOut, CheckCircle } from 'lucide-react';
 import { apiService } from '../services/apiService';
 
-export const MultiplayerResults: React.FC = () => {
+export const PracticeResults: React.FC = () => {
     const context = useContext(AppContext);
-    if (!context) throw new Error("MultiplayerResults must be used within an AppProvider");
+    if (!context) throw new Error("PracticeResults must be used within an AppProvider");
     const { gameSession, setGameSession, setCurrentPage, user, setUser } = context;
     const t = useTranslations();
 
@@ -36,8 +36,6 @@ export const MultiplayerResults: React.FC = () => {
         return null;
     }
     
-    const winner = sortedPlayers[0];
-    
     const handleExit = () => {
         setGameSession(null);
         setCurrentPage(Page.Dashboard);
@@ -52,19 +50,11 @@ export const MultiplayerResults: React.FC = () => {
 
     return (
         <div className="text-center animate-fade-in">
-            <h2 className="text-3xl font-bold text-neutral-800">{t.multiplayer.finalResults}</h2>
+            <CheckCircle className="text-secondary mx-auto" size={64} />
+            <h2 className="text-3xl font-bold text-neutral-800 mt-4">{t.peerPractice.practiceComplete}</h2>
             
-            {winner && (
-                 <div className="my-8 flex flex-col items-center">
-                     <Trophy className="text-amber-400" size={64} />
-                     <p className="text-lg font-semibold text-neutral-600 mt-2">{t.multiplayer.winner}</p>
-                     <p className="text-4xl font-extrabold text-primary">{winner.name}</p>
-                     <p className="text-xl font-bold text-accent mt-1">{winner.score} {t.common.pointsAbbr}</p>
-                 </div>
-            )}
-           
             <div className="mt-8 max-w-lg mx-auto">
-                 <h4 className="font-bold text-lg text-neutral-700 mb-3">{t.multiplayer.scoreboard}</h4>
+                 <h4 className="font-bold text-lg text-neutral-700 mb-3">Final Scores</h4>
                  <div className="space-y-2">
                     {sortedPlayers.map((player, index) => (
                         <div key={player.id} className="flex items-center bg-neutral-50 p-3 rounded-lg text-left">
@@ -87,13 +77,13 @@ export const MultiplayerResults: React.FC = () => {
                     disabled={true} /* Disabled until implemented */
                     className="flex items-center justify-center gap-3 bg-secondary text-white font-bold py-3 px-6 rounded-xl text-lg hover:opacity-90 transition disabled:bg-neutral-300 disabled:cursor-not-allowed"
                 >
-                    <RotateCw/> {t.multiplayer.rematch}
+                    <RotateCw/> {t.peerPractice.practiceAgain}
                 </button>
                 <button 
                     onClick={handleExit}
                     className="flex items-center justify-center gap-3 bg-neutral-600 text-white font-bold py-3 px-6 rounded-xl text-lg hover:bg-neutral-700 transition"
                 >
-                    <LogOut/> {t.multiplayer.exit}
+                    <LogOut/> {t.peerPractice.exit}
                 </button>
             </div>
         </div>

@@ -21,12 +21,15 @@ export enum Language {
 
 export enum Page {
   Dashboard = 'Dashboard',
-  Multiplayer = 'Multi-player',
+  PeerPractice = 'Peer-to-Peer Practice',
   AiVsHuman = 'AI vs Human',
   Profile = 'Profile & Certificates',
   Lesson = 'Lesson',
   Leaderboard = 'Leaderboard',
   Wallet = 'Wallet',
+  Glossary = 'Glossary',
+  PodcastGenerator = 'Podcast Generator',
+  CareerExplorer = 'AI Career Explorer',
 }
 
 export type Difficulty = 'Easy' | 'Hard';
@@ -35,6 +38,12 @@ export enum FeedbackType {
     Bug = 'Bug Report',
     Suggestion = 'Suggestion',
     General = 'General Feedback'
+}
+
+export enum UserRole {
+  Student = 'Student',
+  Teacher = 'Teacher',
+  Parent = 'Parent',
 }
 
 export interface Badge {
@@ -76,6 +85,8 @@ export interface User {
   name: string;
   avatarUrl?: string;
   level: LearningPath | null;
+  role: UserRole;
+  childEmail?: string; // For Parent role
   points: number; // This will mirror wallet.balance for easy access
   completedModules: string[];
   badges: string[];
@@ -91,6 +102,22 @@ export interface User {
   quizRewinds: number;
   unlockedBanners: string[];
   unlockedThemes: string[];
+}
+
+export interface StudentProgress {
+  studentId: string;
+  studentName: string;
+  avatarId: string;
+  completedModules: string[];
+}
+
+export interface SchoolClass {
+  id: string;
+  name: string;
+  teacherId: string;
+  joinCode: string;
+  students: StudentProgress[];
+  assignedModules: string[];
 }
 
 export interface Question {

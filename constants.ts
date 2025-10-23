@@ -1,5 +1,5 @@
-import { BrainCircuit, BookOpen, Bot, ShieldCheck, Briefcase, Star, Award, Trophy, Swords, Zap, Paintbrush, Medal, GraduationCap, Users, MessageSquarePlus, RotateCcw, Image as ImageIcon, Palette, Gift, HeartHandshake } from 'lucide-react';
-import { Badge, MarketplaceItem, User, Language } from './types';
+import { BrainCircuit, BookOpen, Bot, ShieldCheck, Briefcase, Star, Award, Trophy, Swords, Zap, Paintbrush, Medal, GraduationCap, Users, MessageSquarePlus, RotateCcw, Image as ImageIcon, Palette, Gift, HeartHandshake, Leaf, Landmark, PenTool } from 'lucide-react';
+import { Badge, MarketplaceItem, User, Language, LearningPath } from './types';
 
 export const CURRICULUM_MODULES = [
   {
@@ -22,6 +22,41 @@ export const CURRICULUM_MODULES = [
     id: 'ai-and-jobs',
     icon: Briefcase,
   },
+];
+
+export const LEARNING_PATHS = {
+  [LearningPath.Beginner]: {
+    modules: ['what-is-ai', 'ai-in-daily-life'],
+  },
+  [LearningPath.Intermediate]: {
+    modules: ['how-ai-works', 'risks-and-bias'],
+  },
+  [LearningPath.Advanced]: {
+    modules: ['ai-and-jobs'],
+  },
+};
+
+export const CAREER_PROFILES = [
+  {
+    id: 'agritech-specialist',
+    icon: Leaf,
+    relevantModuleIds: ['ai-in-daily-life', 'how-ai-works'],
+  },
+  {
+    id: 'fintech-ml-engineer',
+    icon: Landmark,
+    relevantModuleIds: ['how-ai-works', 'risks-and-bias'],
+  },
+  {
+    id: 'ai-content-creator',
+    icon: PenTool,
+    relevantModuleIds: ['what-is-ai', 'ai-in-daily-life'],
+  },
+  {
+    id: 'ai-ethicist',
+    icon: ShieldCheck,
+    relevantModuleIds: ['risks-and-bias', 'ai-and-jobs'],
+  }
 ];
 
 export const BADGES: Record<string, Badge> = {
@@ -51,14 +86,14 @@ export const BADGES: Record<string, Badge> = {
   },
   'first-win': {
     id: 'first-win',
-    name: 'First Win',
-    description: 'Won your first multiplayer match.',
-    icon: Trophy,
+    name: 'Practice Partner',
+    description: 'Completed your first practice session with a peer.',
+    icon: Users,
   },
   'multiplayer-maestro': {
     id: 'multiplayer-maestro',
-    name: 'Multiplayer Maestro',
-    description: 'Played 10 multiplayer matches.',
+    name: 'Practice Pro',
+    description: 'Completed 10 peer-to-peer practice sessions.',
     icon: Swords,
   },
   'bronze-supporter': {

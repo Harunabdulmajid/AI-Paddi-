@@ -1,13 +1,17 @@
-import React, { useContext, useRef, useCallback, useState } from 'react';
+// FIX: Import `useEffect` from React to resolve the "Cannot find name 'useEffect'" error.
+import React, { useContext, useRef, useCallback, useState, useEffect } from 'react';
 import { AppContext } from '../context/AppContext';
-import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Wallet } from 'lucide-react';
+import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Wallet, Feather, BookOpen, BrainCircuit } from 'lucide-react';
 import { LearningPath, User, Page } from '../types';
 import { useTranslations } from '../i18n';
-import { CURRICULUM_MODULES, BADGES } from '../constants';
+// FIX: Import the `BADGES` constant to resolve the "Cannot find name 'BADGES'" error.
+import { CURRICULUM_MODULES, LEARNING_PATHS, BADGES } from '../constants';
 import * as htmlToImage from 'html-to-image';
 import { apiService } from '../services/apiService';
 import { BadgeIcon } from './BadgeIcon';
 import { FeedbackModal } from './FeedbackModal';
+import { UserAvatar, AVATARS } from './Header';
+import { ConfirmationModal } from './Wallet/ConfirmationModal';
 
 const Certificate: React.FC<{ user: User, certificateRef: React.RefObject<HTMLDivElement> }> = ({ user, certificateRef }) => {
     const t = useTranslations();
@@ -40,6 +44,98 @@ const Certificate: React.FC<{ user: User, certificateRef: React.RefObject<HTMLDi
     );
 };
 
+interface AvatarSelectionModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (avatarId: string) => Promise<void>;
+    currentAvatarId: string;
+    isSaving: boolean;
+}
+
+const AvatarSelectionModal: React.FC<AvatarSelectionModalProps> = ({ isOpen, onClose, onSave, currentAvatarId, isSaving }) => {
+    const [selectedAvatarId, setSelectedAvatarId] = useState(currentAvatarId);
+
+    useEffect(() => {
+        setSelectedAvatarId(currentAvatarId);
+    }, [currentAvatarId, isOpen]);
+
+    if (!isOpen) return null;
+
+    const handleSave = () => {
+        onSave(selectedAvatarId);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-lg w-full transform transition-all animate-slide-up relative" onClick={(e) => e.stopPropagation()}>
+                <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-700">
+                    <X size={24} />
+                </button>
+                <h2 className="text-2xl font-bold text-neutral-800">Choose Your Avatar</h2>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 my-6">
+                    {Object.entries(AVATARS).map(([id, AvatarComponent]) => (
+                        <button
+                            key={id}
+                            onClick={() => setSelectedAvatarId(id)}
+                            className={`p-2 rounded-full transition-all duration-200 ${selectedAvatarId === id ? 'ring-4 ring-primary ring-offset-2' : 'hover:ring-2 hover:ring-primary/50'}`}
+                            aria-label={`Select avatar ${id.split('-')[1]}`}
+                        >
+                            <AvatarComponent className="w-20 h-20 sm:w-24 sm:h-24 rounded-full" />
+                        </button>
+                    ))}
+                </div>
+                <div className="flex justify-end gap-3 border-t border-neutral-200 pt-4">
+                    <button onClick={onClose} className="font-bold py-2 px-5 rounded-lg text-neutral-600 bg-neutral-200 hover:bg-neutral-300 transition">
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        disabled={isSaving || selectedAvatarId === currentAvatarId}
+                        className="flex items-center justify-center gap-2 font-bold py-2 px-5 rounded-lg bg-primary text-white hover:bg-primary-dark transition disabled:bg-neutral-300"
+                    >
+                        {isSaving ? <Loader2 className="animate-spin" size={20} /> : 'Save Changes'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const PathSelectionModal: React.FC<{ isOpen: boolean, onClose: () => void, onSelect: (path: LearningPath) => void, currentPath: LearningPath }> = ({ isOpen, onClose, onSelect, currentPath }) => {
+    const t = useTranslations();
+    const paths = [
+        { level: LearningPath.Beginner, icon: Feather },
+        { level: LearningPath.Intermediate, icon: BookOpen },
+        { level: LearningPath.Advanced, icon: BrainCircuit },
+    ];
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-fade-in" onClick={onClose}>
+            <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 max-w-2xl w-full transform transition-all animate-slide-up relative" onClick={(e) => e.stopPropagation()}>
+                 <button onClick={onClose} className="absolute top-4 right-4 text-neutral-400 hover:text-neutral-700">
+                    <X size={24} />
+                </button>
+                <h2 className="text-2xl font-bold text-neutral-800">Change Learning Path</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+                    {paths.map(({ level, icon: Icon }) => (
+                        <button
+                            key={level}
+                            onClick={() => onSelect(level)}
+                            className={`text-left p-5 border-2 rounded-xl hover:border-primary hover:bg-primary/5 transition-all duration-300 group ${currentPath === level ? 'border-primary bg-primary/5' : 'border-neutral-200'}`}
+                        >
+                            <Icon className="text-primary mb-3" size={28} />
+                            <h3 className="text-lg font-bold text-neutral-800">{t.paths[level].name}</h3>
+                            <p className="text-neutral-500 text-sm mt-1">{t.paths[level].description}</p>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 export const Profile: React.FC = () => {
     const context = useContext(AppContext);
@@ -52,7 +148,14 @@ export const Profile: React.FC = () => {
     const [editedName, setEditedName] = useState(user?.name || '');
     const [isSaving, setIsSaving] = useState(false);
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+    const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
+    const [isSavingAvatar, setIsSavingAvatar] = useState(false);
     
+    const [isPathModalOpen, setIsPathModalOpen] = useState(false);
+    const [isPathConfirmModalOpen, setIsPathConfirmModalOpen] = useState(false);
+    const [selectedPath, setSelectedPath] = useState<LearningPath | null>(null);
+    const [isSavingPath, setIsSavingPath] = useState(false);
+
     if (!user) return null;
 
     const handleEditName = () => {
@@ -78,8 +181,48 @@ export const Profile: React.FC = () => {
         setIsEditingName(false);
     };
 
-    const completedModulesCount = user.completedModules.length;
-    const totalModules = CURRICULUM_MODULES.length;
+    const handleSaveAvatar = async (avatarId: string) => {
+        if (avatarId === user.avatarId) {
+            setIsAvatarModalOpen(false);
+            return;
+        }
+        setIsSavingAvatar(true);
+        const updatedUser = await apiService.updateUser(user.email, { avatarId });
+        if (updatedUser) {
+            setUser(updatedUser as User);
+        }
+        setIsSavingAvatar(false);
+        setIsAvatarModalOpen(false);
+    };
+    
+    const handlePathSelect = (path: LearningPath) => {
+        if (path === user.level) {
+            setIsPathModalOpen(false);
+            return;
+        }
+        setSelectedPath(path);
+        setIsPathModalOpen(false);
+        setIsPathConfirmModalOpen(true);
+    };
+    
+    const handleConfirmPathChange = async () => {
+        if (!selectedPath) return;
+        setIsSavingPath(true);
+        const updatedUser = await apiService.updateUser(user.email, {
+            level: selectedPath,
+            completedModules: [] // Reset progress
+        });
+        if (updatedUser) {
+            setUser(updatedUser as User);
+        }
+        setIsSavingPath(false);
+        setIsPathConfirmModalOpen(false);
+        setSelectedPath(null);
+    };
+
+    const userPathModules = user.level ? LEARNING_PATHS[user.level].modules : [];
+    const completedModulesCount = user.completedModules.filter(id => userPathModules.includes(id)).length;
+    const totalModules = userPathModules.length;
     const progressPercentage = totalModules > 0 ? (completedModulesCount / totalModules) * 100 : 0;
     const allModulesCompleted = completedModulesCount === totalModules && totalModules > 0;
     
@@ -99,6 +242,29 @@ export const Profile: React.FC = () => {
     return (
         <>
             <FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
+            <AvatarSelectionModal 
+                isOpen={isAvatarModalOpen}
+                onClose={() => setIsAvatarModalOpen(false)}
+                onSave={handleSaveAvatar}
+                currentAvatarId={user.avatarId}
+                isSaving={isSavingAvatar}
+            />
+            <PathSelectionModal 
+                isOpen={isPathModalOpen}
+                onClose={() => setIsPathModalOpen(false)}
+                onSelect={handlePathSelect}
+                currentPath={user.level!}
+            />
+            <ConfirmationModal
+                isOpen={isPathConfirmModalOpen}
+                onClose={() => setIsPathConfirmModalOpen(false)}
+                onConfirm={handleConfirmPathChange}
+                title={t.profile.changePathConfirmTitle}
+                message={t.profile.changePathConfirmMessage}
+                isConfirming={isSavingPath}
+                confirmText={t.common.submit}
+            />
+
             <div className="container mx-auto p-4 md:p-8">
                 <h2 className="text-3xl md:text-4xl font-extrabold text-neutral-800 mb-2">{t.profile.title}</h2>
                 <p className="text-neutral-500 mb-8 text-base md:text-lg">{t.profile.description}</p>
@@ -106,9 +272,12 @@ export const Profile: React.FC = () => {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Profile Card */}
                     <div className="lg:col-span-1 bg-white p-6 md:p-8 rounded-2xl shadow-lg text-center flex flex-col items-center">
-                        <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-4xl md:text-5xl mb-5 ring-4 ring-white shadow-md">
-                            {user.name.charAt(0).toUpperCase()}
-                        </div>
+                        <button onClick={() => setIsAvatarModalOpen(true)} className="relative group rounded-full mb-5 ring-4 ring-white shadow-md hover:ring-primary transition-all">
+                            <UserAvatar name={user.name} avatarId={user.avatarId} avatarUrl={user.avatarUrl} className="w-24 h-24 md:w-32 md:h-32 text-4xl md:text-5xl" />
+                            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                <Edit size={32} className="text-white" />
+                            </div>
+                        </button>
                         
                         {!isEditingName ? (
                             <div className="flex items-center gap-2">
@@ -147,6 +316,17 @@ export const Profile: React.FC = () => {
 
                     {/* Main Content Area */}
                     <div className="lg:col-span-2 space-y-8">
+                         {/* Learning Path */}
+                         <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h4 className="text-xl md:text-2xl font-bold text-neutral-800 mb-1">{t.profile.learningPathTitle}</h4>
+                                    <p className="font-bold text-lg text-primary">{t.paths[user.level!].name}</p>
+                                </div>
+                                <button onClick={() => setIsPathModalOpen(true)} className="font-semibold text-sm text-primary hover:underline">{t.profile.changePath}</button>
+                            </div>
+                        </div>
+
                         {/* Multiplayer Stats */}
                          <div className="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
                             <h4 className="text-xl md:text-2xl font-bold text-neutral-800 mb-5">{t.profile.multiplayerStatsTitle}</h4>

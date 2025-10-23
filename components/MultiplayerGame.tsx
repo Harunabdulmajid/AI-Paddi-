@@ -3,30 +3,35 @@ import { AppContext } from '../context/AppContext';
 import { useTranslations } from '../i18n';
 import { apiService } from '../services/apiService';
 import { GameSession, Player } from '../types';
-import { Loader2, CheckCircle, XCircle, BarChart2 } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Users } from 'lucide-react';
 
-const Scoreboard: React.FC<{ players: Player[] }> = ({ players }) => {
-    const sortedPlayers = useMemo(() => [...players].sort((a, b) => b.score - a.score), [players]);
+const ProgressTracker: React.FC<{ players: Player[], currentQuestionIndex: number }> = ({ players, currentQuestionIndex }) => {
     const t = useTranslations();
     
     return (
         <div className="w-full lg:w-1/3 bg-neutral-50 p-4 rounded-xl border border-neutral-200">
-            <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-neutral-700"><BarChart2 size={20}/> {t.multiplayer.scoreboard}</h3>
+            <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-neutral-700"><Users size={20}/> {t.peerPractice.progress}</h3>
             <div className="space-y-2">
-                {sortedPlayers.map((player, index) => (
-                    <div key={player.id} className="flex justify-between items-center bg-white p-2 rounded-md">
-                        <span className="font-semibold text-neutral-800">{index + 1}. {player.name}</span>
-                        <span className="font-bold text-primary">{player.score}</span>
-                    </div>
-                ))}
+                {players.map((player) => {
+                    const hasAnswered = player.progressIndex > currentQuestionIndex;
+                    return (
+                        <div key={player.id} className="flex justify-between items-center bg-white p-2 rounded-md">
+                            <span className="font-semibold text-neutral-800">{player.name}</span>
+                            {hasAnswered ? 
+                                <CheckCircle size={20} className="text-secondary" /> : 
+                                <Loader2 size={20} className="text-neutral-400 animate-spin" />
+                            }
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
 };
 
-export const MultiplayerGame: React.FC = () => {
+export const PracticeGame: React.FC = () => {
     const context = useContext(AppContext);
-    if (!context) throw new Error("MultiplayerGame must be used within an AppProvider");
+    if (!context) throw new Error("PracticeGame must be used within an AppProvider");
     const { gameSession, setGameSession, user } = context;
     const t = useTranslations();
 
@@ -89,7 +94,7 @@ export const MultiplayerGame: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-8">
             <div className="w-full lg:w-2/3">
                 <p className="font-bold text-primary mb-2">
-                    {t.multiplayer.question(currentQuestionIndex + 1, gameSession.questions.length)}
+                    {t.peerPractice.question(currentQuestionIndex + 1, gameSession.questions.length)}
                 </p>
                 <h2 className="text-2xl font-bold text-neutral-800 mb-6">{questionContent.question}</h2>
                 <div className="space-y-3">
@@ -120,12 +125,12 @@ export const MultiplayerGame: React.FC = () => {
                 </div>
                  {isAnswered && gameSession.status === 'in-progress' && (
                      <div className="text-center p-4 mt-6">
-                        <p className="text-neutral-500 font-semibold">{t.multiplayer.waitingForPlayers}</p>
+                        <p className="text-neutral-500 font-semibold">{t.peerPractice.waitingForPlayers}</p>
                         <Loader2 className="animate-spin text-primary mx-auto mt-2"/>
                      </div>
                  )}
             </div>
-            <Scoreboard players={gameSession.players} />
+            <ProgressTracker players={gameSession.players} currentQuestionIndex={currentQuestionIndex} />
         </div>
     );
 };

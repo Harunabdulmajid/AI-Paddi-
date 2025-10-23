@@ -4,9 +4,9 @@ import { apiService } from '../services/apiService';
 import { useTranslations } from '../i18n';
 import { Loader2, Clipboard, Check, Users, Play, Crown, LogIn, Share2 } from 'lucide-react';
 
-export const MultiplayerLobby: React.FC = () => {
+export const PracticeLobby: React.FC = () => {
   const context = useContext(AppContext);
-  if (!context) throw new Error("MultiplayerLobby must be used within an AppProvider");
+  if (!context) throw new Error("PracticeLobby must be used within an AppProvider");
   const { user, language, gameSession, setGameSession } = context;
 
   const [isLoading, setIsLoading] = useState<'create' | 'join' | 'start' | null>(null);
@@ -31,20 +31,20 @@ export const MultiplayerLobby: React.FC = () => {
 
   if (!user) return null;
 
-  const handleCreateGame = async () => {
+  const handleCreateSession = async () => {
     setIsLoading('create');
     setError(null);
     try {
       const session = await apiService.createGameSession(user, language);
       setGameSession(session);
     } catch (err) {
-      setError(t.multiplayer.errorGeneric);
+      setError(t.peerPractice.errorGeneric);
     } finally {
       setIsLoading(null);
     }
   };
 
-  const handleJoinGame = async (e: React.FormEvent) => {
+  const handleJoinSession = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!gameCode.trim()) return;
     setIsLoading('join');
@@ -53,16 +53,16 @@ export const MultiplayerLobby: React.FC = () => {
       const session = await apiService.joinGameSession(gameCode.toUpperCase(), user, language);
       setGameSession(session);
     } catch (err: any) {
-        if (err.message.includes('not found')) setError(t.multiplayer.errorNotFound);
-        else if (err.message.includes('started')) setError(t.multiplayer.errorAlreadyStarted);
-        else if (err.message.includes('full')) setError(t.multiplayer.errorFull);
-        else setError(t.multiplayer.errorGeneric);
+        if (err.message.includes('not found')) setError(t.peerPractice.errorNotFound);
+        else if (err.message.includes('started')) setError(t.peerPractice.errorAlreadyStarted);
+        else if (err.message.includes('full')) setError(t.peerPractice.errorFull);
+        else setError(t.peerPractice.errorGeneric);
     } finally {
       setIsLoading(null);
     }
   };
 
-  const handleStartGame = async () => {
+  const handleStartPractice = async () => {
       if (!gameSession) return;
       setIsLoading('start');
       setError(null);
@@ -70,7 +70,7 @@ export const MultiplayerLobby: React.FC = () => {
           const session = await apiService.startGameSession(gameSession.code, user.id);
           setGameSession(session);
       } catch (err) {
-          setError(t.multiplayer.errorGeneric);
+          setError(t.peerPractice.errorGeneric);
       } finally {
           setIsLoading(null);
       }
@@ -89,8 +89,8 @@ export const MultiplayerLobby: React.FC = () => {
       const isHost = gameSession.hostId === user.id;
       return (
         <div className="text-center animate-fade-in">
-            <h3 className="text-3xl font-bold text-neutral-800">{t.multiplayer.lobbyTitle}</h3>
-            <p className="text-neutral-500 mt-2">{t.multiplayer.shareCode}</p>
+            <h3 className="text-3xl font-bold text-neutral-800">{t.peerPractice.lobbyTitle}</h3>
+            <p className="text-neutral-500 mt-2">{t.peerPractice.shareCode}</p>
             <div className="my-6 flex justify-center">
                 <div className="inline-flex items-center gap-2 bg-neutral-100 border-2 border-dashed border-neutral-300 p-4 rounded-xl">
                     <span className="text-4xl font-extrabold text-primary tracking-widest">{gameSession.code}</span>
@@ -101,12 +101,11 @@ export const MultiplayerLobby: React.FC = () => {
             </div>
 
             <div className="mt-8">
-                <h4 className="font-bold text-lg text-neutral-700 flex items-center justify-center gap-2"><Users size={20}/> {t.multiplayer.players} ({gameSession.players.length}/10)</h4>
+                <h4 className="font-bold text-lg text-neutral-700 flex items-center justify-center gap-2"><Users size={20}/> {t.peerPractice.players} ({gameSession.players.length}/10)</h4>
                 <div className="mt-4 space-y-2 max-w-sm mx-auto">
                     {gameSession.players.map(p => (
                         <div key={p.id} className="flex items-center justify-between bg-neutral-50 p-3 rounded-lg">
                             <span className="font-semibold text-neutral-800">{p.name}</span>
-                            {/* FIX: Wrap lucide-react icon in a span with a title attribute for tooltips, as the icon component itself doesn't support it. */}
                             {p.id === gameSession.hostId && <span title="Host"><Crown size={20} className="text-accent" /></span>}
                         </div>
                     ))}
@@ -115,11 +114,11 @@ export const MultiplayerLobby: React.FC = () => {
 
             <div className="mt-10">
                 {isHost ? (
-                     <button onClick={handleStartGame} disabled={isLoading === 'start'} className="w-full max-w-xs mx-auto flex items-center justify-center gap-3 bg-primary text-white font-bold py-4 px-6 rounded-xl text-lg hover:bg-primary-dark transition-transform active:scale-95 disabled:bg-neutral-400">
-                        {isLoading === 'start' ? <><Loader2 className="animate-spin"/> {t.multiplayer.starting}</> : <><Play/> {t.multiplayer.startGame}</>}
+                     <button onClick={handleStartPractice} disabled={isLoading === 'start'} className="w-full max-w-xs mx-auto flex items-center justify-center gap-3 bg-primary text-white font-bold py-4 px-6 rounded-xl text-lg hover:bg-primary-dark transition-transform active:scale-95 disabled:bg-neutral-400">
+                        {isLoading === 'start' ? <><Loader2 className="animate-spin"/> {t.peerPractice.starting}</> : <><Play/> {t.peerPractice.startPractice}</>}
                     </button>
                 ) : (
-                    <p className="text-neutral-500 font-semibold flex items-center justify-center gap-2"><Loader2 className="animate-spin"/> {t.multiplayer.waitingForHost}</p>
+                    <p className="text-neutral-500 font-semibold flex items-center justify-center gap-2"><Loader2 className="animate-spin"/> {t.peerPractice.waitingForHost}</p>
                 )}
             </div>
         </div>
@@ -129,19 +128,19 @@ export const MultiplayerLobby: React.FC = () => {
   return (
     <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12 h-full">
         <div className="w-full md:w-1/2 text-center md:text-left">
-            <h3 className="text-2xl font-bold text-neutral-800">{t.multiplayer.createGame}</h3>
-            <button onClick={handleCreateGame} disabled={!!isLoading} className="mt-4 flex w-full md:w-auto items-center justify-center gap-3 bg-primary text-white font-bold py-3 px-6 rounded-xl text-lg hover:bg-primary-dark transition-transform active:scale-95 disabled:bg-neutral-400">
-                {isLoading === 'create' ? <><Loader2 className="animate-spin"/> {t.multiplayer.creating}</> : <><Share2/> {t.multiplayer.createGame}</>}
+            <h3 className="text-2xl font-bold text-neutral-800">{t.peerPractice.createSession}</h3>
+            <button onClick={handleCreateSession} disabled={!!isLoading} className="mt-4 flex w-full md:w-auto items-center justify-center gap-3 bg-primary text-white font-bold py-3 px-6 rounded-xl text-lg hover:bg-primary-dark transition-transform active:scale-95 disabled:bg-neutral-400">
+                {isLoading === 'create' ? <><Loader2 className="animate-spin"/> {t.peerPractice.creating}</> : <><Share2/> {t.peerPractice.createSession}</>}
             </button>
         </div>
         <div className="w-full md:w-1/2">
-             <h3 className="text-2xl font-bold text-neutral-800 text-center md:text-left">{t.multiplayer.joinGame}</h3>
-             <form onSubmit={handleJoinGame} className="mt-4 flex flex-col sm:flex-row gap-2">
+             <h3 className="text-2xl font-bold text-neutral-800 text-center md:text-left">{t.peerPractice.joinSession}</h3>
+             <form onSubmit={handleJoinSession} className="mt-4 flex flex-col sm:flex-row gap-2">
                  <input 
                     type="text"
                     value={gameCode}
                     onChange={e => setGameCode(e.target.value)}
-                    placeholder={t.multiplayer.gameCodePlaceholder}
+                    placeholder={t.peerPractice.sessionCodePlaceholder}
                     className="flex-grow p-3 border-2 border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary bg-white text-neutral-900 placeholder:text-neutral-400 uppercase tracking-widest text-center sm:text-left"
                     maxLength={5}
                     required

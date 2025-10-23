@@ -38,6 +38,25 @@ function mergeDeep<T extends object>(target: T, source: DeepPartial<T>): T {
 
 export type Translation = {
   onboarding: {
+    welcome: {
+      title: string;
+      subtitle: string;
+      consumerTitle: string;
+      consumerParagraph: string;
+      creatorTitle: string;
+      creatorParagraph: string;
+      ctaButton: string;
+    };
+    roleSelection: {
+      title: string;
+      description: string;
+      student: string;
+      studentDescription: string;
+      teacher: string;
+      teacherDescription: string;
+      parent: string;
+      parentDescription: string;
+    };
     ctaButton: string;
     signInButton: string;
     signUpButton: string;
@@ -56,6 +75,7 @@ export type Translation = {
   dashboard: {
     greeting: (name: string) => string;
     subGreeting: string;
+    subGreetingParent: string;
     progressTitle: string;
     progressDescription: (completed: number, total: number) => string;
     continueLearningButton: string;
@@ -70,29 +90,98 @@ export type Translation = {
     leaderboardDescription: string;
     walletTitle: string;
     walletDescription: string;
+    glossaryTitle: string;
+    glossaryDescription: string;
+    podcastGeneratorTitle: string;
+    podcastGeneratorDescription: string;
+    careerExplorerTitle: string;
+    careerExplorerDescription: string;
     learningPathTitle: string;
   };
-  multiplayer: {
+  teacherDashboard: {
+    greeting: (name: string) => string;
+    subGreeting: string;
+    classManagementTitle: string;
+    classManagementDescription: string;
+    resourceHubTitle: string;
+    resourceHubDescription: string;
+    reviewCurriculumTitle: string;
+    reviewCurriculumDescription: string;
+    myClasses: string;
+    noClasses: string;
+    createClass: string;
+    studentsCount: (count: number) => string;
+    viewProgress: string;
+    joinCode: string;
+  };
+  parentDashboard: {
+    greeting: (name: string) => string;
+    subGreeting: string;
+    childProgressTitle: (name: string) => string;
+    currentPath: string;
+    modulesCompleted: string;
+    pointsEarned: string;
+    parentsGuideTitle: string;
+    parentsGuideDescription: string;
+    familySettingsTitle: string;
+    familySettingsDescription: string;
+    learningFocusTitle: string;
+    linkChildTitle: string;
+    linkChildDescription: string;
+    linkChildInputPlaceholder: string;
+    linkChildButton: string;
+    linking: string;
+    childNotFound: string;
+    childAlreadyLinked: string;
+  };
+  parentGuideModal: {
     title: string;
     description: string;
-    createGame: string;
+    tip1Title: string;
+    tip1Content: string;
+    tip2Title: string;
+    tip2Content: string;
+    tip3Title: string;
+    tip3Content: string;
+  };
+  createClassModal: {
+    title: string;
+    description: string;
+    classNameLabel: string;
+    classNamePlaceholder: string;
+    createButton: string;
+    creatingButton: string;
+  };
+  classDetailsModal: {
+    title: (className: string) => string;
+    studentsTab: string;
+    assignmentsTab: string;
+    noStudents: string;
+    moduleProgress: (completed: number, total: number) => string;
+    assignModules: string;
+    saveAssignments: string;
+    saving: string;
+  };
+  peerPractice: {
+    title: string;
+    description: string;
+    createSession: string;
     creating: string;
-    joinGame: string;
+    joinSession: string;
     joining: string;
-    gameCodePlaceholder: string;
+    sessionCodePlaceholder: string;
     lobbyTitle: string;
     shareCode: string;
     copied: string;
     players: string;
     waitingForHost: string;
     waitingForPlayers: string;
-    startGame: string;
+    startPractice: string;
     starting: string;
     question: (current: number, total: number) => string;
-    scoreboard: string;
-    finalResults: string;
-    winner: string;
-    rematch: string;
+    progress: string;
+    practiceComplete: string;
+    practiceAgain: string;
     exit: string;
     errorNotFound: string;
     errorAlreadyStarted: string;
@@ -139,6 +228,10 @@ export type Translation = {
     wins: string;
     gamesPlayed: string;
     viewWallet: string;
+    learningPathTitle: string;
+    changePath: string;
+    changePathConfirmTitle: string;
+    changePathConfirmMessage: string;
   };
   lesson: {
     startQuizButton: string;
@@ -256,13 +349,53 @@ export type Translation = {
       profile: string;
       leaderboard: string;
       game: string;
-      multiplayer: string;
+      peerPractice: string;
       wallet: string;
     },
     startingModule: (moduleName: string) => string;
     openingSettings: string;
     closingSettings: string;
     loggingOut: string;
+  };
+  glossary: {
+    title: string;
+    description: string;
+    searchPlaceholder: string;
+    noResultsTitle: string;
+    noResultsDescription: (term: string) => string;
+  };
+  podcastGenerator: {
+    title: string;
+    description: string;
+    scriptLabel: string;
+    scriptPlaceholder: string;
+    voiceLabel: string;
+    voices: {
+        kore: string;
+        puck: string;
+    };
+    generateButton: string;
+    generatingButton: string;
+    yourCreation: string;
+    errorMessage: string;
+  };
+  careerExplorer: {
+    title: string;
+    description: string;
+    whatTheyDo: string;
+    skillsNeeded: string;
+    dayInTheLife: string;
+    relevantLessons: string;
+    startLearning: string;
+    careers: {
+      [key: string]: {
+        title: string;
+        description: string;
+        what_they_do: string;
+        skills: string[];
+        day_in_the_life: string;
+      }
+    }
   };
   curriculum: {
     [key: string]: {
@@ -273,6 +406,12 @@ export type Translation = {
   };
   levels: {
     [key: string]: string;
+  };
+  paths: {
+    [key in LearningPath]: {
+      name: string;
+      description: string;
+    }
   };
   tooltips: {
     [key: string]: string;
@@ -288,6 +427,25 @@ export type Translation = {
 // Base English translations - the single source of truth for the structure
 export const englishTranslations: Translation = {
   onboarding: {
+    welcome: {
+      title: "From Consumer to Creator",
+      subtitle: "Two people can use the same AI tool but have different destinies. One uses AI to do a task. The other uses AI to build a new solution.",
+      consumerTitle: "An AI Consumer...",
+      consumerParagraph: "...asks an AI to write a poem.",
+      creatorTitle: "An AI Creator...",
+      creatorParagraph: "...builds a tool with AI that helps thousands write poems.",
+      ctaButton: "Let's Start Building",
+    },
+    roleSelection: {
+      title: "How will you be using AI Paddi?",
+      description: "This helps us get you started on the right foot.",
+      student: "I'm a Student",
+      studentDescription: "I want to learn AI skills for my future.",
+      teacher: "I'm a Teacher",
+      teacherDescription: "I want to bring AI concepts into my classroom.",
+      parent: "I'm a Parent",
+      parentDescription: "I want to guide my child's learning journey.",
+    },
     ctaButton: "Start Learning!",
     signInButton: "Sign In",
     signUpButton: "Create Account",
@@ -306,12 +464,13 @@ export const englishTranslations: Translation = {
   dashboard: {
     greeting: (name) => `Hello, ${name}!`,
     subGreeting: "Ready to continue your AI adventure?",
+    subGreetingParent: "Ready to guide your child's learning journey?",
     progressTitle: "Your Progress",
     progressDescription: (completed, total) => `You've completed ${completed} of ${total} modules.`,
     continueLearningButton: "Continue Learning",
     allModulesCompleted: "All Modules Completed!",
-    multiplayerTitle: "Multi-player",
-    multiplayerDescription: "Challenge friends or others in a real-time quiz.",
+    multiplayerTitle: "Peer-to-Peer Practice",
+    multiplayerDescription: "Practice AI concepts with a friend in a collaborative session.",
     gameTitle: "AI vs. Human",
     gameDescription: "Can you tell who wrote it? Test your skills!",
     profileTitle: "Profile & Certificates",
@@ -320,33 +479,102 @@ export const englishTranslations: Translation = {
     leaderboardDescription: "See how you rank against other learners.",
     walletTitle: "My Wallet",
     walletDescription: "View, send, and spend your earned points.",
+    glossaryTitle: "AI Glossary",
+    glossaryDescription: "Look up definitions for key AI terminology.",
+    podcastGeneratorTitle: "Podcast Generator",
+    podcastGeneratorDescription: "Use AI to create your own short audio show. Go from learner to creator!",
+    careerExplorerTitle: "AI Career Explorer",
+    careerExplorerDescription: "Discover future job opportunities in the world of AI.",
     learningPathTitle: "Your Learning Path",
   },
-  multiplayer: {
-    title: "Multi-player Challenge",
-    description: "Test your AI knowledge against others in a fun, real-time quiz.",
-    createGame: "Create Game",
+  teacherDashboard: {
+    greeting: (name: string) => `Welcome, ${name}`,
+    subGreeting: "Manage your classes and access teaching resources.",
+    classManagementTitle: "Class Management",
+    classManagementDescription: "Create classes, view student progress, and share resources.",
+    resourceHubTitle: "Resource Hub",
+    resourceHubDescription: "Access lesson plans, teaching guides, and project ideas.",
+    reviewCurriculumTitle: "Review Curriculum",
+    reviewCurriculumDescription: "Explore all lesson modules available to your students.",
+    myClasses: "My Classes",
+    noClasses: "You haven't created any classes yet. Get started by creating one!",
+    createClass: "Create New Class",
+    studentsCount: (count: number) => `${count} Students`,
+    viewProgress: "View Details",
+    joinCode: "Join Code",
+  },
+  parentDashboard: {
+    greeting: (name: string) => `Hello, ${name}`,
+    subGreeting: "You're doing a great job guiding your child's AI journey!",
+    childProgressTitle: (name: string) => `${name}'s Progress`,
+    currentPath: "Current Path",
+    modulesCompleted: "Modules Completed",
+    pointsEarned: "Points Earned",
+    parentsGuideTitle: "Parent's Guide to AI",
+    parentsGuideDescription: "Get tips on how to talk to your child about AI.",
+    familySettingsTitle: "Family Settings",
+    familySettingsDescription: "Manage linked accounts and preferences.",
+    learningFocusTitle: "Current Learning Focus",
+    linkChildTitle: "Link Your Child's Account",
+    linkChildDescription: "To see your child's progress, enter the email address they use for their AI Paddi student account.",
+    linkChildInputPlaceholder: "Your child's email address",
+    linkChildButton: "Link Account",
+    linking: "Linking...",
+    childNotFound: "No student account was found with that email. Please check and try again.",
+    childAlreadyLinked: "This student account is already linked to another parent.",
+  },
+  parentGuideModal: {
+    title: "A Parent's Guide to AI",
+    description: "Here are some simple ways to support your child's learning and start great conversations about AI.",
+    tip1Title: "Ask 'What If?'",
+    tip1Content: "Instead of asking what AI is, ask what it could do. 'What if an AI could help doctors in our local clinic?' or 'What if we used AI to design a new building for our community?' This sparks creativity.",
+    tip2Title: "Be a Co-learner",
+    tip2Content: "You don't need to be an expert. Learn alongside your child. Say things like, 'I don't know the answer to that, let's find out together using AI Paddi.' This shows that learning is a lifelong journey.",
+    tip3Title: "Connect to Their World",
+    tip3Content: "Talk about the AI they already use. Discuss how their favorite mobile game recommends new levels, or how a banking app keeps their savings safe. This makes AI real and relatable, not just a school subject.",
+  },
+  createClassModal: {
+    title: "Create a New Class",
+    description: "Give your new class a name to get started.",
+    classNameLabel: "Class Name",
+    classNamePlaceholder: "e.g., JSS1 Introduction to AI",
+    createButton: "Create Class",
+    creatingButton: "Creating...",
+  },
+  classDetailsModal: {
+    title: (className: string) => `Details for ${className}`,
+    studentsTab: "Students",
+    assignmentsTab: "Assignments",
+    noStudents: "No students have joined this class yet.",
+    moduleProgress: (completed: number, total: number) => `${completed} / ${total} modules completed`,
+    assignModules: "Assign Modules to this Class",
+    saveAssignments: "Save Assignments",
+    saving: "Saving...",
+  },
+  peerPractice: {
+    title: "Peer-to-Peer Practice",
+    description: "Practice AI concepts with a friend. No scores, just learning together.",
+    createSession: "Create Session",
     creating: "Creating...",
-    joinGame: "Join Game",
+    joinSession: "Join Session",
     joining: "Joining...",
-    gameCodePlaceholder: "Enter Game Code",
-    lobbyTitle: "Game Lobby",
-    shareCode: "Share this code with your friends:",
+    sessionCodePlaceholder: "Enter Session Code",
+    lobbyTitle: "Practice Lobby",
+    shareCode: "Share this code with your practice partner:",
     copied: "Copied!",
-    players: "Players",
+    players: "Participants",
     waitingForHost: "Waiting for host to start...",
-    waitingForPlayers: "Waiting for other players...",
-    startGame: "Start Game",
+    waitingForPlayers: "Waiting for other participants...",
+    startPractice: "Start Practice",
     starting: "Starting...",
     question: (current, total) => `Question ${current} of ${total}`,
-    scoreboard: "Scoreboard",
-    finalResults: "Final Results",
-    winner: "Winner!",
-    rematch: "Rematch",
+    progress: "Progress",
+    practiceComplete: "Practice Complete!",
+    practiceAgain: "Practice Again",
     exit: "Exit",
-    errorNotFound: "Game not found. Please check the code.",
-    errorAlreadyStarted: "This game has already started.",
-    errorFull: "This game is full.",
+    errorNotFound: "Session not found. Please check the code.",
+    errorAlreadyStarted: "This session has already started.",
+    errorFull: "This session is full.",
     errorGeneric: "An error occurred. Please try again.",
   },
   game: {
@@ -385,10 +613,14 @@ export const englishTranslations: Translation = {
     downloadButton: "Download",
     shareButton: "Share",
     feedbackButton: "Send Feedback",
-    multiplayerStatsTitle: "Multi-player Stats",
+    multiplayerStatsTitle: "Practice Stats",
     wins: "Wins",
-    gamesPlayed: "Games Played",
+    gamesPlayed: "Sessions Completed",
     viewWallet: "View Wallet Details",
+    learningPathTitle: "Your Learning Path",
+    changePath: "Change Path",
+    changePathConfirmTitle: "Confirm Path Change",
+    changePathConfirmMessage: "Changing your learning path will reset your module completion progress. Are you sure you want to continue?",
   },
   lesson: {
       startQuizButton: "Start Quiz to Test Your Knowledge",
@@ -508,13 +740,74 @@ export const englishTranslations: Translation = {
       profile: "Opening your profile.",
       leaderboard: "Showing the leaderboard.",
       game: "Starting the AI versus Human game.",
-      multiplayer: "Opening multi-player.",
+      peerPractice: "Opening peer-to-peer practice.",
       wallet: "Opening your wallet.",
     },
     startingModule: (moduleName) => `Starting module: ${moduleName}.`,
     openingSettings: "Opening settings.",
     closingSettings: "Closing settings.",
     loggingOut: "Logging you out.",
+  },
+  glossary: {
+    title: "AI Glossary",
+    description: "A quick reference for all the key AI terms used in the lessons.",
+    searchPlaceholder: "Search for a term...",
+    noResultsTitle: "No Terms Found",
+    noResultsDescription: (term) => `We couldn't find any terms matching "${term}". Try another search.`,
+  },
+  podcastGenerator: {
+    title: "AI Paddi's Podcast Studio",
+    description: "Turn your ideas into audio. Become an AI Creator!",
+    scriptLabel: "Your Podcast Script",
+    scriptPlaceholder: "Write a short script here. You could explain an AI concept, tell a story, or share news from your community!",
+    voiceLabel: "Choose a Voice",
+    voices: {
+        kore: "Deep, Clear Voice (Kore)",
+        puck: "Friendly, Upbeat Voice (Puck)",
+    },
+    generateButton: "Generate Audio",
+    generatingButton: "Creating Magic...",
+    yourCreation: "Your Creation",
+    errorMessage: "Oops! Something went wrong while generating the audio. Please try again.",
+  },
+  careerExplorer: {
+    title: "AI Career Explorer",
+    description: "See how your AI skills can create real opportunities in Nigeria and beyond.",
+    whatTheyDo: "What They Do",
+    skillsNeeded: "Skills Needed",
+    dayInTheLife: "A Day in the Life",
+    relevantLessons: "Relevant Lessons",
+    startLearning: "Start Learning",
+    careers: {
+      'agritech-specialist': {
+        title: "AI in Agriculture Specialist",
+        description: "Uses AI to help farmers improve crop yields and manage resources.",
+        what_they_do: "They analyze data from drones and sensors to monitor crop health, predict weather patterns, and recommend the best times for planting and harvesting. Their work helps make farming more efficient and sustainable.",
+        skills: ["Data Analysis", "Problem-Solving", "Knowledge of Agriculture", "Communication"],
+        day_in_the_life: "My day starts not in an office, but checking drone footage from a farm in Kano. The AI flags a section of maize with potential signs of nutrient deficiency. I then work with the local farm extension officer via WhatsApp, sending them the coordinates and a recommendation. It's not about replacing farmers; it's about giving them superpowers with data."
+      },
+      'fintech-ml-engineer': {
+        title: "Fintech ML Engineer",
+        description: "Builds smart financial tools, from fraud detection to loan applications.",
+        what_they_do: "They create machine learning models that can detect fraudulent transactions in real-time, assess loan risk for small business owners, or create personalized savings plans for users of a banking app.",
+        skills: ["Machine Learning", "Programming (Python)", "Statistics", "Financial Knowledge"],
+        day_in_the_life: "Today, our AI model flagged a series of unusual transactions trying to drain an account. We stopped it in milliseconds. This afternoon, I'm training a new model to help market traders in Lagos get small loans faster by analyzing their sales history instead of demanding impossible collateral. It's about building trust with technology."
+      },
+      'ai-content-creator': {
+        title: "AI Tutor & Content Creator",
+        description: "Uses generative AI to create engaging educational materials and stories.",
+        what_they_do: "They use AI tools to generate scripts for educational videos, create illustrations for children's books in local languages, or build simple chatbots that can help students practice new subjects. They are modern storytellers and teachers.",
+        skills: ["Creativity", "Prompt Engineering", "Writing & Storytelling", "Teaching Skills"],
+        day_in_the_life: "I'm working with a teacher in Port Harcourt to create a simple, illustrated science lesson about the water cycle. I use an AI image generator to create beautiful pictures and a language model to simplify the text. We're making learning materials that look amazing and are easy to understand for any student."
+      },
+      'ai-ethicist': {
+        title: "AI Ethicist",
+        description: "Ensures that AI systems are built and used fairly and responsibly.",
+        what_they_do: "They work with tech companies to test AI models for bias, ensuring they work equally well for people of all backgrounds. They help create guidelines to protect user data and ensure that the AI's decisions are transparent and fair.",
+        skills: ["Critical Thinking", "Ethics", "Communication", "Understanding of AI Bias"],
+        day_in_the_life: "A team is building an AI to help doctors diagnose illnesses. My job is to ask the tough questions: Was the AI trained on data from Nigerian hospitals? Does it work as well for women as it does for men? We're running tests to make sure the answer is 'yes' before it ever reaches a real patient. My role is to be the voice for fairness."
+      }
+    }
   },
   curriculum: {
     'what-is-ai': { 
@@ -593,7 +886,7 @@ export const englishTranslations: Translation = {
               },
               {
                   heading: "Supervised Learning: Learning with a Teacher",
-                  content: "This is the most common type of machine learning. It uses 'labeled' data. Imagine showing a model thousands of pictures, each one with a label: 'cat', 'dog', 'car'. The model learns to connect the patterns in the pictures to the correct labels. This is 'supervised' because the labels act like a teacher, telling the model the right answers during training."
+                  content: "This is the most common type of machine learning. It uses 'labeled' data. Imagine showing a model thousands of pictures, each one with a label: 'cat', 'dog', 'car'. The model learns to connect the patterns in the pictures to the correct labels. In fintech, this is how an app learns to spot fraud; it's shown thousands of transactions labeled 'normal' or 'fraudulent' until it can identify the patterns of bad behaviour."
               },
               {
                   heading: "Unsupervised Learning: Finding Patterns on Its Own",
@@ -604,7 +897,7 @@ export const englishTranslations: Translation = {
                   content: "This is how AIs learn to play games. The model (called an 'agent') takes actions in an environment (the game). It receives 'rewards' for good actions (like winning a point) and 'penalties' for bad ones. Its goal is to figure out a strategy to maximize its total reward. It learns through trial and error, just like a pet learns a trick by getting a treat for doing it right."
               }
           ],
-          summary: "AI learns through Machine Learning, which requires three things: Data (experience), a Model (the student), and a Training process (studying). The main learning methods are Supervised (with labeled data), Unsupervised (finding hidden patterns), and Reinforcement (learning from rewards and penalties).",
+          summary: "AI learns through Machine Learning, which requires three things: Data (experience), a Model (the student), and a Training process (studying). The main learning methods are Supervised (with labeled data, like for fraud detection), Unsupervised (finding hidden patterns), and Reinforcement (learning from rewards and penalties).",
           quiz: {
             questions: [
               {
@@ -648,26 +941,26 @@ export const englishTranslations: Translation = {
       description: 'Explore examples of AI in farming, health, and on your phone.',
       lessonContent: {
           title: "Module 3: AI is All Around Us",
-          introduction: "You might not realize it, but you interact with AI dozens of times every day. It's the silent partner in many of the tools we use, making them smarter, more personal, and more helpful. Let's pull back the curtain and see where AI is working behind the scenes.",
+          introduction: "You might not realize it, but you interact with AI dozens of times every day. It's the silent partner in many of the tools we use, making them smarter, more personal, and more helpful. Let's look at some local examples.",
           sections: [
               {
-                  heading: "The Brain in Your Pocket",
-                  content: "Your smartphone is an AI powerhouse. When you use face unlock, a 'computer vision' model recognizes your unique facial features. When your keyboard suggests the next word, a 'language model' is predicting what you'll type. When you ask a voice assistant a question, it uses 'natural language processing' to understand you and find an answer. These specialized AIs make your device feel intuitive and personal."
+                  heading: "AI on Your Phone & In Your City",
+                  content: "Your smartphone is an AI powerhouse. Face unlock uses AI to recognize you. But it's also in the city. When a ride-hailing app in Lagos or Abuja finds the fastest route, avoids traffic, and sets a price, that's AI at work, calculating millions of possibilities in seconds. It's making our transport systems smarter."
               },
               {
-                  heading: "Transforming Industries: Health and Farming",
-                  content: "AI's impact goes far beyond convenience. In healthcare, AI helps doctors analyze medical scans like X-rays with greater accuracy and can even help researchers discover new medicines by simulating how molecules interact. In agriculture, AI-powered drones monitor crop health from the sky, identifying sick plants or dry soil, which helps farmers use water and fertilizer more efficiently, leading to better harvests."
+                  heading: "Transforming Key Nigerian Industries",
+                  content: "AI's impact goes far beyond convenience. In agriculture, AI-powered drones monitor crop health in northern Nigeria, helping farmers use water and fertilizer more efficiently for better harvests. In fintech, your banking app uses AI to detect fraud and protect your money. It can even help small business owners get loans by analyzing their business data fairly."
               },
               {
-                  heading: "The Power of Recommendation Engines",
-                  content: "When an online store recommends a product or a streaming service suggests a movie, it's an AI 'recommendation engine' at work. It analyzes your past behavior (what you've bought, watched, or liked) and compares it to millions of other users to predict what you might enjoy next. This is a form of unsupervised learning that powers much of the modern internet."
+                  heading: "Smarter Learning and Entertainment",
+                  content: "When a streaming service suggests a Nollywood movie, it's an AI 'recommendation engine' at work. It analyzes what you've watched to predict what you might enjoy next. In education, AI is creating personalized learning tools that act like a private tutor, helping students learn at their own pace. This makes education more accessible for everyone."
               },
               {
                   heading: "The Rise of Generative AI",
-                  content: "One of the most exciting recent developments is 'Generative AI'. This is AI that can *create* new things, not just analyze existing data. You've seen this in advanced chatbots that can write poems, or in image generators that can create amazing art from a simple text description. This creative capability is opening up brand new possibilities in art, design, writing, and programming."
+                  content: "One of the most exciting recent developments is 'Generative AI'. This is AI that can *create* new things. You see this in chatbots that can write poems, or in image generators that can create amazing art from a simple text description. Nigerian artists, writers, and programmers are now using these tools to build new, creative projects faster than ever before."
               }
           ],
-          summary: "AI is a part of our daily lives, from 'computer vision' in our phones to 'recommendation engines' on shopping sites. It's transforming major industries like health and farming. The newest frontier is 'Generative AI', which can create new text, images, and ideas, changing the way we interact with technology.",
+          summary: "AI is a part of our daily lives, from transport apps in our cities to fintech apps protecting our money. It's transforming major local industries like agriculture and education. The newest frontier is 'Generative AI', which allows us to become creators, building new content and tools.",
           quiz: {
             questions: [
               {
@@ -715,7 +1008,7 @@ export const englishTranslations: Translation = {
           sections: [
               {
                   heading: "Where Does AI Bias Come From?",
-                  content: "AI bias occurs when an AI system produces unfair or prejudiced results. This isn't because the AI is 'evil'; it's because it learned from biased data. For example, if facial recognition software is mostly trained on pictures of one demographic, it may be less accurate for others. If a loan approval AI is trained on historical data from a time when certain groups were unfairly denied loans, it might learn to repeat those same unfair patterns."
+                  content: "AI bias occurs when an AI system produces unfair results. This isn't because the AI is 'evil'; it's because it learned from biased data. For example, if an AI used for job hiring is trained on historical data where most managers were from a certain background, it might unfairly favour new candidates from that same background, ignoring equally qualified people from other groups. The AI is simply repeating the bias it was taught."
               },
               {
                   heading: "The 'Black Box' Problem",
@@ -730,7 +1023,7 @@ export const englishTranslations: Translation = {
                   content: "To combat these risks, the global tech community is focusing on 'Responsible AI'. This involves several key principles: Fairness (checking for and correcting bias), Accountability (knowing who is responsible if an AI makes a mistake), and Transparency (being open about how an AI works and the data it uses). It requires a team effort from developers, companies, and users like you to demand and build ethical AI."
               }
           ],
-          summary: "AI is not neutral; it can inherit human biases from its training data. Key challenges include the 'black box' problem, where AI decisions are hard to explain, as well as privacy and security risks. The solution lies in building 'Responsible AI' based on principles of Fairness, Accountability, and Transparency.",
+          summary: "AI is not neutral; it can inherit human biases from its training data, like in job hiring. Key challenges include the 'black box' problem, where AI decisions are hard to explain, as well as privacy and security risks. The solution lies in building 'Responsible AI' based on principles of Fairness, Accountability, and Transparency.",
           quiz: {
             questions: [
               {
@@ -836,6 +1129,20 @@ export const englishTranslations: Translation = {
     [LearningPath.Intermediate]: 'Intermediate',
     [LearningPath.Advanced]: 'Advanced',
   },
+  paths: {
+    [LearningPath.Beginner]: {
+        name: 'Beginner',
+        description: 'Start with the fundamental concepts of what AI is and where you can find it.',
+    },
+    [LearningPath.Intermediate]: {
+        name: 'Intermediate',
+        description: 'Dive deeper into how AI models learn and the ethical challenges they present.',
+    },
+    [LearningPath.Advanced]: {
+        name: 'Advanced',
+        description: 'Explore the future of work and the new opportunities AI is creating.',
+    },
+  },
   tooltips: {
     'artificial intelligence': 'The ability of a computer to perform tasks that normally require human intelligence, like understanding language, recognizing images, and making decisions.',
     'ai': 'Short for Artificial Intelligence. The field of science focused on creating smart machines that can learn and solve problems.',
@@ -865,12 +1172,12 @@ export const englishTranslations: Translation = {
         description: 'Reached the Top 3 on the leaderboard.',
     },
     'first-win': {
-        name: 'First Win',
-        description: 'Won your first multiplayer match.',
+        name: 'Practice Partner',
+        description: 'Completed your first practice session with a peer.',
     },
     'multiplayer-maestro': {
-        name: 'Multiplayer Maestro',
-        description: 'Played 10 multiplayer matches.',
+        name: 'Practice Pro',
+        description: 'Completed 10 peer-to-peer practice sessions.',
     },
     'bronze-supporter': {
         name: 'Bronze Supporter',
@@ -901,33 +1208,39 @@ const swahiliPartial: DeepPartial<Translation> = {
   dashboard: {
     greeting: (name) => `Habari, ${name}!`,
     subGreeting: "Uko tayari kuendelea na safari yako ya AI?",
-    multiplayerTitle: "Wachezaji Wengi",
-    multiplayerDescription: "Shindana na marafiki katika jaribio la wakati halisi.",
+    multiplayerTitle: "Mazoezi ya Pamoja",
+    multiplayerDescription: "Fanya mazoezi ya dhana za AI na rafiki.",
     gameTitle: "AI dhidi ya Binadamu",
     gameDescription: "Je, unaweza kutambua ni nani aliyeandika? Jaribu ujuzi wako!",
     profileTitle: "Wasifu na Vyeti",
     profileDescription: "Tazama maendeleo yako na vyeti ulivyopata.",
     leaderboardTitle: "Ubao wa Wanaoongoza",
     leaderboardDescription: "Tazama jinsi unavyopambana na wanafunzi wengine.",
+    glossaryTitle: "Kamusi ya AI",
+    glossaryDescription: "Tafuta maana za istilahi muhimu za AI.",
+    podcastGeneratorTitle: "Jenereta ya Podcast",
+    podcastGeneratorDescription: "Tumia AI kuunda kipindi chako kifupi cha sauti. Toka kuwa mwanafunzi hadi kuwa muundaji!",
+    careerExplorerTitle: "Mgunduzi wa Kazi za AI",
+    careerExplorerDescription: "Gundua fursa za kazi za baadaye katika ulimwengu wa AI.",
     learningPathTitle: "Njia Yako ya Kujifunza",
   },
-  multiplayer: {
-    title: "Changamoto ya Wachezaji Wengi",
-    description: "Pima maarifa yako ya AI dhidi ya wengine katika jaribio la kufurahisha la wakati halisi.",
-    createGame: "Anzisha Mchezo",
-    joinGame: "Jiunge na Mchezo",
-    gameCodePlaceholder: "Weka Nambari ya Mchezo",
-    lobbyTitle: "Ukumbi wa Mchezo",
-    shareCode: "Shiriki nambari hii na marafiki zako:",
+  peerPractice: {
+    title: "Mazoezi ya Pamoja",
+    description: "Fanya mazoezi ya dhana za AI na rafiki. Hakuna alama, ni kujifunza pamoja tu.",
+    createSession: "Anzisha Kikao",
+    joinSession: "Jiunge na Kikao",
+    sessionCodePlaceholder: "Weka Nambari ya Kikao",
+    lobbyTitle: "Ukumbi wa Mazoezi",
+    shareCode: "Shiriki nambari hii na mwenzako wa mazoezi:",
     copied: "Imenakiliwa!",
-    players: "Wachezaji",
+    players: "Washiriki",
     waitingForHost: "Inasubiri mwenyeji aanze...",
-    waitingForPlayers: "Inasubiri wachezaji wengine...",
-    startGame: "Anza Mchezo",
+    waitingForPlayers: "Inasubiri washiriki wengine...",
+    startPractice: "Anza Mazoezi",
   },
   game: {
     title: "AI dhidi ya Binadamu",
-    description: "Je, unaweza kutofautisha methali iliyoandikوا na AI?",
+    description: "Je, unaweza kutofautisha methali iliyoandikwa na AI?",
     correct: "Sahihi! 🎉 (alama +10)",
     incorrect: "Sio sahihi kabisa!",
     writtenBy: (author) => `Methali hii iliandikwa na ${author}.`,
@@ -961,9 +1274,9 @@ const swahiliPartial: DeepPartial<Translation> = {
     downloadButton: "Pakua",
     shareButton: "Shiriki",
     feedbackButton: "Tuma Maoni",
-    multiplayerStatsTitle: "Takwimu za Wachezaji Wengi",
+    multiplayerStatsTitle: "Takwimu za Mazoezi",
     wins: "Ushindi",
-    gamesPlayed: "Michezo Iliyochezwa",
+    gamesPlayed: "Vikao Vilivyokamilika",
   },
   lesson: {
       startQuizButton: "Anza Jaribio la Kupima Ujuzi Wako",
@@ -1035,13 +1348,74 @@ const swahiliPartial: DeepPartial<Translation> = {
       profile: "Inafungua wasifu wako.",
       leaderboard: "Inaonyesha ubao wa wanaoongoza.",
       game: "Inaanza mchezo wa AI dhidi ya Binadamu.",
-      multiplayer: "Inafungua wachezaji wengi.",
+      peerPractice: "Inafungua mazoezi ya pamoja.",
       wallet: "Inafungua pochi yako.",
     },
     startingModule: (moduleName) => `Inaanza moduli: ${moduleName}.`,
     openingSettings: "Inafungua mipangilio.",
     closingSettings: "Inafunga mipangilio.",
     loggingOut: "Unatoka.",
+  },
+  glossary: {
+    title: "Kamusi ya AI",
+    description: "Marejeleo ya haraka kwa istilahi zote muhimu za AI zilizotumika katika masomo.",
+    searchPlaceholder: "Tafuta istilahi...",
+    noResultsTitle: "Hakuna Istilahi Zilizopatikana",
+    noResultsDescription: (term) => `Hatukuweza kupata istilahi zinazolingana na "${term}". Jaribu utafutaji mwingine.`,
+  },
+  podcastGenerator: {
+    title: "Studio ya Podcast ya AI Paddi",
+    description: "Geuza mawazo yako kuwa sauti. Kuwa Muumba wa AI!",
+    scriptLabel: "Hati Yako ya Podcast",
+    scriptPlaceholder: "Andika hati fupi hapa. Unaweza kuelezea dhana ya AI, kusimulia hadithi, au kushiriki habari kutoka kwa jamii yako!",
+    voiceLabel: "Chagua Sauti",
+    voices: {
+        kore: "Sauti ya Kina, Wazi (Kore)",
+        puck: "Sauti ya Kirafiki, ya Kuchangamsha (Puck)",
+    },
+    generateButton: "Tengeneza Sauti",
+    generatingButton: "Inatengeneza...",
+    yourCreation: "Uumbaji Wako",
+    errorMessage: "Oops! Kitu kilienda mrama wakati wa kutengeneza sauti. Tafadhali jaribu tena.",
+  },
+  careerExplorer: {
+    title: "Mgunduzi wa Kazi za AI",
+    description: "Angalia jinsi ujuzi wako wa AI unavyoweza kuunda fursa za kweli nchini na kwingineko.",
+    whatTheyDo: "Wanachofanya",
+    skillsNeeded: "Ujuzi Unaohitajika",
+    dayInTheLife: "Siku Moja Maishani",
+    relevantLessons: "Masomo Husika",
+    startLearning: "Anza Kujifunza",
+    careers: {
+      'agritech-specialist': {
+        title: "Mtaalamu wa AI katika Kilimo",
+        description: "Anatumia AI kusaidia wakulima kuboresha mazao na kusimamia rasilimali.",
+        what_they_do: "Wanachambua data kutoka kwa droni na sensa kufuatilia afya ya mimea, kutabiri hali ya hewa, na kupendekeza nyakati bora za kupanda na kuvuna. Kazi yao inasaidia kufanya kilimo kiwe na ufanisi zaidi.",
+        skills: ["Uchambuzi wa Data", "Utatuzi wa Matatizo", "Ujuzi wa Kilimo", "Mawasiliano"],
+        day_in_the_life: "Siku yangu haianzi ofisini, bali kwa kuangalia picha za droni kutoka shambani. AI inaonyesha sehemu ya mahindi yenye dalili za upungufu wa virutubisho. Nashirikiana na afisa ugani kupitia WhatsApp, nikimtumia eneo husika na pendekezo."
+      },
+      'fintech-ml-engineer': {
+        title: "Mhandisi wa ML katika Fintech",
+        description: "Anaunda zana za kifedha zenye akili, kutoka kugundua ulaghai hadi maombi ya mikopo.",
+        what_they_do: "Wanaunda mifumo ya kujifunza kwa mashine inayoweza kugundua miamala ya ulaghai mara moja, kutathmini hatari ya mikopo kwa wafanyabiashara wadogo, au kuunda mipango ya akiba ya kibinafsi kwa watumiaji wa programu za benki.",
+        skills: ["Kujifunza kwa Mashine", "Programu (Python)", "Takwimu", "Ujuzi wa Kifedha"],
+        day_in_the_life: "Leo, mfumo wetu wa AI uligundua miamala isiyo ya kawaida ikijaribu kuiba pesa kwenye akaunti. Tuliizuia kwa sekunde chache. Mchana huu, ninafundisha mfumo mpya kusaidia wafanyabiashara wadogo kupata mikopo haraka."
+      },
+      'ai-content-creator': {
+        title: "Muundaji wa Maudhui na Mwalimu wa AI",
+        description: "Anatumia AI ya uzalishaji kuunda vifaa vya elimu na hadithi za kuvutia.",
+        what_they_do: "Wanatumia zana za AI kuandika miswada ya video za kielimu, kuunda vielelezo vya vitabu vya watoto kwa lugha za kienyeji, au kujenga chatbots rahisi zinazoweza kusaidia wanafunzi kufanya mazoezi ya masomo mapya.",
+        skills: ["Ubunifu", "Uhandisi wa Haraka", "Uandishi na Usomaji hadithi", "Ujuzi wa Kufundisha"],
+        day_in_the_life: "Ninafanya kazi na mwalimu kuunda somo rahisi la sayansi lenye vielelezo. Ninatumia jenereta ya picha ya AI kuunda picha nzuri na mfumo wa lugha kurahisisha maandishi. Tunatengeneza vifaa vya kujifunzia vinavyovutia."
+      },
+      'ai-ethicist': {
+        title: "Mtaalamu wa Maadili ya AI",
+        description: "Anahakikisha kwamba mifumo ya AI inajengwa na kutumika kwa haki na uwajibikaji.",
+        what_they_do: "Wanafanya kazi na makampuni ya teknolojia kupima mifumo ya AI kwa upendeleo, wakihakikisha inafanya kazi sawa kwa watu wa asili zote. Wanasaidia kuunda miongozo ya kulinda data ya watumiaji na kuhakikisha maamuzi ya AI ni ya wazi na ya haki.",
+        skills: ["Fikra Muhimu", "Maadili", "Mawasiliano", "Uelewa wa Upendeleo wa AI"],
+        day_in_the_life: "Timu inajenga AI ya kusaidia madaktari kugundua magonjwa. Kazi yangu ni kuuliza maswali magumu: Je, AI ilifunzwa kwa data kutoka hospitali za hapa? Je, inafanya kazi vizuri kwa wanawake kama inavyofanya kwa wanaume? Jukumu langu ni kuwa sauti ya haki."
+      }
+    }
   },
   curriculum: {
     'what-is-ai': { 
@@ -1093,22 +1467,29 @@ const hausaPartial: DeepPartial<Translation> = {
   dashboard: {
     greeting: (name) => `Sannu, ${name}!`,
     subGreeting: "A shirye kake ka ci gaba da kasadar ka ta AI?",
-    multiplayerTitle: "Wasa da yawa",
-    multiplayerDescription: "Kalubalanci abokai a cikin jarrabawar lokaci-gaske.",
+    multiplayerTitle: "Aiwatar da Kai-da-Kai",
+    multiplayerDescription: "Aiwatar da dabarun AI tare da aboki a cikin zaman hadin gwiwa.",
     gameTitle: "AI vs. Mutum",
     gameDescription: "Za ka iya gane wanda ya rubuta? Gwada kwarewarka!",
     profileTitle: "Bayanan Sirri & Takaddun Shaida",
     profileDescription: "Duba ci gabanka da takaddun shaidar da ka samu.",
     leaderboardTitle: "Jerin Gwarzaye",
     leaderboardDescription: "Duba yadda ka ke tsere da sauran masu koyo.",
+    glossaryTitle: "Kamun AI",
+    glossaryDescription: "Nemo ma'anar manyan kalmomin AI.",
+    podcastGeneratorTitle: "Mai Samar da Podcast",
+    podcastGeneratorDescription: "Yi amfani da AI don ƙirƙirar gajeren shirin sauti naka. Daga mai koyo zuwa mahalicci!",
+    careerExplorerTitle: "Mai Binciken Ayyukan AI",
+    careerExplorerDescription: "Gano damar ayyukan gaba a duniyar AI.",
     learningPathTitle: "Hanyar Karatunka",
   },
-  multiplayer: {
-    title: "Kalubalen Wasa da yawa",
-    createGame: "Kirkiri Wasa",
-    joinGame: "Shiga Wasa",
-    gameCodePlaceholder: "Shigar da Lambar Wasa",
-    waitingForPlayers: "Ana jiran sauran 'yan wasa...",
+  peerPractice: {
+    title: "Aiwatar da Kai-da-Kai",
+    description: "Aiwatar da dabarun AI tare da aboki. Babu maki, kawai koyo tare.",
+    createSession: "Kirkiri Zama",
+    joinSession: "Shiga Zama",
+    sessionCodePlaceholder: "Shigar da Lambar Zama",
+    waitingForPlayers: "Ana jiran sauran mahalarta...",
   },
   game: {
     title: "AI vs. Mutum",
@@ -1146,9 +1527,9 @@ const hausaPartial: DeepPartial<Translation> = {
     downloadButton: "Sauke",
     shareButton: "Raba",
     feedbackButton: "Aika Ra'ayi",
-    multiplayerStatsTitle: "Kididdigar Wasa da yawa",
+    multiplayerStatsTitle: "Kididdigar Aiwatarwa",
     wins: "Nasarori",
-    gamesPlayed: "Wasannin da aka buga",
+    gamesPlayed: "Zaman da aka Kammala",
   },
   lesson: {
       startQuizButton: "Fara Jarrabawa Don Gwada Iliminka",
@@ -1220,13 +1601,74 @@ const hausaPartial: DeepPartial<Translation> = {
       profile: "Ana bude bayanan ka.",
       leaderboard: "Ana nuna jerin gwarzaye.",
       game: "Ana fara wasan AI da Mutum.",
-      multiplayer: "Ana bude wasa da yawa.",
+      peerPractice: "Ana bude aiwatar da kai-da-kai.",
       wallet: "Ana bude walat dinka.",
     },
     startingModule: (moduleName) => `Ana fara darasi: ${moduleName}.`,
     openingSettings: "Ana bude saiti.",
     closingSettings: "Ana rufe saiti.",
     loggingOut: "Ana fitar da kai.",
+  },
+  glossary: {
+    title: "Kamun AI",
+    description: "Jagora mai sauri ga dukkan manyan kalmomin AI da aka yi amfani da su a cikin darussa.",
+    searchPlaceholder: "Nemo kalma...",
+    noResultsTitle: "Ba a Samu Kalmomi ba",
+    noResultsDescription: (term) => `Ba mu iya samun kalmomin da suka dace da "${term}" ba. Gwada wani bincike.`,
+  },
+  podcastGenerator: {
+    title: "Sitidiyon Podcast na AI Paddi",
+    description: "Mayar da ra'ayoyinka zuwa sauti. Zama Mahaliccin AI!",
+    scriptLabel: "Rubutun Podcast Naka",
+    scriptPlaceholder: "Rubuta gajeren rubutu a nan. Za ka iya bayyana wata dabara ta AI, ba da labari, ko raba labarai daga al'ummarka!",
+    voiceLabel: "Zaɓi Murya",
+    voices: {
+        kore: "Murya Mai Zurfi, a fili (Kore)",
+        puck: "Murya ta Abokantaka, Mai Farin Ciki (Puck)",
+    },
+    generateButton: "Samar da Sauti",
+    generatingButton: "Ana Kirkira...",
+    yourCreation: "Halittarka",
+    errorMessage: "A'a! Wani abu ya faru ba daidai ba yayin samar da sauti. Da fatan za a sake gwadawa.",
+  },
+  careerExplorer: {
+    title: "Mai Binciken Ayyukan AI",
+    description: "Duba yadda kwarewar AI dinka zai iya haifar da dama ta gaske a Najeriya da sauran wurare.",
+    whatTheyDo: "Abin da Suke Yi",
+    skillsNeeded: "Kwarewar da ake Bukata",
+    dayInTheLife: "Rana Daya a Rayuwa",
+    relevantLessons: "Darussan da suka dace",
+    startLearning: "Fara Koyo",
+    careers: {
+      'agritech-specialist': {
+        title: "Kwararre a fannin AI a Noma",
+        description: "Yana amfani da AI don taimaka wa manoma su inganta amfanin gona da sarrafa albarkatu.",
+        what_they_do: "Suna nazarin bayanai daga jirage marasa matuka da na'urori masu auna sigina don lura da lafiyar amfanin gona, hasashen yanayi, da ba da shawarar lokutan da suka fi dacewa don shuka da girbi. Ayyukansu na taimakawa wajen sa aikin noma ya zama mai inganci da dorewa.",
+        skills: ["Nazarin Bayanai", "Magance Matsaloli", "Sanin Noma", "Sadarwa"],
+        day_in_the_life: "Ranata ba ta fara a ofis ba, amma da duba hotunan jirgin sama mara matuki daga wata gona a Kano. AI na nuna wani bangare na masara da alamun karancin abinci mai gina jiki. Sai na yi aiki da jami'in fadada aikin gona na yankin ta WhatsApp, na aika masa da wurin da kuma shawarar wani takin zamani."
+      },
+      'fintech-ml-engineer': {
+        title: "Injiniyan ML a fannin Fintech",
+        description: "Yana gina kayan aikin kudi masu wayo, daga gano zamba zuwa neman rance.",
+        what_they_do: "Suna kirkirar samfuran koyon na'ura da za su iya gano ma'amaloli na zamba a ainihin lokacin, tantance hadarin rance ga masu kananan sana'o'i, ko kirkirar tsare-tsaren tanadi na musamman ga masu amfani da manhajar banki.",
+        skills: ["Koyon Na'ura", "Shirye-shirye (Python)", "Kididdiga", "Sanin Kudi"],
+        day_in_the_life: "A yau, samfurinmu na AI ya gano wasu ma'amaloli marasa kyau da ke kokarin kwashe kudi daga wani asusu. Mun dakatar da shi cikin dakika kadan. Yau da yamma, ina horar da wani sabon samfuri don taimaka wa 'yan kasuwa a Legas su sami kananan rancuna cikin sauri."
+      },
+      'ai-content-creator': {
+        title: "Mai Kirkirar Abun Ciki na AI & Malami",
+        description: "Yana amfani da AI mai kirkira don samar da kayan koyarwa masu jan hankali da labarai.",
+        what_they_do: "Suna amfani da kayan aikin AI don samar da rubuce-rubucen bidiyo na ilimantarwa, kirkirar zane-zane na littattafan yara a cikin harsunan gida, ko gina chatbots masu sauki da za su iya taimaka wa dalibai su gwada sabbin darussa.",
+        skills: ["Kirkira", "Injiniyancin Umarni", "Rubutu & Ba da Labari", "Kwarewar Koyarwa"],
+        day_in_the_life: "Ina aiki tare da wani malami a Fatakwal don kirkirar wani darasi mai sauki na kimiyya mai hoto game da zagayowar ruwa. Ina amfani da na'urar samar da hotuna ta AI don kirkirar kyawawan hotuna da kuma samfurin harshe don saukaka rubutun."
+      },
+      'ai-ethicist': {
+        title: "Kwararre a fannin Da'a na AI",
+        description: "Yana tabbatar da cewa an gina kuma an yi amfani da tsarin AI cikin adalci da alhaki.",
+        what_they_do: "Suna aiki tare da kamfanonin fasaha don gwada samfuran AI don nuna bambanci, tabbatar da cewa suna aiki daidai ga mutane na kowane jinsi. Suna taimakawa wajen kirkirar ka'idoji don kare bayanan masu amfani da kuma tabbatar da cewa shawarwarin AI a bayyane suke kuma masu adalci.",
+        skills: ["Tunani Mai Zurfi", "Da'a", "Sadarwa", "Fahimtar Nuna Bambanci na AI"],
+        day_in_the_life: "Wata kungiya na gina AI don taimakawa likitoci su gano cututtuka. Aikina shi ne in yi tambayoyi masu wuya: Shin an horar da AI da bayanai daga asibitocin Najeriya? Shin yana aiki daidai ga mata kamar yadda yake yi ga maza? Aikina shi ne in zama murya ga adalci."
+      }
+    }
   },
   curriculum: {
       'what-is-ai': { 
@@ -1272,14 +1714,21 @@ const yorubaPartial: DeepPartial<Translation> = {
   dashboard: {
     greeting: (name) => `Pẹlẹ o, ${name}!`,
     subGreeting: "Ṣetan lati tẹsiwaju ìrìn AI rẹ?",
-    multiplayerTitle: "Elere-pupọ",
-    multiplayerDescription: " koju awọn ọrẹ ni adanwo akoko gidi.",
+    multiplayerTitle: "Ìdánrawò Ẹlẹgbẹ́-sí-Ẹlẹgbẹ́",
+    multiplayerDescription: "Ṣe ìdánrawò àwọn èrò AI pẹ̀lú ọ̀rẹ́ kan nínú ìpàdé àjùmọ̀ṣe.",
     profileTitle: "Profaili & Awọn iwe-ẹri",
     leaderboardTitle: "Igbimọ Awọn adari",
     leaderboardDescription: "Wo bi o ṣe n ṣe afiwe si awọn akẹkọọ miiran.",
+    glossaryTitle: "Àtúmọ̀-èdè AI",
+    glossaryDescription: "Wá ìtumọ̀ fún àwọn ọ̀rọ̀ pàtàkì AI.",
+    podcastGeneratorTitle: "Ẹlẹda Adarọ-ese",
+    podcastGeneratorDescription: "Lo AI lati ṣẹda eto ohun kukuru tirẹ. Lọ lati akẹkọọ si ẹlẹda!",
+    careerExplorerTitle: "Oluṣawari Iṣẹ AI",
+    careerExplorerDescription: "Ṣawari awọn anfani iṣẹ iwaju ni agbaye ti AI.",
   },
-  multiplayer: {
-    waitingForPlayers: "Nduro de awọn oṣere miiran...",
+  peerPractice: {
+    title: "Ìdánrawò Ẹlẹgbẹ́-sí-Ẹlẹgbẹ́",
+    waitingForPlayers: "Nduro de awọn alabaṣepọ miiran...",
   },
   game: {
       title: "AI vs. Eniyan",
@@ -1294,9 +1743,9 @@ const yorubaPartial: DeepPartial<Translation> = {
       learnerLevel: (level) => `Akẹ́kọ̀ọ́ ${level}`,
       points: "Awọn ojuami",
       feedbackButton: "Firanṣẹ Idahun",
-      multiplayerStatsTitle: "Awọn iṣiro Elere-pupọ",
+      multiplayerStatsTitle: "Àwọn Iṣiro Ìdánrawò",
       wins: "Iṣẹgun",
-      gamesPlayed: "Awọn ere ti aṣe",
+      gamesPlayed: "Àwọn Ìpàdé Tí A Ti Parí",
       certificateIssuedBy: (orgName) => `Láti ọwọ́ ${orgName}`,
   },
   lesson: {
@@ -1355,13 +1804,74 @@ const yorubaPartial: DeepPartial<Translation> = {
       profile: "Nsii profaili rẹ.",
       leaderboard: "Nfihan igbimọ awọn adari.",
       game: "Bẹrẹ ere AI dipo Eniyan.",
-      multiplayer: "Nsii elere-pupọ.",
+      peerPractice: "Nsii ìdánrawò ẹlẹgbẹ́-sí-ẹlẹgbẹ́.",
       wallet: "Nsii apamọwọ rẹ.",
     },
     startingModule: (moduleName) => `Bẹrẹ modulu: ${moduleName}.`,
     openingSettings: "Nsii awọn eto.",
     closingSettings: "Titiipa awọn eto.",
     loggingOut: "N jade kuro.",
+  },
+  glossary: {
+    title: "Àtúmọ̀-èdè AI",
+    description: "Ìtọ́kasi yára fún gbogbo àwọn ọ̀rọ̀ pàtàkì AI tí a lò nínú àwọn ẹ̀kọ́.",
+    searchPlaceholder: "Wá ọ̀rọ̀ kan...",
+    noResultsTitle: "Kò Rí Àwọn Ọ̀rọ̀",
+    noResultsDescription: (term) => `A kò rí àwọn ọ̀rọ̀ tó bá "${term}" mu. Gbìyànjú ìwákiri mìíràn.`,
+  },
+  podcastGenerator: {
+    title: "Situdio Adarọ-ese AI Paddi",
+    description: "Yi awọn imọran rẹ pada si ohun. Di Ẹlẹda AI!",
+    scriptLabel: "Iwe-afọwọkọ Adarọ-ese Rẹ",
+    scriptPlaceholder: "Kọ iwe-afọwọkọ kukuru kan nibi. O le ṣalaye imọran AI kan, sọ itan kan, tabi pin awọn iroyin lati agbegbe rẹ!",
+    voiceLabel: "Yan Ohùn Kan",
+    voices: {
+        kore: "Ohùn Jinlẹ, kedere (Kore)",
+        puck: "Ohùn ọrẹ, Alarinrin (Puck)",
+    },
+    generateButton: "Ṣẹda Ohun",
+    generatingButton: "Nṣẹda...",
+    yourCreation: "Ẹda Rẹ",
+    errorMessage: "Oops! Nkan kan lọ aṣiṣe lakoko ti o n ṣẹda ohun. Jọwọ gbiyanju lẹẹkansi.",
+  },
+  careerExplorer: {
+    title: "Oluṣawari Iṣẹ AI",
+    description: "Wo bi awọn ọgbọn AI rẹ ṣe le ṣẹda awọn anfani gidi ni Nigeria ati ni ikọja.",
+    whatTheyDo: "Ohun ti Wọn Ṣe",
+    skillsNeeded: "Awọn Ogbon ti a beere",
+    dayInTheLife: "Ọjọ Kan Ni Igbesi aye",
+    relevantLessons: "Awọn Ẹkọ ti o yẹ",
+    startLearning: "Bẹrẹ Ikẹkọ",
+    careers: {
+      'agritech-specialist': {
+        title: "Ọjọgbọn AI ni Ogbin",
+        description: "Nlo AI lati ṣe iranlọwọ fun awọn agbẹ lati mu ikore pọ si ati ṣakoso awọn ohun elo.",
+        what_they_do: "Wọn ṣe itupalẹ data lati awọn drones ati awọn sensọ lati ṣe abojuto ilera irugbin, sọ asọtẹlẹ oju ojo, ati ṣeduro awọn akoko ti o dara julọ fun gbingbin ati ikore. Iṣẹ wọn ṣe iranlọwọ lati jẹ ki iṣẹ-ogbin munadoko siwaju sii.",
+        skills: ["Itupalẹ Data", "Iyanju Iṣoro", "Imọ-ogbin", "Ibaraẹnisọrọ"],
+        day_in_the_life: "Ọjọ mi ko bẹrẹ ni ọfiisi, ṣugbọn pẹlu ṣiṣe ayẹwo aworan drone lati oko kan ni Kano. AI ṣe afihan apakan agbado kan pẹlu awọn ami aipe ounjẹ. Mo lẹhinna ṣiṣẹ pẹlu oṣiṣẹ itẹsiwaju oko agbegbe nipasẹ WhatsApp."
+      },
+      'fintech-ml-engineer': {
+        title: "Onimọ-ẹrọ ML ni Fintech",
+        description: "Kọ awọn irinṣẹ owo ti o gbọn, lati wiwa jibiti si awọn ohun elo awin.",
+        what_they_do: "Wọn ṣẹda awọn awoṣe ẹkọ ẹrọ ti o le rii awọn iṣowo arekereke ni akoko gidi, ṣe ayẹwo eewu awin fun awọn oniwun iṣowo kekere, tabi ṣẹda awọn ero ifowopamọ ti ara ẹni fun awọn olumulo ti ohun elo banki kan.",
+        skills: ["Ẹkọ Ẹrọ", "Siseto (Python)", "Iṣiro", "Imọ-owo"],
+        day_in_the_life: "Loni, awoṣe AI wa ṣe afihan lẹsẹsẹ awọn iṣowo dani ti n gbiyanju lati fa owo jade kuro ninu akọọlẹ kan. A da duro ni iṣẹju-aaya. Mo n kọ awoṣe tuntun lati ṣe iranlọwọ fun awọn oniṣowo ọja ni Eko lati gba awọn awin kekere ni iyara."
+      },
+      'ai-content-creator': {
+        title: "Oludasile Akoonu & Olukọni AI",
+        description: "Nlo AI ipilẹṣẹ lati ṣẹda awọn ohun elo eto-ẹkọ ti o nifẹ ati awọn itan.",
+        what_they_do: "Wọn lo awọn irinṣẹ AI lati ṣe agbekalẹ awọn iwe afọwọkọ fun awọn fidio eto-ẹkọ, ṣẹda awọn aworan fun awọn iwe ọmọde ni awọn ede abinibi, tabi kọ awọn chatbots ti o rọrun ti o le ṣe iranlọwọ fun awọn ọmọ ile-iwe lati ṣe adaṣe awọn koko-ọrọ tuntun.",
+        skills: ["Ẹda", "Imọ-ẹrọ Kọni", "Kikọ & Itan-itan", "Awọn Ogbon Ikọni"],
+        day_in_the_life: "Mo n ṣiṣẹ pẹlu olukọ kan ni Port Harcourt lati ṣẹda ẹkọ imọ-jinlẹ ti o rọrun, ti o ni aworan nipa iyipo omi. Mo lo olupilẹṣẹ aworan AI lati ṣẹda awọn aworan ẹlẹwa ati awoṣe ede lati jẹ ki ọrọ naa rọrun."
+      },
+      'ai-ethicist': {
+        title: "Onimọ-jinlẹ AI",
+        description: "Ṣe idaniloju pe awọn eto AI ni a kọ ati lo ni ododo ati ni ojuse.",
+        what_they_do: "Wọn ṣiṣẹ pẹlu awọn ile-iṣẹ imọ-ẹrọ lati ṣe idanwo awọn awoṣe AI fun ojuṣaaju, ni idaniloju pe wọn ṣiṣẹ bakanna fun awọn eniyan ti gbogbo ipilẹ. Wọn ṣe iranlọwọ lati ṣẹda awọn itọnisọna lati daabobo data olumulo ati rii daju pe awọn ipinnu AI jẹ gbangba ati ododo.",
+        skills: ["Iroye Pataki", "Iwa", "Ibaraẹnisọrọ", "Oye ti Ojuṣaaju AI"],
+        day_in_the_life: "Ẹgbẹ kan n kọ AI lati ṣe iranlọwọ fun awọn dokita lati ṣe iwadii awọn aisan. Iṣẹ mi ni lati beere awọn ibeere lile: Njẹ a kọ AI lori data lati awọn ile-iwosan Naijiria? Njẹ o ṣiṣẹ daradara fun awọn obinrin bi o ṣe nṣe fun awọn ọkunrin? Ipa mi ni lati jẹ ohun fun ododo."
+      }
+    }
   },
   levels: {
     [LearningPath.Beginner]: 'Olùbẹ̀rẹ̀',
@@ -1387,14 +1897,21 @@ const igboPartial: DeepPartial<Translation> = {
   dashboard: {
     greeting: (name) => `Ndewo, ${name}!`,
     subGreeting: "Ị dịla njikere ịga n'ihu na njem AI gị?",
-    multiplayerTitle: "Ọtụtụ Onye ọkpụkpọ",
-    multiplayerDescription: "maa ndị enyi aka n'ajụjụ ọnụ oge.",
+    multiplayerTitle: "Omume ndị ọgbọ na ndị ọgbọ",
+    multiplayerDescription: "Soro enyi gị na-eme echiche AI na nnọkọ imekọ ihe ọnụ.",
     profileTitle: "Profaịlụ & Asambodo",
     leaderboardTitle: "Bọọdụ Ndị ndu",
     leaderboardDescription: "Hụ ka ị na-atụnyere ndị mmụta ndị ọzọ.",
+    glossaryTitle: "Nkọwa okwu AI",
+    glossaryDescription: "Chọọ nkọwa maka usoro AI dị mkpa.",
+    podcastGeneratorTitle: "Onye na-emepụta Pọdkastị",
+    podcastGeneratorDescription: "Jiri AI mepụta obere ihe ngosi ọdịyo nke gị. Site na onye mmụta gaa na onye okike!",
+    careerExplorerTitle: "Onye nyocha Ọrụ AI",
+    careerExplorerDescription: "Chọpụta ohere ọrụ n'ọdịnihu n'ụwa nke AI.",
   },
-  multiplayer: {
-    waitingForPlayers: "Na-eche ndị egwuregwu ndị ọzọ...",
+  peerPractice: {
+    title: "Omume ndị ọgbọ na ndị ọgbọ",
+    waitingForPlayers: "Na-eche ndị ọzọ so...",
   },
   game: {
     title: "AI vs. Mmadụ",
@@ -1409,9 +1926,9 @@ const igboPartial: DeepPartial<Translation> = {
       learnerLevel: (level) => `Onye mmụta ${level}`,
       points: "Akara",
       feedbackButton: "Zipu Nkwupụta",
-      multiplayerStatsTitle: "Ọnụọgụgụ Ọtụtụ Onye ọkpụkpọ",
+      multiplayerStatsTitle: "Ọnụọgụgụ Omume",
       wins: "Mmeri",
-      gamesPlayed: "Egwuregwu Egwuru",
+      gamesPlayed: "Oge Emechara",
       certificateIssuedBy: (orgName) => `Nke ${orgName} nyere`,
   },
   lesson: {
@@ -1470,13 +1987,74 @@ const igboPartial: DeepPartial<Translation> = {
       profile: "Na-emeghe profaịlụ gị.",
       leaderboard: "Na-egosi bọọdụ ndị ndu.",
       game: "Na-amalite egwuregwu AI megide Mmadụ.",
-      multiplayer: "Na-emeghe ọtụtụ onye ọkpụkpọ.",
+      peerPractice: "Na-emeghe omume ndị ọgbọ na ndị ọgbọ.",
       wallet: "Na-emeghe obere akpa gị.",
     },
     startingModule: (moduleName) => `Na-amalite modulu: ${moduleName}.`,
     openingSettings: "Na-emeghe ntọala.",
     closingSettings: "Na-emechi ntọala.",
     loggingOut: "Na-apụ apụ.",
+  },
+  glossary: {
+    title: "Nkọwa okwu AI",
+    description: "Ntụaka ngwa ngwa maka usoro AI niile dị mkpa ejiri na nkuzi.",
+    searchPlaceholder: "Chọọ maka okwu...",
+    noResultsTitle: "Ọ nweghị Okwu achọtara",
+    noResultsDescription: (term) => `Anyị enweghị ike ịchọta usoro ọ bụla dabara na "${term}". Nwaa ọchụchọ ọzọ.`,
+  },
+  podcastGenerator: {
+    title: "Situdiyo Pọdkastị nke AI Paddi",
+    description: "Tụgharịa echiche gị n'ime ọdịyo. Bụrụ Onye Okike AI!",
+    scriptLabel: "Ederede Pọdkastị Gị",
+    scriptPlaceholder: "Dee obere ederede ebe a. Ị nwere ike ịkọwa echiche AI, kọọ akụkọ, ma ọ bụ kesaa ozi sitere na obodo gị!",
+    voiceLabel: "Họrọ Olu",
+    voices: {
+        kore: "Olu miri emi, doro anya (Kore)",
+        puck: "Olu enyi, nke nwere obi ụtọ (Puck)",
+    },
+    generateButton: "Mepụta Ọdịyo",
+    generatingButton: "Na-emepụta...",
+    yourCreation: "Okike Gị",
+    errorMessage: "Ewoo! Ihe mehiere mgbe a na-emepụta ọdịyo. Biko nwaa ọzọ.",
+  },
+  careerExplorer: {
+    title: "Onye nyocha Ọrụ AI",
+    description: "Hụ ka nka AI gị nwere ike isi kee ohere dị adị na Naịjirịa na gafere.",
+    whatTheyDo: "Ihe Ha Na-eme",
+    skillsNeeded: "Nkà Dị Mkpa",
+    dayInTheLife: "Otu Ụbọchị na Ndụ",
+    relevantLessons: "Ihe Ọmụmụ Dị Mkpa",
+    startLearning: "Malite Ịmụ Ihe",
+    careers: {
+      'agritech-specialist': {
+        title: "Ọkachamara AI na Ọrụ Ugbo",
+        description: "Na-eji AI enyere ndị ọrụ ugbo aka imeziwanye ihe ọkụkụ na ijikwa akụ.",
+        what_they_do: "Ha na-enyocha data sitere na drones na sensọ iji nyochaa ahụike ihe ọkụkụ, buo amụma ihu igwe, ma kwado oge kacha mma maka ịkụ na iwe ihe ubi. Ọrụ ha na-enyere aka mee ka ọrụ ugbo rụọ ọrụ nke ọma.",
+        skills: ["Nnyocha Data", "Nchọpụta Nsogbu", "Ọmụma Ọrụ Ugbo", "Nkwurịta Okwu"],
+        day_in_the_life: "Ụbọchị m anaghị ebido n'ọfịs, kama ọ na-eji enyocha ihe onyonyo drone si n'ugbo dị na Kano. AI na-egosi akụkụ ọka nwere ike ịnwe ụkọ nri. M na-arụkọ ọrụ na onye ọrụ mgbasa ozi ugbo site na WhatsApp."
+      },
+      'fintech-ml-engineer': {
+        title: "Injinia ML na Fintech",
+        description: "Na-ewu ngwaọrụ ego nwere ọgụgụ isi, site na nchọpụta aghụghọ ruo na ngwa mgbazinye ego.",
+        what_they_do: "Ha na-emepụta ụdị mmụta igwe nwere ike ịchọpụta azụmahịa aghụghọ n'oge, nyochaa ihe egwu mgbazinye ego maka ndị nwe obere azụmaahịa, ma ọ bụ mepụta atụmatụ nchekwa ego ahaziri maka ndị ọrụ ngwa akụ.",
+        skills: ["Mmụta Igwe", "Mmemme (Python)", "Ọnụ ọgụgụ", "Ọmụma Ego"],
+        day_in_the_life: "Taa, ụdị AI anyị gosipụtara usoro azụmahịa pụrụ iche na-anwa iwepụ ego na akaụntụ. Anyị kwụsịrị ya na nkeji ole na ole. N'ehihie a, ana m azụ ụdị ọhụrụ iji nyere ndị ahịa ahịa na Lagos aka inweta obere ego mgbazinye ngwa ngwa."
+      },
+      'ai-content-creator': {
+        title: "Onye Okike ọdịnaya & Onye nkuzi AI",
+        description: "Na-eji AI na-emepụta ihe iji mepụta ihe mmụta na akụkọ na-adọrọ mmasị.",
+        what_they_do: "Ha na-eji ngwaọrụ AI emepụta edemede maka vidiyo mmụta, mepụta ihe atụ maka akwụkwọ ụmụaka n'asụsụ obodo, ma ọ bụ wuo chatbots dị mfe nwere ike inyere ụmụ akwụkwọ aka ịme ihe ọmụmụ ọhụrụ.",
+        skills: ["Ihe Okike", "Injinia Ngwa ngwa", "Ide & Ịkọ Akụkọ", "Nkà Nkụzi"],
+        day_in_the_life: "M na-arụkọ ọrụ na onye nkuzi na Port Harcourt iji mepụta ihe ọmụmụ sayensị dị mfe, nke nwere ihe atụ gbasara usoro mmiri. Ana m eji ihe na-emepụta onyonyo AI emepụta foto mara mma na ụdị asụsụ iji mee ka ederede dị mfe."
+      },
+      'ai-ethicist': {
+        title: "Ọkà mmụta ụkpụrụ omume AI",
+        description: "Na-ahụ na a na-ewu ma na-eji usoro AI eme ihe n'ụzọ ziri ezi na nke kwesịrị ekwesị.",
+        what_they_do: "Ha na-arụkọ ọrụ na ụlọ ọrụ teknụzụ iji nwalee ụdị AI maka ajọ mbunobi, na-ahụ na ha na-arụ ọrụ nke ọma maka ndị mmadụ n'agbanyeghị agbụrụ. Ha na-enyere aka ịmepụta ụkpụrụ iji chebe data onye ọrụ ma hụ na mkpebi AI doro anya ma zie ezi.",
+        skills: ["Echiche Dị Mkpa", "Ụkpụrụ Omume", "Nkwurịta Okwu", "Nghọta nke ajọ mbunobi AI"],
+        day_in_the_life: "Otu ìgwè na-ewu AI iji nyere ndị dọkịta aka ịchọpụta ọrịa. Ọrụ m bụ ịjụ ajụjụ siri ike: A zụrụ AI na data sitere n'ụlọ ọgwụ Naịjirịa? Ọ na-arụ ọrụ nke ọma maka ụmụ nwanyị dịka ọ na-arụ maka ụmụ nwoke? Ọrụ m bụ ịbụ olu maka ikpe ziri ezi."
+      }
+    }
   },
   levels: {
     [LearningPath.Beginner]: 'Onye mbido',
@@ -1502,37 +2080,45 @@ const pidginPartial: DeepPartial<Translation> = {
   dashboard: {
     greeting: (name) => `How far, ${name}!`,
     subGreeting: "You ready to continue your AI adventure?",
-    multiplayerTitle: "Multi-player",
-    multiplayerDescription: "Challenge friends for real-time quiz.",
+    multiplayerTitle: "Peer-to-Peer Practice",
+    multiplayerDescription: "Practice AI ideas with your friend for collaborative session.",
     profileTitle: "Profile & Certificates",
     leaderboardTitle: "Leaderboard",
     leaderboardDescription: "See how you dey rank with other learners.",
+    glossaryTitle: "AI Glossary",
+    glossaryDescription: "Find meaning for key AI words.",
+    podcastGeneratorTitle: "Podcast Generator",
+    podcastGeneratorDescription: "Use AI make your own short audio show. Go from learner to creator!",
+    careerExplorerTitle: "AI Career Explorer",
+    careerExplorerDescription: "Discover future job opportunities for the world of AI.",
   },
-  multiplayer: {
-    waitingForPlayers: "Dey wait for other players...",
+  peerPractice: {
+    title: "Peer-to-Peer Practice",
+    waitingForPlayers: "Dey wait for other people...",
   },
   game: {
       title: "AI vs. Human",
       description: "You fit tell which proverb na AI write am?",
       difficulty: "Level",
-      easy: "Easy",
+      easy: "Easy Peasy",
       hard: "Hard",
-      pointDescription: "Correct guess for AI vs Human game",
+      pointDescription: "Correct answer for AI vs Human game",
   },
   profile: {
       title: "Your Profile & Progress",
       learnerLevel: (level) => `Learner Level: ${level}`,
+      points: "Points",
       feedbackButton: "Send Feedback",
-      multiplayerStatsTitle: "Multi-player Stats",
+      multiplayerStatsTitle: "Practice Stats",
       wins: "Wins",
-      gamesPlayed: "Games Played",
+      gamesPlayed: "Sessions Completed",
       certificateIssuedBy: (orgName) => `From ${orgName}`,
   },
   lesson: {
       submitAnswer: "Submit",
       yourAnswer: "Your answer...",
-      readAloud: "Read Am Aloud",
-      quizCorrect: (points) => `Na correct! (+${points} points)`,
+      readAloud: "Read Aloud",
+      quizCorrect: (points) => `Correct! (+${points} points)`,
   },
   leaderboard: {
     title: "Leaderboard",
@@ -1543,7 +2129,7 @@ const pidginPartial: DeepPartial<Translation> = {
     you: "You",
   },
   common: {
-    backToDashboard: "Go Back to Dashboard",
+    backToDashboard: "Back to Dashboard",
     submit: "Submit",
     close: "Close",
   },
@@ -1560,7 +2146,7 @@ const pidginPartial: DeepPartial<Translation> = {
     messagePlaceholder: "Abeg, describe the issue or your idea...",
     submitting: "Submitting...",
     successTitle: "Thank You!",
-    successDescription: "We don receive your feedback. We appreciate say you dey help us make AI Kasahorow better.",
+    successDescription: "We don receive your feedback. We appreciate say you help us make AI Kasahorow better.",
   },
   settings: {
     title: "Settings",
@@ -1573,24 +2159,85 @@ const pidginPartial: DeepPartial<Translation> = {
     downloading: "Downloading...",
     offlineIndicator: "Offline Mode",
     onlineIndicator: "You dey online",
-    syncing: "Dey sync your progress...",
+    syncing: "Syncing your progress...",
     notAvailable: "This content no dey available offline.",
   },
   voice: {
     listening: "Dey listen...",
     voiceModeActive: "Voice mode dey active",
     navigatingTo: {
-      dashboard: "I dey go dashboard.",
-      profile: "I dey open your profile.",
-      leaderboard: "I dey show leaderboard.",
-      game: "I dey start AI versus Human game.",
-      multiplayer: "I dey open multi-player.",
-      wallet: "I dey open your wallet.",
+      dashboard: "Dey go dashboard.",
+      profile: "Dey open your profile.",
+      leaderboard: "Dey show leaderboard.",
+      game: "Dey start AI versus Human game.",
+      peerPractice: "Dey open peer-to-peer practice.",
+      wallet: "Dey open your wallet.",
     },
-    startingModule: (moduleName) => `I dey start module: ${moduleName}.`,
-    openingSettings: "I dey open settings.",
-    closingSettings: "I dey close settings.",
-    loggingOut: "I dey log you out.",
+    startingModule: (moduleName) => `Dey start module: ${moduleName}.`,
+    openingSettings: "Dey open settings.",
+    closingSettings: "Dey close settings.",
+    loggingOut: "Dey log you out.",
+  },
+  glossary: {
+    title: "AI Glossary",
+    description: "Quick reference for all the key AI terms wey we use for the lessons.",
+    searchPlaceholder: "Search for a term...",
+    noResultsTitle: "No Terms Found",
+    noResultsDescription: (term) => `We no fit find any terms wey match "${term}". Try another search.`,
+  },
+  podcastGenerator: {
+    title: "AI Paddi's Podcast Studio",
+    description: "Turn your ideas to audio. Become an AI Creator!",
+    scriptLabel: "Your Podcast Script",
+    scriptPlaceholder: "Write short script here. You fit explain AI concept, tell story, or share news from your community!",
+    voiceLabel: "Choose a Voice",
+    voices: {
+        kore: "Deep, Clear Voice (Kore)",
+        puck: "Friendly, Upbeat Voice (Puck)",
+    },
+    generateButton: "Generate Audio",
+    generatingButton: "Dey create magic...",
+    yourCreation: "Your Creation",
+    errorMessage: "Oops! Something go wrong while we dey generate the audio. Abeg try again.",
+  },
+  careerExplorer: {
+    title: "AI Career Explorer",
+    description: "See how your AI skills fit create real opportunities for Nigeria and beyond.",
+    whatTheyDo: "Wetin Dem Dey Do",
+    skillsNeeded: "Skills Wey You Need",
+    dayInTheLife: "One Day for their Life",
+    relevantLessons: "Relevant Lessons",
+    startLearning: "Start Learning",
+    careers: {
+      'agritech-specialist': {
+        title: "AI for Agriculture Specialist",
+        description: "Dey use AI help farmers improve crop yields and manage resources.",
+        what_they_do: "Dem dey analyze data from drones and sensors to check crop health, predict weather, and recommend best time to plant and harvest. Their work dey help make farming more efficient and sustainable.",
+        skills: ["Data Analysis", "Problem-Solving", "Knowledge of Agric", "Communication"],
+        day_in_the_life: "My day no dey start for office, but to dey check drone footage from one farm for Kano. The AI go flag one section of maize with potential signs of nutrient deficiency. I go then work with the local farm extension officer via WhatsApp, send them the coordinates and recommendation."
+      },
+      'fintech-ml-engineer': {
+        title: "Fintech ML Engineer",
+        description: "Dey build smart financial tools, from fraud detection to loan applications.",
+        what_they_do: "Dem dey create machine learning models wey fit detect fraudulent transactions sharp-sharp, assess loan risk for small business owners, or create personal savings plans for users of banking app.",
+        skills: ["Machine Learning", "Programming (Python)", "Statistics", "Financial Knowledge"],
+        day_in_the_life: "Today, our AI model flag a series of unusual transactions wey dey try drain one account. We stop am in milliseconds. This afternoon, I dey train new model to help market traders for Lagos get small loans faster by analyzing their sales history instead of demanding impossible collateral."
+      },
+      'ai-content-creator': {
+        title: "AI Tutor & Content Creator",
+        description: "Dey use generative AI create engaging educational materials and stories.",
+        what_they_do: "Dem dey use AI tools generate scripts for educational videos, create illustrations for children's books for local languages, or build simple chatbots wey fit help students practice new subjects.",
+        skills: ["Creativity", "Prompt Engineering", "Writing & Storytelling", "Teaching Skills"],
+        day_in_the_life: "I dey work with one teacher for Port Harcourt to create simple, illustrated science lesson about water cycle. I use AI image generator create beautiful pictures and language model to simplify the text. We dey make learning materials wey look amazing and easy to understand for any student."
+      },
+      'ai-ethicist': {
+        title: "AI Ethicist",
+        description: "Dey make sure say AI systems dey built and used fairly and responsibly.",
+        what_they_do: "Dem dey work with tech companies to test AI models for bias, making sure say dem work equally well for people of all backgrounds. Dem dey help create guidelines to protect user data and make sure say the AI's decisions dey transparent and fair.",
+        skills: ["Critical Thinking", "Ethics", "Communication", "Understanding of AI Bias"],
+        day_in_the_life: "One team dey build AI to help doctors diagnose illnesses. My job na to ask the tough questions: Na data from Nigerian hospitals dem use train the AI? E dey work as well for women as e dey for men? My role na to be the voice for fairness."
+      }
+    }
   },
   levels: {
     [LearningPath.Beginner]: 'Beginner',
@@ -1598,104 +2245,33 @@ const pidginPartial: DeepPartial<Translation> = {
     [LearningPath.Advanced]: 'Advanced',
   },
   curriculum: {
-    'what-is-ai': { title: 'Wetin be AI?', description: 'Learn the basic meaning of AI.', lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
-    'how-ai-works': { title: 'How AI Dey Work?', description: 'Discover how machines learn from data.', lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
+    'what-is-ai': { title: 'Wetin be AI?', description: 'Learn the basic definition of AI.', lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
+    'how-ai-works': { title: 'How AI dey Work?', description: 'Discover how machines dey learn from data.', lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
     'ai-in-daily-life': { title: 'AI for Daily Life', description: 'See examples of AI around you.', lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
     'risks-and-bias': { title: 'Risks & Bias for AI', description: 'Understand the challenges of AI.', lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
-    'ai-and-jobs': { title: 'AI and Future of Jobs', description: 'See how AI is changing work.', lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
+    'ai-and-jobs': { title: 'AI and The Future of Jobs', description: 'See how AI dey change work.', lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
   },
   tooltips: {},
   badges: {}
 };
 
-const amharicPartial: DeepPartial<Translation> = {
-  dashboard: { greeting: (name) => `ሰላም, ${name}!` },
-  multiplayer: { waitingForPlayers: "ሌሎች ተጫዋቾችን በመጠበቅ ላይ..." },
-  levels: { [LearningPath.Beginner]: 'ጀማሪ', [LearningPath.Intermediate]: 'መካከለኛ', [LearningPath.Advanced]: 'ከፍተኛ' },
-  curriculum: {
-    'what-is-ai': { lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
-    'how-ai-works': { lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
-    'ai-in-daily-life': { lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
-    'risks-and-bias': { lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
-    'ai-and-jobs': { lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  },
-  tooltips: {},
-  badges: {}
-};
-const zuluPartial: DeepPartial<Translation> = {
-  dashboard: { greeting: (name) => `Sawubona, ${name}!` },
-  multiplayer: { waitingForPlayers: "Kulindwe abanye abadlali..." },
-  levels: { [LearningPath.Beginner]: 'Osaqalayo', [LearningPath.Intermediate]: 'Ophakathi', [LearningPath.Advanced]: 'Othuthukile' },
-   curriculum: {
-    'what-is-ai': { lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
-    'how-ai-works': { lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
-    'ai-in-daily-life': { lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
-    'risks-and-bias': { lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
-    'ai-and-jobs': { lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  },
-  tooltips: {},
-  badges: {}
-};
-const shonaPartial: DeepPartial<Translation> = {
-  dashboard: { greeting: (name) => `Mhoro, ${name}!` },
-  multiplayer: { waitingForPlayers: "Kumirira vamwe vatambi..." },
-  levels: { [LearningPath.Beginner]: 'Anotanga', [LearningPath.Intermediate]: 'Yepakati', [LearningPath.Advanced]: 'Yepamusoro' },
-   curriculum: {
-    'what-is-ai': { lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
-    'how-ai-works': { lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
-    'ai-in-daily-life': { lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
-    'risks-and-bias': { lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
-    'ai-and-jobs': { lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  },
-  tooltips: {},
-  badges: {}
-};
-const somaliPartial: DeepPartial<Translation> = {
-  dashboard: { greeting: (name) => `Salaam, ${name}!` },
-  multiplayer: { waitingForPlayers: "Sugitaanka ciyaartoyda kale..." },
-  levels: { [LearningPath.Beginner]: 'Bilow', [LearningPath.Intermediate]: 'Dhexdhexaad', [LearningPath.Advanced]: 'Sare' },
-   curriculum: {
-    'what-is-ai': { lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
-    'how-ai-works': { lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
-    'ai-in-daily-life': { lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
-    'risks-and-bias': { lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
-    'ai-and-jobs': { lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  },
-  tooltips: {},
-  badges: {}
+// FIX: Add `translations` object to be exported and used by the app. It merges the partial translations with the English base.
+export const translations: Record<Language, Translation> = {
+    [Language.English]: englishTranslations,
+    [Language.Hausa]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), hausaPartial),
+    [Language.Yoruba]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), yorubaPartial),
+    [Language.Igbo]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), igboPartial),
+    [Language.Pidgin]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), pidginPartial),
+    [Language.Swahili]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), swahiliPartial),
+    [Language.Amharic]: englishTranslations,
+    [Language.Zulu]: englishTranslations,
+    [Language.Shona]: englishTranslations,
+    [Language.Somali]: englishTranslations,
 };
 
-// This function dynamically populates badge translations from the constants
-const populateBadgeTranslations = (trans: Translation) => {
-    Object.keys(BADGES).forEach(badgeId => {
-        trans.badges[badgeId] = {
-            name: BADGES[badgeId].name,
-            description: BADGES[badgeId].description,
-        };
-    });
-    return trans;
-}
-
-
-export const translations: { [key in Language]: Translation } = {
-  [Language.English]: populateBadgeTranslations(englishTranslations),
-  [Language.Swahili]: mergeDeep({ ...englishTranslations }, swahiliPartial),
-  [Language.Hausa]: mergeDeep({ ...englishTranslations }, hausaPartial),
-  [Language.Yoruba]: mergeDeep({ ...englishTranslations }, yorubaPartial),
-  [Language.Igbo]: mergeDeep({ ...englishTranslations }, igboPartial),
-  [Language.Pidgin]: mergeDeep({ ...englishTranslations }, pidginPartial),
-  [Language.Amharic]: mergeDeep({ ...englishTranslations }, amharicPartial),
-  [Language.Zulu]: mergeDeep({ ...englishTranslations }, zuluPartial),
-  [Language.Shona]: mergeDeep({ ...englishTranslations }, shonaPartial),
-  [Language.Somali]: mergeDeep({ ...englishTranslations }, somaliPartial),
-};
-
+// FIX: Add and export `useTranslations` hook to provide translations to components based on the current app language.
 export const useTranslations = (): Translation => {
   const context = useContext(AppContext);
-  if (!context) {
-    throw new Error('useTranslations must be used within an AppProvider');
-  }
-  const { language } = context;
-
-  return translations[language] || translations[Language.English]!;
+  const lang = context?.language || Language.English;
+  return translations[lang] || englishTranslations;
 };

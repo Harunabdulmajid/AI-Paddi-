@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { Quiz as QuizType } from '../types';
-import { CheckCircle, XCircle, ArrowRight, Mic } from 'lucide-react';
+import { CheckCircle, XCircle, Mic } from 'lucide-react';
 import { useTranslations } from '../i18n';
 import { AppContext } from '../context/AppContext';
 import { useSpeech } from '../hooks/useSpeech';
@@ -30,6 +30,40 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
   
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const questionId = `quiz-question-${currentQuestionIndex}`;
+
+  // Use a ref to hold the advancement logic. This prevents the timer's useEffect
+  // from re-running every time the parent re-renders and passes a new onComplete function.
+  // FIX: Initialize useRef with `null` to fix "Expected 1 arguments, but got 0." error.
+  const advanceToNextStepRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    // Keep the ref updated with the latest state and props.
+    advanceToNextStepRef.current = () => {
+      if (currentQuestionIndex < quiz.questions.length - 1) {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+        setSelectedAnswer(null);
+        setIsAnswered(false);
+        setIsCorrect(null);
+        setInputValue('');
+      } else {
+        onComplete();
+      }
+    };
+  }, [currentQuestionIndex, quiz.questions.length, onComplete]);
+
+  useEffect(() => {
+    if (isAnswered) {
+      const delay = isCorrect ? 1500 : 3000; // Shorter delay for correct, longer for incorrect to read explanation
+      const timer = setTimeout(() => {
+        if (advanceToNextStepRef.current) {
+          advanceToNextStepRef.current();
+        }
+      }, delay);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isAnswered, isCorrect]);
+
 
   useEffect(() => {
     if (isVoiceModeEnabled && !isAnswered) {
@@ -103,18 +137,6 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
   };
 
 
-  const handleNext = () => {
-    if (currentQuestionIndex < quiz.questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedAnswer(null);
-      setIsAnswered(false);
-      setIsCorrect(null);
-      setInputValue('');
-    } else {
-      onComplete();
-    }
-  };
-  
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (currentQuestion.type !== 'multiple-choice' || isAnswered) return;
 
@@ -134,8 +156,6 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
     
     setFocusedIndex(newIndex);
   };
-
-  const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
 
   return (
     <div className="mt-12 pt-8 border-t border-neutral-200">
@@ -223,18 +243,6 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
             {!isCorrect && <p className="mt-1 font-semibold">{currentQuestion.type === 'multiple-choice' ? currentQuestion.options[currentQuestion.correctAnswerIndex] : currentQuestion.answer}</p>}
             <p className="text-sm mt-2">{currentQuestion.explanation}</p>
           </div>
-        )}
-        
-        {isAnswered && (
-            <div className="mt-6 text-center">
-                 <button
-                    onClick={handleNext}
-                    className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-lg text-base transition-transform active:scale-95 flex items-center gap-2 mx-auto"
-                >
-                    <span>{isLastQuestion ? t.lesson.completeLessonButton : t.lesson.nextQuestionButton}</span>
-                    <ArrowRight size={18} />
-                </button>
-            </div>
         )}
       </div>
     </div>

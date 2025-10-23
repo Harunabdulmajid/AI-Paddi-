@@ -2,10 +2,10 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Onboarding } from './components/Onboarding';
 import { Dashboard } from './components/Dashboard';
 import { Header } from './components/Header';
-import { Multiplayer } from './components/Multiplayer';
+import { PeerPractice } from './components/Multiplayer';
 import { AiVsHumanGame } from './components/AiVsHumanGame';
 import { Profile } from './components/Profile';
-import { AppContextType, User, Language, Page, Badge, GameSession, Module, Transaction } from './types';
+import { AppContextType, User, Language, Page, Badge, GameSession, Module, Transaction, UserRole } from './types';
 import { ArrowLeft, Loader2, Send } from 'lucide-react';
 import { translations, englishTranslations } from './i18n';
 import { Lesson } from './components/Lesson';
@@ -20,6 +20,11 @@ import { geminiService } from './services/geminiService';
 import { SettingsModal } from './components/SettingsModal';
 import { useSpeech } from './hooks/useSpeech';
 import { Wallet } from './components/Wallet';
+import { Glossary } from './components/Glossary';
+import { PodcastGenerator } from './components/PodcastGenerator';
+import { CareerExplorer } from './components/CareerExplorer';
+import { TeacherDashboard } from './components/TeacherDashboard';
+import { ParentDashboard } from './components/ParentDashboard';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -186,9 +191,9 @@ const App: React.FC = () => {
     } else if (lowerCommand.includes('game') || lowerCommand.includes('human')) {
         setCurrentPage(Page.AiVsHuman);
         speak(t.voice.navigatingTo.game, language);
-    } else if (lowerCommand.includes('multiplayer')) {
-        setCurrentPage(Page.Multiplayer);
-        speak(t.voice.navigatingTo.multiplayer, language);
+    } else if (lowerCommand.includes('practice') || lowerCommand.includes('peer practice')) {
+        setCurrentPage(Page.PeerPractice);
+        speak(t.voice.navigatingTo.peerPractice, language);
     } else if (lowerCommand.includes('open settings')) {
         setIsSettingsOpen(true);
         speak(t.voice.openingSettings, language);
@@ -346,13 +351,23 @@ const App: React.FC = () => {
 
   const renderCurrentPage = () => {
     switch(currentPage) {
-        case Page.Dashboard: return <Dashboard />;
-        case Page.Multiplayer: return <Multiplayer />;
+        case Page.Dashboard:
+            if (user?.role === UserRole.Teacher) {
+                return <TeacherDashboard />;
+            }
+            if (user?.role === UserRole.Parent) {
+                return <ParentDashboard />;
+            }
+            return <Dashboard />;
+        case Page.PeerPractice: return <PeerPractice />;
         case Page.AiVsHuman: return <AiVsHumanGame />;
         case Page.Profile: return <Profile />;
         case Page.Lesson: return <Lesson />;
         case Page.Leaderboard: return <Leaderboard />;
         case Page.Wallet: return <Wallet />;
+        case Page.Glossary: return <Glossary />;
+        case Page.PodcastGenerator: return <PodcastGenerator />;
+        case Page.CareerExplorer: return <CareerExplorer />;
         default: return <Dashboard />;
     }
   }
