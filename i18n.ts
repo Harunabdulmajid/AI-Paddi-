@@ -1,6 +1,6 @@
 import { useContext } from 'react';
-import { AppContext } from './context/AppContext';
-import { Language, LearningPath, LessonContent, FeedbackType } from './types';
+import { AppContext } from './components/AppContext';
+import { Language, LearningPath, LessonContent, FeedbackType, AppContextType } from './types';
 import { BADGES } from './constants';
 
 // --- Utility for deep merging translations --- //
@@ -96,7 +96,19 @@ export type Translation = {
     podcastGeneratorDescription: string;
     careerExplorerTitle: string;
     careerExplorerDescription: string;
+    creationStudioTitle: string;
+    creationStudioDescription: string;
+    myPortfolioTitle: string;
+    myPortfolioDescription: string;
     learningPathTitle: string;
+  };
+  aiTutor: {
+    title: string;
+    description: string;
+    welcomeMessage: string;
+    inputPlaceholder: string;
+    systemInstruction: string;
+    errorMessage: string;
   };
   teacherDashboard: {
     greeting: (name: string) => string;
@@ -397,6 +409,46 @@ export type Translation = {
       }
     }
   };
+  creationStudio: {
+    title: string;
+    description: string;
+    selectTemplate: string;
+    createButton: string;
+    creatingButton: string;
+    outputTitle: string;
+    canvasPlaceholder: string;
+    pointDescription: (templateName: string) => string;
+    pointsAwarded: string;
+    errorMessage: string;
+    systemInstruction: string;
+    templates: {
+        [key: string]: {
+            title: string;
+            description: string;
+            inputLabel: string;
+            placeholder: string;
+        }
+    };
+    refinementActions: {
+      longer: string;
+      shorter: string;
+      funnier: string;
+      moreSerious: string;
+      tryAgain: string;
+    };
+    creatorTools: {
+      changeStyle: string;
+      downloadImage: string;
+    }
+  },
+  studentPortfolio: {
+    title: string;
+    description: string;
+    downloadButton: string;
+    generating: string;
+    completedModules: string;
+    badgesEarned: string;
+  },
   curriculum: {
     [key: string]: {
       title: string;
@@ -485,7 +537,19 @@ export const englishTranslations: Translation = {
     podcastGeneratorDescription: "Use AI to create your own short audio show. Go from learner to creator!",
     careerExplorerTitle: "AI Career Explorer",
     careerExplorerDescription: "Discover future job opportunities in the world of AI.",
+    creationStudioTitle: "Creation Studio",
+    creationStudioDescription: "Collaborate with AI to create, remix, and share your own unique content.",
+    myPortfolioTitle: "My Portfolio",
+    myPortfolioDescription: "Generate a shareable summary of your learning journey.",
     learningPathTitle: "Your Learning Path",
+  },
+  aiTutor: {
+    title: "AI Paddi Tutor",
+    description: "Your personal AI learning assistant. Ask me anything!",
+    welcomeMessage: "Hello! I'm AI Paddi, your learning partner. How can I help you understand AI better today? Ask me anything about our lessons or any AI topic you're curious about! 🚀",
+    inputPlaceholder: "Ask a question about AI...",
+    systemInstruction: "You are AI Paddi, a friendly, patient, and encouraging AI literacy tutor for students, teachers, and parents in Nigeria and Africa. Your goal is to make AI concepts simple, relatable, and fun. Use short sentences (1-3 max). Use everyday Nigerian/African analogies (e.g., jollof rice, market trading, farming) to explain complex topics. Always be positive and end your response with an encouraging follow-up question. Your tone is supportive and never condescending. You are helping users go from AI consumers to AI creators.",
+    errorMessage: "Oops! I'm having a little trouble connecting right now. Please try asking your question again in a moment.",
   },
   teacherDashboard: {
     greeting: (name: string) => `Welcome, ${name}`,
@@ -809,6 +873,58 @@ export const englishTranslations: Translation = {
       }
     }
   },
+  creationStudio: {
+    title: "Creation Studio",
+    description: "Your space to create with AI. Start with an idea, then refine and remix it with your AI partner.",
+    selectTemplate: "1. Choose a Project",
+    createButton: "Create",
+    creatingButton: "Creating...",
+    outputTitle: "Your AI Creation",
+    canvasPlaceholder: "Your creation will appear here... Let's make something amazing! ✨",
+    pointDescription: (templateName) => `Creation in Studio: ${templateName}`,
+    pointsAwarded: "+5 Points!",
+    errorMessage: "Sorry, something went wrong. Please try creating again.",
+    systemInstruction: "You are a creative and encouraging AI partner. Your goal is to help the user create short, fun, and imaginative content based on their prompts. You should be concise and follow instructions for refinement (like making things funnier, longer, etc.) directly. You only output the creative text itself, with no extra conversational text.",
+    templates: {
+        'poem': {
+            title: "Poem Generator",
+            description: "Create a short and sweet poem on any topic.",
+            inputLabel: "2. What is your poem about?",
+            placeholder: "e.g., a sunny day in Lagos, my favourite football team, the taste of jollof rice..."
+        },
+        'story': {
+            title: "Story Starter",
+            description: "Get the first paragraph of an exciting new story.",
+            inputLabel: "2. What is your story idea?",
+            placeholder: "e.g., a young girl who discovers a hidden map, a robot who wants to be a chef..."
+        },
+        'proverb': {
+            title: "Proverb Creator",
+            description: "Invent a new proverb for the modern world.",
+            inputLabel: "2. What is your modern topic?",
+            placeholder: "e.g., social media, online shopping, traffic jams..."
+        }
+    },
+    refinementActions: {
+      longer: "Make it Longer",
+      shorter: "Make it Shorter",
+      funnier: "Make it Funnier",
+      moreSerious: "More Serious Tone",
+      tryAgain: "Try Again",
+    },
+    creatorTools: {
+      changeStyle: "Change Style",
+      downloadImage: "Download as Image",
+    }
+  },
+  studentPortfolio: {
+    title: "My Learning Portfolio",
+    description: "A snapshot of your achievements and progress. Download and share your journey!",
+    downloadButton: "Download Portfolio",
+    generating: "Generating...",
+    completedModules: "Completed Modules",
+    badgesEarned: "Badges Earned",
+  },
   curriculum: {
     'what-is-ai': { 
       title: 'What is AI?', 
@@ -1060,11 +1176,70 @@ export const englishTranslations: Translation = {
           }
       }
     },
+    'ai-safety': {
+      title: 'AI Safety: Staying Smart Online',
+      description: 'Learn to spot deepfakes, avoid scams, and protect your personal information.',
+      lessonContent: {
+        title: "Module 5: AI Safety: Staying Smart Online",
+        introduction: "The internet is like a massive, busy city. There are wonderful places to learn and connect, but there are also hidden dangers. AI can make the good parts better and the dangerous parts trickier. This lesson will give you the tools to navigate the online world safely.",
+        sections: [
+          {
+            heading: "Spotting the Fake: Deepfakes & Misinformation",
+            content: "A 'deepfake' is a video or audio clip that has been altered by AI to make it look or sound like someone is saying or doing something they never did. They can be very convincing. AI can also be used to write and spread false news (misinformation) very quickly. \n\n**How to stay safe:** Be a detective! Always ask: Who made this? Is it a trusted news source? Check other reputable sources before you believe or share something surprising."
+          },
+          {
+            heading: "Smarter Scams: AI-Powered Phishing",
+            content: "'Phishing' is when a scammer tries to trick you into giving them your personal information, like passwords or bank details, often through a fake email or message. AI makes these scams much harder to spot because the messages can be written in perfect, personalized language. They often create a sense of urgency, like 'Your account will be locked!'. \n\n**How to stay safe:** Remember the golden rule: If it sounds too good (or too scary) to be true, it probably is. Never click on suspicious links, and never share your password with anyone. Your bank or school will never ask for your password in an email."
+          },
+          {
+            heading: "Your Data is Precious",
+            content: "AI systems learn from data. This means that many online companies collect information about what you do online. This is your 'personal data'. It's important to be careful about what you share. \n\n**How to stay safe:** Think before you share personal details like your full name, home address, school, or phone number online. Check the privacy settings on your apps and social media accounts to control who sees your information."
+          }
+        ],
+        summary: "To stay safe online, you need to be a critical thinker. Be skeptical of information you see and check its source. Be suspicious of any urgent message that asks for your personal details. And be careful about what personal data you share online. Being smart online is your best defense.",
+        quiz: {
+          questions: [
+            {
+              type: 'multiple-choice',
+              question: "What is a 'deepfake'?",
+              options: [
+                "A very deep part of the ocean.",
+                "An AI-generated video or audio clip that shows something that didn't really happen.",
+                "A secret code used by programmers.",
+                "A type of computer virus."
+              ],
+              correctAnswerIndex: 1,
+              explanation: "Deepfakes use AI to create realistic but fake video or audio content, which is why it's important to be critical of what you see online."
+            },
+            {
+              type: 'fill-in-the-blank',
+              question: "A scam where someone tries to trick you into giving them your password is called _________.",
+              options: [],
+              correctAnswerIndex: -1,
+              answer: "phishing",
+              explanation: "Phishing is a common type of online scam. AI can make phishing emails and messages more convincing, so it's important to be cautious."
+            },
+            {
+              type: 'multiple-choice',
+              question: "What is the best way to protect your personal data?",
+              options: [
+                "Share it with everyone so you have nothing to hide.",
+                "Only share what's necessary and check your privacy settings.",
+                "Use the same simple password for everything.",
+                "Post your phone number online so friends can find you."
+              ],
+              correctAnswerIndex: 1,
+              explanation: "Being mindful of what you share and using strong privacy settings are key to protecting your personal information online."
+            }
+          ]
+        }
+      }
+    },
     'ai-and-jobs': { 
       title: 'AI and The Future of Jobs', 
       description: 'See how AI is changing work and what new opportunities are emerging.',
       lessonContent: {
-          title: "Module 5: How AI is Changing Work",
+          title: "Module 6: How AI is Changing Work",
           introduction: "Every major technology, from the printing press to the internet, has changed the way we work. AI is the next chapter in this story. It's not just about what jobs will disappear; it's about how current jobs will change and what new, exciting roles will be created. Let's explore the future of work.",
           sections: [
               {
@@ -1123,6 +1298,122 @@ export const englishTranslations: Translation = {
           }
       }
     },
+    'digital-citizenship': {
+      title: 'Digital Citizenship in the Age of AI',
+      description: 'Understand your role as a responsible creator and community member online.',
+      lessonContent: {
+        title: "Module 7: Digital Citizenship in the Age of AI",
+        introduction: "Being a good citizen means being respectful, responsible, and helpful in your community. This doesn't just apply to your town or city; it applies to the online world, too. As AI becomes a bigger part of our digital lives, understanding how to be a good 'digital citizen' is more important than ever.",
+        sections: [
+          {
+            heading: "The Creator's Responsibility: Giving Credit",
+            content: "Generative AI tools are amazing for creating art, writing stories, or coding. When you use these tools, it's important to be honest. Don't pretend you made something entirely by yourself if an AI helped you. Think of AI as a powerful collaborator. A good digital citizen is transparent about the tools they use and gives credit where it's due, both to the AI tool and any original work it was inspired by."
+          },
+          {
+            heading: "Your Digital Footprint: Think Before You Post",
+            content: "Every time you post, comment, or like something online, you leave a trace. This is your 'digital footprint'. In the past, this was just seen by people. Now, AI systems can analyze this data to understand patterns. Being a good digital citizen means being mindful of your footprint. Be kind and respectful in your online interactions. What you post can stay online forever, so build a digital footprint that you can be proud of."
+          },
+          {
+            heading: "Building, Not Breaking: Using AI for Good",
+            content: "Like any tool, AI can be used to build amazing things or to cause harm. A good digital citizen chooses to build. You can use AI to help you learn a new subject, create beautiful art to share with your community, or even design a solution to a local problem. The goal is to use these powerful tools to contribute positively, not to cheat on homework, spread rumours, or bully others."
+          }
+        ],
+        summary: "Being a good digital citizen in the age of AI means three things: Be honest about when and how you use AI tools. Be mindful of the permanent 'digital footprint' you create with your online actions. And finally, choose to use AI as a tool for creativity and positive contribution to your community.",
+        quiz: {
+          questions: [
+            {
+              type: 'multiple-choice',
+              question: "If you use an AI tool to help write a school report, what is the most responsible thing to do?",
+              options: [
+                "Pretend you wrote the entire thing yourself.",
+                "Mention that you used an AI tool for assistance or brainstorming.",
+                "Copy and paste the AI's answer directly without checking it.",
+                "Delete the report and start over."
+              ],
+              correctAnswerIndex: 1,
+              explanation: "Honesty and transparency are key parts of good digital citizenship. It's okay to use tools, but you should be open about it."
+            },
+            {
+              type: 'fill-in-the-blank',
+              question: "The trail of data and interactions you leave online is called your digital _________.",
+              options: [],
+              correctAnswerIndex: -1,
+              answer: "footprint",
+              explanation: "Your digital footprint is the collection of all your online activities. It's important to make it a positive one."
+            },
+            {
+              type: 'multiple-choice',
+              question: "Which of the following is the BEST example of using AI for good digital citizenship?",
+              options: [
+                "Using an AI to write negative comments on social media.",
+                "Creating a deepfake video of a classmate to be funny.",
+                "Using an AI image generator to create inspiring posters for your school.",
+                "Using a chatbot to do all your homework for you."
+              ],
+              correctAnswerIndex: 2,
+              explanation: "Using AI to create something positive and share it with your community is a great example of being a good digital citizen."
+            }
+          ]
+        }
+      }
+    },
+    'prompt-engineering': {
+      title: 'Prompt Engineering: Talking to AI',
+      description: 'Learn how to write clear instructions to get the best results from AI tools.',
+      lessonContent: {
+        title: "Module 8: The Art of the Prompt",
+        introduction: "Imagine you're talking to a very smart but very literal assistant. To get the best help, you need to give clear, detailed instructions. That's exactly what 'prompt engineering' is: the skill of crafting effective instructions (prompts) to guide an AI toward the best possible response. It's the difference between getting a generic answer and a masterpiece.",
+        sections: [
+          {
+            heading: "What Exactly is a Prompt?",
+            content: "A prompt is simply the text you give to an AI to tell it what to do. It can be a question, a command, or even a short story for the AI to continue. The quality of the AI's output is directly related to the quality of your prompt. A vague prompt leads to a vague answer, while a detailed prompt leads to a detailed, relevant answer."
+          },
+          {
+            heading: "Best Practices: The C.L.E.A.R. Framework",
+            content: "To write better prompts, remember the word CLEAR:\n\n**C - Context:** Give the AI background information. Who are you? What is the situation? The more context, the better.\n\n**L - Logical Steps:** For complex tasks, tell the AI to think step-by-step or to follow a specific process. This helps it organize its 'thoughts'.\n\n**E - Explicit Instructions:** Be specific! Instead of saying 'make it shorter', say 'summarize this in three bullet points'. Tell it the format, tone, and length you want.\n\n**A - Actor (Persona):** Tell the AI who it should be. 'Act as an expert career counselor' or 'You are a friendly storyteller for a 5-year-old'. This sets the right tone and style.\n\n**R - Refine:** Your first prompt might not be perfect. Don't be afraid to try again! Look at the AI's response and think about how you could make your instruction clearer. It's a conversation."
+          },
+          {
+            heading: "Examples: Vague vs. Clear Prompts",
+            content: "**Task: Write an email to a teacher.**\n\n*Vague Prompt:* 'Write an email asking for an extension.'\n\n*Clear Prompt:* 'Act as a respectful student. Write a short, formal email to my history teacher, Mrs. Adebayo, asking for a two-day extension on the essay about the Benin Empire. Mention that I have been unwell but will submit it by Friday.'\n\n**Task: Get ideas for a project.**\n\n*Vague Prompt:* 'Give me ideas for an agriculture project.'\n\n*Clear Prompt:* 'I am a student in Nigeria interested in technology. Brainstorm three project ideas that use AI to help small-scale farmers in my community solve a real problem, like water scarcity or predicting crop disease.'"
+          }
+        ],
+        summary: "Prompt engineering is the skill of writing clear instructions for AI. A great prompt is not a single magic sentence, but a process. By using the CLEAR framework (Context, Logical Steps, Explicit Instructions, Actor, Refine), you can guide AI to produce amazing, accurate, and helpful results.",
+        quiz: {
+          questions: [
+            {
+              type: 'multiple-choice',
+              question: "What is the primary goal of prompt engineering?",
+              options: [
+                "To make the AI work faster.",
+                "To guide the AI to produce a more accurate and relevant response.",
+                "To test the AI's memory.",
+                "To break the AI."
+              ],
+              correctAnswerIndex: 1,
+              explanation: "Good prompts are all about providing clear instructions to help the AI understand your goal and give you the best possible output."
+            },
+            {
+              type: 'fill-in-the-blank',
+              question: "Telling an AI to 'Act as a professional chef' is an example of giving it an ________ or persona.",
+              options: [],
+              correctAnswerIndex: -1,
+              answer: "Actor",
+              explanation: "The 'A' in the CLEAR framework stands for Actor, which means assigning a role or persona to the AI to set the tone and expertise for its response."
+            },
+            {
+              type: 'multiple-choice',
+              question: "Which of the following is a more effective prompt?",
+              options: [
+                "Tell me about AI in fintech.",
+                "Explain three ways machine learning is used for fraud detection in Nigerian mobile banking apps, in simple terms for a beginner."
+              ],
+              correctAnswerIndex: 1,
+              explanation: "The second prompt is much more effective because it's specific (fraud detection), provides context (Nigerian mobile banking), and defines the audience (for a beginner)."
+            }
+          ]
+        }
+      }
+    },
   },
   levels: {
     [LearningPath.Beginner]: 'Beginner',
@@ -1153,6 +1444,11 @@ export const englishTranslations: Translation = {
     'ai trainers': 'The \'teachers\' for an AI. They carefully prepare and label data (the \'lessons\') to help the AI learn accurately and avoid bias.',
     'ai ethicists': 'Like a referee for technology, they help make sure AI is designed and used in a safe, fair, and responsible way for everyone.',
     'prompt engineers': 'An expert at \'talking\' to an AI. They know how to ask questions and give instructions (prompts) in just the right way to get the most helpful and creative answers.',
+    'deepfake': 'An AI-generated video or audio clip that has been altered to make it look or sound like someone is saying or doing something they never did.',
+    'phishing': 'An online scam where a criminal tries to trick you into giving them personal information, like passwords or bank details.',
+    'digital footprint': 'The trail of data, posts, comments, and interactions you leave behind every time you use the internet.',
+    'prompt engineering': 'The skill of writing clear and effective instructions (prompts) to get the best possible results from an AI model.',
+    'prompt': 'An instruction, question, or piece of text given to an AI to tell it what to do.',
   },
   badges: {
     'first-step': {
@@ -1222,7 +1518,19 @@ const swahiliPartial: DeepPartial<Translation> = {
     podcastGeneratorDescription: "Tumia AI kuunda kipindi chako kifupi cha sauti. Toka kuwa mwanafunzi hadi kuwa muundaji!",
     careerExplorerTitle: "Mgunduzi wa Kazi za AI",
     careerExplorerDescription: "Gundua fursa za kazi za baadaye katika ulimwengu wa AI.",
+    creationStudioTitle: "Studio ya Uundaji",
+    creationStudioDescription: "Shirikiana na AI kuunda, kurekebisha, na kushiriki maudhui yako ya kipekee.",
+    myPortfolioTitle: "Kwingineko Yangu",
+    myPortfolioDescription: "Tengeneza muhtasari unaoweza kushirikiwa wa safari yako ya kujifunza.",
     learningPathTitle: "Njia Yako ya Kujifunza",
+  },
+  aiTutor: {
+    title: "Mwalimu wa AI Paddi",
+    description: "Msaidizi wako binafsi wa kujifunza AI. Niulize chochote!",
+    welcomeMessage: "Habari! Mimi ni AI Paddi, mshirika wako wa kujifunza. Ninawezaje kukusaidia kuelewa AI vizuri zaidi leo? Niulize chochote kuhusu masomo yetu au mada yoyote ya AI unayotaka kujua! 🚀",
+    inputPlaceholder: "Uliza swali kuhusu AI...",
+    systemInstruction: "Wewe ni AI Paddi, mwalimu wa elimu ya AI mwenye urafiki, subira, na anayehimiza wanafunzi, walimu, na wazazi. Lengo lako ni kufanya dhana za AI ziwe rahisi, zenye uhusiano, na za kufurahisha. Tumia sentensi fupi (1-3). Tumia mifano ya kila siku (k.m., pilau, biashara sokoni, kilimo) kuelezea mada ngumu. Daima uwe na mtazamo chanya na maliza jibu lako kwa swali la kutia moyo. Sauti yako ni ya kusaidia na kamwe si ya dharau. Unawasaidia watumiaji kutoka kuwa watumiaji wa AI hadi kuwa waumbaji wa AI.",
+    errorMessage: "Oops! Nina shida kidogo ya kuunganisha sasa hivi. Tafadhali jaribu kuuliza swali lako tena baada ya muda mfupi.",
   },
   peerPractice: {
     title: "Mazoezi ya Pamoja",
@@ -1314,6 +1622,7 @@ const swahiliPartial: DeepPartial<Translation> = {
   feedback: {
     title: "Shiriki Maoni Yako",
     description: "Tunathamini mchango wako! Tujulishe jinsi tunavyoweza kuboresha.",
+// FIX: Added missing 'typeLabel' property
     typeLabel: "Aina ya Maoni",
     types: {
         [FeedbackType.Bug]: "Ripoti ya Hitilafu",
@@ -1417,6 +1726,58 @@ const swahiliPartial: DeepPartial<Translation> = {
       }
     }
   },
+  creationStudio: {
+    title: "Studio ya Uundaji",
+    description: "Nafasi yako ya kuunda na AI. Anza na wazo, kisha rekebisha na changanya na mshirika wako wa AI.",
+    selectTemplate: "1. Chagua Mradi",
+    createButton: "Unda",
+    creatingButton: "Inaunda...",
+    outputTitle: "Ubunifu wako wa AI",
+    canvasPlaceholder: "Ubunifu wako utaonekana hapa... Wacha tufanye kitu cha kushangaza! ✨",
+    pointDescription: (templateName) => `Ubunifu katika Studio: ${templateName}`,
+    pointsAwarded: "Alama +5!",
+    errorMessage: "Samahani, kitu kilienda mrama. Tafadhali jaribu kuunda tena.",
+    systemInstruction: "Wewe ni mshirika wa AI mbunifu na anayehimiza. Lengo lako ni kumsaidia mtumiaji kuunda maudhui mafupi, ya kufurahisha, na ya kufikirika kulingana na maagizo yao. Unapaswa kuwa mfupi na kufuata maagizo ya uboreshaji (kama kufanya vitu kuwa vya kuchekesha, virefu, n.k.) moja kwa moja. Unatoa maandishi ya ubunifu pekee, bila maandishi ya ziada ya mazungumzo.",
+    templates: {
+        'poem': {
+            title: "Jenereta ya Mashairi",
+            description: "Unda shairi fupi na tamu juu ya mada yoyote.",
+            inputLabel: "2. Shairi lako linahusu nini?",
+            placeholder: "k.m., siku ya jua, timu yangu ya mpira, ladha ya pilau..."
+        },
+        'story': {
+            title: "Kianzio cha Hadithi",
+            description: "Pata aya ya kwanza ya hadithi mpya ya kusisimua.",
+            inputLabel: "2. Wazo lako la hadithi ni nini?",
+            placeholder: "k.m., msichana mdogo anayegundua ramani iliyofichwa, roboti anayetaka kuwa mpishi..."
+        },
+        'proverb': {
+            title: "Muumba wa Methali",
+            description: "Buni methali mpya kwa ulimwengu wa kisasa.",
+            inputLabel: "2. Mada yako ya kisasa ni ipi?",
+            placeholder: "k.m., mitandao ya kijamii, ununuzi mtandaoni, foleni za magari..."
+        }
+    },
+    refinementActions: {
+      longer: "Fanya iwe ndefu",
+      shorter: "Fanya iwe fupi",
+      funnier: "Fanya iwe ya kuchekesha",
+      moreSerious: "Sauti nzito zaidi",
+      tryAgain: "Jaribu Tena",
+    },
+    creatorTools: {
+      changeStyle: "Badilisha Mtindo",
+      downloadImage: "Pakua kama Picha",
+    }
+  },
+  studentPortfolio: {
+    title: "Kwingineko Yangu ya Kujifunza",
+    description: "Picha ya mafanikio na maendeleo yako. Pakua na ushiriki safari yako!",
+    downloadButton: "Pakua Kwingineko",
+    generating: "Inatengeneza...",
+    completedModules: "Moduli Zilizokamilika",
+    badgesEarned: "Beji Zilizopatikana",
+  },
   curriculum: {
     'what-is-ai': { 
       title: 'AI ni Nini?', 
@@ -1438,10 +1799,25 @@ const swahiliPartial: DeepPartial<Translation> = {
       description: 'Elewa changamoto za AI, ikiwa ni pamoja na usawa na usalama.',
       lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent,
     },
+    'ai-safety': {
+        title: 'Usalama wa AI: Kuwa Mjanja Mtandaoni',
+        description: 'Jifunze kutambua deepfakes, kuepuka utapeli, na kulinda taarifa zako za kibinafsi.',
+        lessonContent: englishTranslations.curriculum['ai-safety'].lessonContent,
+    },
     'ai-and-jobs': { 
       title: 'AI na Mustakabali wa Kazi', 
       description: 'Angalia jinsi AI inavyobadilisha kazi na ni fursa gani mpya zinazojitokeza.',
       lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent,
+    },
+    'digital-citizenship': {
+        title: 'Uraia wa Kidijitali katika Enzi ya AI',
+        description: 'Elewa jukumu lako kama muundaji na mwanajamii anayewajibika mtandaoni.',
+        lessonContent: englishTranslations.curriculum['digital-citizenship'].lessonContent,
+    },
+    'prompt-engineering': {
+        title: "Uhandisi wa Haraka: Kuzungumza na AI",
+        description: "Jifunze jinsi ya kuandika maagizo wazi ili kupata matokeo bora kutoka kwa zana za AI.",
+        lessonContent: englishTranslations.curriculum['prompt-engineering'].lessonContent,
     },
   },
   levels: {
@@ -1481,7 +1857,19 @@ const hausaPartial: DeepPartial<Translation> = {
     podcastGeneratorDescription: "Yi amfani da AI don ƙirƙirar gajeren shirin sauti naka. Daga mai koyo zuwa mahalicci!",
     careerExplorerTitle: "Mai Binciken Ayyukan AI",
     careerExplorerDescription: "Gano damar ayyukan gaba a duniyar AI.",
+    creationStudioTitle: "Sitidiyon Ƙirƙira",
+    creationStudioDescription: "Haɗa kai da AI don ƙirƙira, gyara, da raba abubuwan da ka kirkira na musamman.",
+    myPortfolioTitle: "Fayil Dina",
+    myPortfolioDescription: "Samar da takaitaccen bayanin tafiyar karatunka da za a iya rabawa.",
     learningPathTitle: "Hanyar Karatunka",
+  },
+   aiTutor: {
+    title: "Malamin AI Paddi",
+    description: "Mataimakin koyon AI naka na kanka. Tambaye ni komai!",
+    welcomeMessage: "Sannu! Ni ne AI Paddi, abokin karatunka. Ta yaya zan iya taimaka maka ka fahimci AI da kyau a yau? Tambaye ni komai game da darussanmu ko kowane fannin AI da kake son sani! 🚀",
+    inputPlaceholder: "Yi tambaya game da AI...",
+    systemInstruction: "Kai ne AI Paddi, malamin ilimin AI mai abokantaka, haƙuri, da ƙarfafawa ga ɗalibai, malamai, da iyaye a Najeriya da Afirka. Manufarka ita ce ka sauƙaƙe dabarun AI, ka sa su zama masu sauƙin fahimta da ban sha'awa. Yi amfani da gajerun jimloli (1-3). Yi amfani da kwatancen yau da kullum na Najeriya/Afirka (misali, shinkafa jollof, kasuwanci, noma) don bayyana batutuwa masu wuyar fahimta. Koyaushe ka zama mai kyakkyawan fata kuma ka ƙare amsarka da tambaya mai ƙarfafawa. Muryarka ta zama mai goyon baya kuma ba ta wulakanci ba. Kana taimaka wa masu amfani su tashi daga masu amfani da AI zuwa masu ƙirƙirar AI.",
+    errorMessage: "A'a! Ina fuskantar ɗan matsalar haɗi a yanzu. Da fatan za a sake gwada tambayarka nan da ɗan lokaci.",
   },
   peerPractice: {
     title: "Aiwatar da Kai-da-Kai",
@@ -1670,6 +2058,58 @@ const hausaPartial: DeepPartial<Translation> = {
       }
     }
   },
+  creationStudio: {
+    title: "Sitidiyon Ƙirƙira",
+    description: "Wurinka na ƙirƙira da AI. Fara da ra'ayi, sannan ka gyara kuma ka haɗa shi tare da abokin aikinka na AI.",
+    selectTemplate: "1. Zaɓi Aiki",
+    createButton: "Ƙirƙira",
+    creatingButton: "Ana Ƙirƙira...",
+    outputTitle: "Kirkirarka ta AI",
+    canvasPlaceholder: "Kirkirarka za ta bayyana a nan... Bari mu yi wani abu mai ban mamaki! ✨",
+    pointDescription: (templateName) => `Kirkira a Sitidiyo: ${templateName}`,
+    pointsAwarded: "Maki +5!",
+    errorMessage: "Yi hakuri, wani abu ya faru ba daidai ba. Da fatan za a sake gwada kirkira.",
+    systemInstruction: "Kai abokin aiki ne na AI mai kirkira da karfafa gwiwa. Manufarka ita ce ka taimaka wa mai amfani ya kirkiri gajere, mai ban sha'awa, da kirkirar abun ciki bisa ga umarninsa. Ya kamata ka takaita kuma ka bi umarni don gyara (kamar sa abubuwa su zama masu ban dariya, masu tsayi, da sauransu) kai tsaye. Za ka fitar da rubutun kirkira kawai, ba tare da wani karin rubutun tattaunawa ba.",
+    templates: {
+        'poem': {
+            title: "Mai Kirkirar Waka",
+            description: "Kirkiri gajeren waka mai dadi akan kowane fanni.",
+            inputLabel: "2. Menene taken wakar ka?",
+            placeholder: "misali, rana mai haske a Legas, kungiyar kwallon kafa da na fi so, dandanon shinkafa jollof..."
+        },
+        'story': {
+            title: "Mai Fara Labari",
+            description: "Samu sakin layi na farko na wani sabon labari mai ban sha'awa.",
+            inputLabel: "2. Menene ra'ayin labarin ka?",
+            placeholder: "misali, wata yarinya da ta gano wata boyayyiyar taswira, mutum-mutumi da yake son zama mai dafa abinci..."
+        },
+        'proverb': {
+            title: "Mai Kirkirar Karin Magana",
+            description: "Kirkiri sabon karin magana na zamani.",
+            inputLabel: "2. Menene taken ka na zamani?",
+            placeholder: "misali, kafofin sada zumunta, siyayya a intanet, cunkoson ababen hawa..."
+        }
+    },
+    refinementActions: {
+      longer: "Sa ya fi tsayi",
+      shorter: "Sa ya fi gajarta",
+      funnier: "Sa ya fi ban dariya",
+      moreSerious: "Yanayi mai tsanani",
+      tryAgain: "Sake Gwada",
+    },
+    creatorTools: {
+      changeStyle: "Canza Salo",
+      downloadImage: "Sauke a Matsayin Hoto",
+    }
+  },
+  studentPortfolio: {
+    title: "Fayil Dina na Karatu",
+    description: "Hoton nasarorinka da ci gabanka. Sauke kuma raba tafiyarka!",
+    downloadButton: "Sauke Fayil",
+    generating: "Ana Samarwa...",
+    completedModules: "Darussan da aka Kammala",
+    badgesEarned: "Bajojin da aka Samu",
+  },
   curriculum: {
       'what-is-ai': { 
           title: 'Menene AI?', 
@@ -1691,10 +2131,25 @@ const hausaPartial: DeepPartial<Translation> = {
           description: 'Fahimci kalubalen AI, gami da adalci da tsaro.',
           lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent,
       },
+      'ai-safety': {
+          title: 'Tsaron AI: Zama Mai Wayo a Yanar Gizo',
+          description: 'Koyi gane deepfakes, guje wa zamba, da kare bayanan sirri naka.',
+          lessonContent: englishTranslations.curriculum['ai-safety'].lessonContent,
+      },
       'ai-and-jobs': { 
           title: 'AI da Makomar Ayyuka', 
           description: 'Duba yadda AI ke canza aiki da kuma irin sabbin damar da ke fitowa.',
           lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent,
+      },
+      'digital-citizenship': {
+          title: 'Zama Dan Kasa na Dijital a Zamanin AI',
+          description: 'Fahimci matsayinka a matsayin mahalicci mai alhaki da kuma dan al\'umma a yanar gizo.',
+          lessonContent: englishTranslations.curriculum['digital-citizenship'].lessonContent,
+      },
+      'prompt-engineering': {
+          title: "Injiniyancin Umarni: Yin Magana da AI",
+          description: "Koyi yadda ake rubuta umarni a fili don samun sakamako mafi kyau daga kayan aikin AI.",
+          lessonContent: englishTranslations.curriculum['prompt-engineering'].lessonContent,
       },
   },
   levels: {
@@ -1720,11 +2175,23 @@ const yorubaPartial: DeepPartial<Translation> = {
     leaderboardTitle: "Igbimọ Awọn adari",
     leaderboardDescription: "Wo bi o ṣe n ṣe afiwe si awọn akẹkọọ miiran.",
     glossaryTitle: "Àtúmọ̀-èdè AI",
-    glossaryDescription: "Wá ìtumọ̀ fún àwọn ọ̀rọ̀ pàtàkì AI.",
+    glossaryDescription: "Wá ìtumọ̀ fún àwọn ọ̀rọ̀ pàtàìkì AI.",
     podcastGeneratorTitle: "Ẹlẹda Adarọ-ese",
     podcastGeneratorDescription: "Lo AI lati ṣẹda eto ohun kukuru tirẹ. Lọ lati akẹkọọ si ẹlẹda!",
     careerExplorerTitle: "Oluṣawari Iṣẹ AI",
     careerExplorerDescription: "Ṣawari awọn anfani iṣẹ iwaju ni agbaye ti AI.",
+    creationStudioTitle: "Studio Ìṣẹ̀dá",
+    creationStudioDescription: "Bá AI ṣiṣẹ́ pọ̀ láti ṣẹ̀dá, túnṣe, àti pín àwọn àkóónú aláìlẹ́gbẹ́ rẹ.",
+    myPortfolioTitle: "Àpò-ìwé Mi",
+    myPortfolioDescription: "Ṣe àkópọ̀ ìrìn-àjò ẹ̀kọ́ rẹ tí o lè pín.",
+  },
+  aiTutor: {
+    title: "Olùkọ́ AI Paddi",
+    description: "Olùrànlọ́wọ́ ẹ̀kọ́ AI ti ara ẹni. Béèrè ohunkóhun lọ́wọ́ mi!",
+    welcomeMessage: "Pẹlẹ o! Èmi ni AI Paddi, alábàáṣiṣẹ́ ẹ̀kọ́ rẹ. Báwo ni mo ṣe lè ràn ọ́ lọ́wọ́ láti lóye AI dáradára lónìí? Béèrè ohunkóhun nípa àwọn ẹ̀kọ́ wa tàbí kókó ẹ̀kọ́ AI èyíkéyìí tí o fẹ́ mọ̀! 🚀",
+    inputPlaceholder: "Béèrè ìbéèrè nípa AI...",
+    systemInstruction: "Ìwọ ni AI Paddi, olùkọ́ ìmọ̀ AI oníṣeun, onísùúrù, àti onígboyà fún àwọn akẹ́kọ̀ọ́, olùkọ́, àti òbí ní Nàìjíríà àti Áfíríkà. Ète rẹ ni láti jẹ́ kí àwọn èrò AI rọrùn, jẹmọ́, àti fúnni ní ìgbádùn. Lo àwọn gbólóhùn kúkúrú (1-3). Lo àwọn àfiwé ojoojúmọ́ ti Nàìjíríà/Áfíríkà (f.a., ìrẹsì jollof, ìṣòwò ọjà, iṣẹ́ àgbẹ̀) láti ṣàlàyé àwọn kókó ẹ̀kọ́ tí ó díjú. Máa jẹ́ oní rere nígbà gbogbo kí o sì parí ìdáhùn rẹ pẹ̀lú ìbéèrè ìtẹ̀lé onígboyà. Ohùn rẹ jẹ́ onítìlẹ́yìn kò sì fi àìbọ̀wọ̀ hàn rárá. Ìwọ ń ran àwọn olùlò lọ́wọ́ láti lọ láti ọ̀dọ̀ àwọn oníbàárà AI sí àwọn ẹlẹ́dàá AI.",
+    errorMessage: "Ó dàbí pé ìṣòro díẹ̀ wà pẹ̀lú ìsopọ̀ mi báyìí. Jọ̀wọ́ gbìyànjú láti béèrè ìbéèrè rẹ lẹ́ẹ̀kansíi ní ìṣẹ́jú díẹ̀.",
   },
   peerPractice: {
     title: "Ìdánrawò Ẹlẹgbẹ́-sí-Ẹlẹgbẹ́",
@@ -1873,6 +2340,58 @@ const yorubaPartial: DeepPartial<Translation> = {
       }
     }
   },
+  creationStudio: {
+    title: "Studio Ìṣẹ̀dá",
+    description: "Aaye rẹ láti ṣẹ̀dá pẹ̀lú AI. Bẹ̀rẹ̀ pẹ̀lú èrò kan, lẹ́yìn náà túnṣe kí o sì dàpọ̀ mọ́ pẹ̀lú alábàáṣiṣẹ́ AI rẹ.",
+    selectTemplate: "1. Yan Iṣẹ́ Àkanṣe kan",
+    createButton: "Ṣẹ̀dá",
+    creatingButton: "N ṣẹ̀dá...",
+    outputTitle: "Ìṣẹ̀dá AI Rẹ",
+    canvasPlaceholder: "Ìṣẹ̀dá rẹ yóò hàn níbí... Jẹ́ kí a ṣe nǹkan àgbàyanu kan! ✨",
+    pointDescription: (templateName) => `Ìṣẹ̀dá ní Studio: ${templateName}`,
+    pointsAwarded: "Àwọn Ojúàmì +5!",
+    errorMessage: "Mabinu, nkan kan lọ́ aṣiṣe. Jọ̀wọ́ gbìyànjú láti ṣẹ̀dá lẹ́ẹ̀kansíi.",
+    systemInstruction: "Ìwọ ni alábàáṣiṣẹ́ AI oníṣẹ̀dá àti onígboyà. Ète rẹ ni láti ran olùlò lọ́wọ́ láti ṣẹ̀dá àkóónú kúkúrú, fúnni ní ìgbádùn, àti oníṣirò gẹ́gẹ́ bí àwọn ìtọ́ni wọn. O yẹ kí o jẹ́ oníkúkúrú kí o sì tẹ̀lé àwọn ìtọ́ni fún àtúnṣe (bíi ṣíṣe àwọn nǹkan ní amúṣeré, gígùn, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) tààrà. Ìwọ nìkan ni o ń ṣàgbéjáde ọ̀rọ̀ oníṣẹ̀dá, láìsí ọ̀rọ̀ ìjùmọ̀sọ̀rọ̀ àfikún.",
+    templates: {
+        'poem': {
+            title: "Olùpilẹ̀ṣẹ̀ Ewì",
+            description: "Ṣẹ̀dá ewì kúkúrú àti dídùn lórí kókó ẹ̀kọ́ èyíkéyìí.",
+            inputLabel: "2. Kí ni ewì rẹ dá lórí?",
+            placeholder: "f.a., ọjọ́ tí oòrùn ràn ní Èkó, ẹgbẹ́ agbábọ́ọ̀lù ààyò mi, adùn ìrẹsì jollof..."
+        },
+        'story': {
+            title: "Ìbẹ̀rẹ̀ Ìtàn",
+            description: "Gba ìpínrọ̀ àkọ́kọ́ ti ìtàn tuntun amóríyá.",
+            inputLabel: "2. Kí ni èrò ìtàn rẹ?",
+            placeholder: "f.a., ọ̀dọ́bìnrin kan tí ó ṣàwárí àwòrán ilẹ̀ tí ó fara pamọ́, rọ́bọ́ọ̀tì kan tí ó fẹ́ di aṣèje..."
+        },
+        'proverb': {
+            title: "Ẹlẹ́dàá Òwe",
+            description: "Ṣẹ̀dá òwe tuntun fún ayé òde òní.",
+            inputLabel: "2. Kí ni kókó ẹ̀kọ́ òde òní rẹ?",
+            placeholder: "f.a., àwọn ìkànnì ayélujára, ríra ọjà lórí ayélujára, ìdènà ọkọ̀..."
+        }
+    },
+    refinementActions: {
+      longer: "Jẹ́ kó gùn síi",
+      shorter: "Jẹ́ kó kúrú síi",
+      funnier: "Jẹ́ kó panilẹ́rìn-ín síi",
+      moreSerious: "Ohùn Tí ó ṣe Pàtàkì Jù",
+      tryAgain: "Gbìyànjú Lẹ́ẹ̀kansíi",
+    },
+    creatorTools: {
+      changeStyle: "Yí Ìrísí Padà",
+      downloadImage: "Ṣe ìgbàsílẹ̀ Gẹ́gẹ́ bí Àwòrán",
+    }
+  },
+  studentPortfolio: {
+    title: "Àpò-ìwé Ẹ̀kọ́ Mi",
+    description: "Àwòrán àwọn àṣeyọrí àti ìlọsíwájú rẹ. Ṣe ìgbàsílẹ̀ kí o sì pín ìrìn-àjò rẹ!",
+    downloadButton: "Ṣe ìgbàsílẹ̀ Àpò-ìwé",
+    generating: "N ṣẹda...",
+    completedModules: "Àwọn Módúù tí a parí",
+    badgesEarned: "Àwọn Báàjì tí a gbà",
+  },
   levels: {
     [LearningPath.Beginner]: 'Olùbẹ̀rẹ̀',
     [LearningPath.Intermediate]: 'Aarin',
@@ -1883,7 +2402,22 @@ const yorubaPartial: DeepPartial<Translation> = {
     'how-ai-works': { title: 'Bawo ni AI Ṣiṣẹ?', description: 'Ṣawari bi awọn ẹrọ ṣe nkọ ẹkọ lati data.', lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
     'ai-in-daily-life': { title: 'AI ni Igbesi aye Ojoojumọ', description: 'Wo awọn apẹẹrẹ ti AI ni ayika rẹ.', lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
     'risks-and-bias': { title: 'Awọn Ewu & Ojusaju ninu AI', description: 'Loye awọn italaya ti AI.', lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
+    'ai-safety': {
+        title: 'Aabo AI: Duro ni Ọgbọn lori Ayelujara',
+        description: 'Kọ ẹkọ lati ṣe akiyesi awọn deepfakes, yago fun awọn itanjẹ, ati daabobo alaye ti ara ẹni rẹ.',
+        lessonContent: englishTranslations.curriculum['ai-safety'].lessonContent,
+    },
     'ai-and-jobs': { title: 'AI ati Ojo iwaju Awọn iṣẹ', description: 'Wo bi AI ṣe n yi iṣẹ pada.', lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
+    'digital-citizenship': {
+        title: 'Ilu oni-nọmba ni Igba ti AI',
+        description: 'Loye ipa rẹ gẹgẹbi ẹlẹda oniduro ati ọmọ ẹgbẹ agbegbe lori ayelujara.',
+        lessonContent: englishTranslations.curriculum['digital-citizenship'].lessonContent,
+    },
+    'prompt-engineering': {
+        title: "Imọ-ẹrọ Kọni: Ba AI Sọrọ",
+        description: "Kọ bi o ṣe le kọ awọn ilana ti o yege lati gba awọn abajade to dara julọ lati awọn irinṣẹ AI.",
+        lessonContent: englishTranslations.curriculum['prompt-engineering'].lessonContent,
+    },
   },
   tooltips: {},
   badges: {}
@@ -1908,60 +2442,72 @@ const igboPartial: DeepPartial<Translation> = {
     podcastGeneratorDescription: "Jiri AI mepụta obere ihe ngosi ọdịyo nke gị. Site na onye mmụta gaa na onye okike!",
     careerExplorerTitle: "Onye nyocha Ọrụ AI",
     careerExplorerDescription: "Chọpụta ohere ọrụ n'ọdịnihu n'ụwa nke AI.",
+    creationStudioTitle: "Ụlọ Ọrụ Okike",
+    creationStudioDescription: "Soro AI rụkọọ ọrụ iji mepụta, megharịa, ma kesaa ọdịnaya pụrụ iche nke gị.",
+    myPortfolioTitle: "Pọtụfoliyo M",
+    myPortfolioDescription: "Mepụta nchịkọta nke njem mmụta gị nke enwere ike ịkekọrịta.",
+  },
+  aiTutor: {
+    title: "Onye nkuzi AI Paddi",
+    description: "Onye enyemaka mmụta AI nke gị. Jụọ m ihe ọ bụla!",
+    welcomeMessage: "Ndewo! Abụ m AI Paddi, onye òtù ọlụlụ mmụta gị. Kedu ka m ga-esi nyere gị aka ịghọta AI nke ọma taa? Jụọ m ihe ọ bụla gbasara nkuzi anyị ma ọ bụ isiokwu AI ọ bụla ị chọrọ ịma! 🚀",
+    inputPlaceholder: "Jụọ ajụjụ gbasara AI...",
+    systemInstruction: "Ị bụ AI Paddi, onye nkuzi AI nwere omume enyi, ndidi, na agbamume maka ụmụ akwụkwọ, ndị nkuzi, na ndị nne na nna na Naịjirịa na Afrịka. Ebumnuche gị bụ ime ka echiche AI dị mfe, nwee njikọ, na-atọkwa ụtọ. Jiri ahịrịokwu dị mkpirikpi (1-3). Jiri atụmatụ kwa ụbọchị nke Naịjirịa/Afrịka (d.m., osikapa jollof, ahịa, ọrụ ugbo) kọwaa isiokwu ndị siri ike. Nwee àgwà ọma mgbe niile ma jiri ajụjụ na-agba ume mechie azịza gị. Olu gị na-akwado ma ọ dịghị mgbe ọ na-eleda anya. Ị na-enyere ndị ọrụ aka ịga site na ndị na-eji AI gaa na ndị na-emepụta AI.",
+    errorMessage: "Ewoo! Enwere m nsogbu ijikọ ugbu a. Biko gbalịa jụọ ajụjụ gị ọzọ n'oge na-adịghị anya.",
   },
   peerPractice: {
     title: "Omume ndị ọgbọ na ndị ọgbọ",
-    waitingForPlayers: "Na-eche ndị ọzọ so...",
+    waitingForPlayers: "Na-eche ndị sonyere ndị ọzọ...",
   },
   game: {
-    title: "AI vs. Mmadụ",
-    description: "Ị nwere ike ịma ilu nke AI dere?",
-    difficulty: "Ọkwa",
-    easy: "Mfe",
-    hard: "Siri ike",
-    pointDescription: "Azịza ziri ezi n'egwuregwu AI vs Human",
+      title: "AI vs. Mmadụ",
+      description: "Ị nwere ike ịmata ilu nke AI dere?",
+      difficulty: "Ọkwa",
+      easy: "Dị Mfe",
+      hard: "Siri Ike",
+      pointDescription: "Echiche ziri ezi na egwuregwu AI vs Mmadụ",
   },
   profile: {
       title: "Profaịlụ Gị & Ọganihu",
       learnerLevel: (level) => `Onye mmụta ${level}`,
       points: "Akara",
       feedbackButton: "Zipu Nkwupụta",
-      multiplayerStatsTitle: "Ọnụọgụgụ Omume",
+      multiplayerStatsTitle: "Ọnụ ọgụgụ Omume",
       wins: "Mmeri",
-      gamesPlayed: "Oge Emechara",
+      gamesPlayed: "Nnọkọ Emechara",
       certificateIssuedBy: (orgName) => `Nke ${orgName} nyere`,
   },
   lesson: {
-      submitAnswer: "Dobe",
+      submitAnswer: "Nyefee",
       yourAnswer: "Azịza gị...",
-      readAloud: "Gụọ N'olu Dara Ụda",
+      readAloud: "Gụọ N'olu Dara ụda",
       quizCorrect: (points) => `Nke ahụ ziri ezi! (+${points} akara)`,
   },
   leaderboard: {
     title: "Bọọdụ Ndị ndu",
-    description: "Hụ ka ọganihu mmụta gị si atụnyere ndị ọzọ na obodo!",
-    rank: "Ọnọdụ",
-    player: "Onye ọkpụkpọ",
+    description: "Hụ ka ọganihu mmụta gị si atụnyere ndị ọzọ n'ime obodo!",
+    rank: "Ọkwa",
+    player: "Onye egwuregwu",
     points: "Akara",
     you: "Gị",
   },
   common: {
     backToDashboard: "Laghachi na Dashboard",
-    submit: "Dobe",
+    submit: "Nyefee",
     close: "Mechie",
   },
   feedback: {
-    title: "Kọọ Nkwupụta Gị",
-    description: "Anyị ji ntinye gị kpọrọ ihe! Mee ka anyị mara otu anyị nwere ike isi mee nke ọma.",
+    title: "Kọọrọ Anyị Echiche Gị",
+    description: "Anyị ji ntinye gị kpọrọ ihe! Mee ka anyị mara ka anyị ga-esi mee nke ọma.",
     typeLabel: "Ụdị Nkwupụta",
     types: {
-        [FeedbackType.Bug]: "Akụkọ Ahụhụ",
-        [FeedbackType.Suggestion]: "Ntụnye",
-        [FeedbackType.General]: "Nkwupụta Ozuruọnụ",
+        [FeedbackType.Bug]: "Akụkọ Njehie",
+        [FeedbackType.Suggestion]: "Atụmatụ",
+        [FeedbackType.General]: "Nkwupụta n'ozuzu",
     },
     messageLabel: "Ozi Gị",
     messagePlaceholder: "Biko kọwaa okwu ma ọ bụ echiche gị...",
-    submitting: "Na-edobe...",
+    submitting: "Na-enyefe...",
     successTitle: "Daalụ!",
     successDescription: "Anabatala nkwupụta gị. Anyị nwere ekele maka inyere anyị aka ime ka AI Kasahorow ka mma.",
   },
@@ -1983,295 +2529,247 @@ const igboPartial: DeepPartial<Translation> = {
     listening: "Na-ege ntị...",
     voiceModeActive: "Ụdị olu na-arụ ọrụ",
     navigatingTo: {
-      dashboard: "Na-aga na dashboard.",
-      profile: "Na-emeghe profaịlụ gị.",
-      leaderboard: "Na-egosi bọọdụ ndị ndu.",
-      game: "Na-amalite egwuregwu AI megide Mmadụ.",
-      peerPractice: "Na-emeghe omume ndị ọgbọ na ndị ọgbọ.",
-      wallet: "Na-emeghe obere akpa gị.",
+      dashboard: "Ịga na dashboard.",
+      profile: "Imepe profaịlụ gị.",
+      leaderboard: "Igosi bọọdụ ndị ndu.",
+      game: "Ịmalite egwuregwu AI na Mmadụ.",
+      peerPractice: "Imepe omume ndị ọgbọ na ndị ọgbọ.",
+      wallet: "Imepe obere akpa gị.",
     },
-    startingModule: (moduleName) => `Na-amalite modulu: ${moduleName}.`,
-    openingSettings: "Na-emeghe ntọala.",
-    closingSettings: "Na-emechi ntọala.",
-    loggingOut: "Na-apụ apụ.",
+    startingModule: (moduleName) => `Ịmalite modul: ${moduleName}.`,
+    openingSettings: "Imepe ntọala.",
+    closingSettings: "Imechi ntọala.",
+    loggingOut: "Ịpụpụ gị.",
   },
   glossary: {
     title: "Nkọwa okwu AI",
     description: "Ntụaka ngwa ngwa maka usoro AI niile dị mkpa ejiri na nkuzi.",
-    searchPlaceholder: "Chọọ maka okwu...",
-    noResultsTitle: "Ọ nweghị Okwu achọtara",
-    noResultsDescription: (term) => `Anyị enweghị ike ịchọta usoro ọ bụla dabara na "${term}". Nwaa ọchụchọ ọzọ.`,
+    searchPlaceholder: "Chọọ okwu...",
+    noResultsTitle: "Ahụghị Okwu Ọ bụla",
+    noResultsDescription: (term) => `Anyị enweghị ike ịchọta usoro ọ bụla dabara na "${term}". Gbalịa nchọ ọzọ.`,
   },
   podcastGenerator: {
-    title: "Situdiyo Pọdkastị nke AI Paddi",
+    title: "Ụlọ ihe nkiri Pọdkastị nke AI Paddi",
     description: "Tụgharịa echiche gị n'ime ọdịyo. Bụrụ Onye Okike AI!",
     scriptLabel: "Ederede Pọdkastị Gị",
-    scriptPlaceholder: "Dee obere ederede ebe a. Ị nwere ike ịkọwa echiche AI, kọọ akụkọ, ma ọ bụ kesaa ozi sitere na obodo gị!",
+    scriptPlaceholder: "Dee ederede dị mkpirikpi ebe a. Ị nwere ike ịkọwa echiche AI, kọọ akụkọ, ma ọ bụ kesaa ozi sitere na obodo gị!",
     voiceLabel: "Họrọ Olu",
     voices: {
-        kore: "Olu miri emi, doro anya (Kore)",
+        kore: "Olu dị omimi, doro anya (Kore)",
         puck: "Olu enyi, nke nwere obi ụtọ (Puck)",
     },
-    generateButton: "Mepụta Ọdịyo",
-    generatingButton: "Na-emepụta...",
-    yourCreation: "Okike Gị",
-    errorMessage: "Ewoo! Ihe mehiere mgbe a na-emepụta ọdịyo. Biko nwaa ọzọ.",
+    generateButton: "Mepụta ọdịyo",
+    generatingButton: "Na-eke...",
+    yourCreation: "Ihe Okike Gị",
+    errorMessage: "Oops! Ihe mebiri mgbe a na-emepụta ọdịyo. Biko nwaa ọzọ.",
   },
   careerExplorer: {
     title: "Onye nyocha Ọrụ AI",
-    description: "Hụ ka nka AI gị nwere ike isi kee ohere dị adị na Naịjirịa na gafere.",
+    description: "Hụ ka nkà AI gị nwere ike isi mepụta ezigbo ohere na Naịjirịa na gafere.",
     whatTheyDo: "Ihe Ha Na-eme",
-    skillsNeeded: "Nkà Dị Mkpa",
+    skillsNeeded: "Nkà Achọrọ",
     dayInTheLife: "Otu Ụbọchị na Ndụ",
     relevantLessons: "Ihe Ọmụmụ Dị Mkpa",
     startLearning: "Malite Ịmụ Ihe",
     careers: {
       'agritech-specialist': {
-        title: "Ọkachamara AI na Ọrụ Ugbo",
+        title: "Ọkachamara AI n'Ọrụ Ugbo",
         description: "Na-eji AI enyere ndị ọrụ ugbo aka imeziwanye ihe ọkụkụ na ijikwa akụ.",
-        what_they_do: "Ha na-enyocha data sitere na drones na sensọ iji nyochaa ahụike ihe ọkụkụ, buo amụma ihu igwe, ma kwado oge kacha mma maka ịkụ na iwe ihe ubi. Ọrụ ha na-enyere aka mee ka ọrụ ugbo rụọ ọrụ nke ọma.",
-        skills: ["Nnyocha Data", "Nchọpụta Nsogbu", "Ọmụma Ọrụ Ugbo", "Nkwurịta Okwu"],
-        day_in_the_life: "Ụbọchị m anaghị ebido n'ọfịs, kama ọ na-eji enyocha ihe onyonyo drone si n'ugbo dị na Kano. AI na-egosi akụkụ ọka nwere ike ịnwe ụkọ nri. M na-arụkọ ọrụ na onye ọrụ mgbasa ozi ugbo site na WhatsApp."
+        what_they_do: "Ha na-enyocha data sitere na drones na sensọ iji nyochaa ahụike ihe ọkụkụ, buru amụma maka usoro ihu igwe, ma na-atụ aro oge kacha mma maka ịkụ na iwe ihe ubi. Ọrụ ha na-enyere aka ime ka ọrụ ugbo bụrụ nke ọma karị.",
+        skills: ["Nyocha Data", "Ndozi Nsogbu", "Ọmụma Ọrụ Ugbo", "Nkwurịta Okwu"],
+        day_in_the_life: "Ụbọchị m anaghị ebido n'ọfis, kama na-elele ihe onyonyo drone si n'ugbo dị na Kano. AI na-egosipụta akụkụ ọka nwere ike ịpụta ihe ịrịba ama nke ụkọ nri. M na-arụkọ ọrụ na onye ọrụ mgbasa ozi ugbo mpaghara site na WhatsApp."
       },
       'fintech-ml-engineer': {
-        title: "Injinia ML na Fintech",
-        description: "Na-ewu ngwaọrụ ego nwere ọgụgụ isi, site na nchọpụta aghụghọ ruo na ngwa mgbazinye ego.",
-        what_they_do: "Ha na-emepụta ụdị mmụta igwe nwere ike ịchọpụta azụmahịa aghụghọ n'oge, nyochaa ihe egwu mgbazinye ego maka ndị nwe obere azụmaahịa, ma ọ bụ mepụta atụmatụ nchekwa ego ahaziri maka ndị ọrụ ngwa akụ.",
+        title: "Injinịa ML na Fintech",
+        description: "Na-ewu ngwaọrụ ego nwere ọgụgụ isi, site na nchọpụta aghụghọ ruo na ngwa mbinye ego.",
+        what_they_do: "Ha na-emepụta ụdị mmụta igwe nwere ike ịchọpụta azụmahịa aghụghọ n'oge, nyochaa ihe egwu mbinye ego maka ndị nwe obere azụmaahịa, ma ọ bụ mepụta atụmatụ nchekwa ego ahaziri maka ndị ọrụ nke ngwa ụlọ akụ.",
         skills: ["Mmụta Igwe", "Mmemme (Python)", "Ọnụ ọgụgụ", "Ọmụma Ego"],
-        day_in_the_life: "Taa, ụdị AI anyị gosipụtara usoro azụmahịa pụrụ iche na-anwa iwepụ ego na akaụntụ. Anyị kwụsịrị ya na nkeji ole na ole. N'ehihie a, ana m azụ ụdị ọhụrụ iji nyere ndị ahịa ahịa na Lagos aka inweta obere ego mgbazinye ngwa ngwa."
+        day_in_the_life: "Taa, ụdị AI anyị gosipụtara usoro azụmahịa ndị a na-adịghị ahụkebe na-anwa iwepụ ego na akaụntụ. Anyị kwụsịrị ya n'ime nkeji ole na ole. M na-azụ ụdị ọhụrụ iji nyere ndị ahịa ahịa na Lagos aka inweta obere mbinye ego ngwa ngwa."
       },
       'ai-content-creator': {
         title: "Onye Okike ọdịnaya & Onye nkuzi AI",
         description: "Na-eji AI na-emepụta ihe iji mepụta ihe mmụta na akụkọ na-adọrọ mmasị.",
-        what_they_do: "Ha na-eji ngwaọrụ AI emepụta edemede maka vidiyo mmụta, mepụta ihe atụ maka akwụkwọ ụmụaka n'asụsụ obodo, ma ọ bụ wuo chatbots dị mfe nwere ike inyere ụmụ akwụkwọ aka ịme ihe ọmụmụ ọhụrụ.",
+        what_they_do: "Ha na-eji ngwaọrụ AI ewepụta edemede maka vidiyo agụmakwụkwọ, mepụta ihe atụ maka akwụkwọ ụmụaka n'asụsụ obodo, ma ọ bụ wuo chatbots dị mfe nwere ike inyere ụmụ akwụkwọ aka ime ihe ọmụmụ ọhụrụ.",
         skills: ["Ihe Okike", "Injinia Ngwa ngwa", "Ide & Ịkọ Akụkọ", "Nkà Nkụzi"],
-        day_in_the_life: "M na-arụkọ ọrụ na onye nkuzi na Port Harcourt iji mepụta ihe ọmụmụ sayensị dị mfe, nke nwere ihe atụ gbasara usoro mmiri. Ana m eji ihe na-emepụta onyonyo AI emepụta foto mara mma na ụdị asụsụ iji mee ka ederede dị mfe."
+        day_in_the_life: "Mụ na onye nkuzi na Port Harcourt na-arụkọ ọrụ iji mepụta nkuzi sayensị dị mfe, nke nwere ihe atụ gbasara usoro mmiri. M na-eji ihe na-emepụta onyonyo AI emepụta foto mara mma na ụdị asụsụ iji mee ka ederede dị mfe."
       },
       'ai-ethicist': {
-        title: "Ọkà mmụta ụkpụrụ omume AI",
+        title: "Ọkachamara Omume AI",
         description: "Na-ahụ na a na-ewu ma na-eji usoro AI eme ihe n'ụzọ ziri ezi na nke kwesịrị ekwesị.",
-        what_they_do: "Ha na-arụkọ ọrụ na ụlọ ọrụ teknụzụ iji nwalee ụdị AI maka ajọ mbunobi, na-ahụ na ha na-arụ ọrụ nke ọma maka ndị mmadụ n'agbanyeghị agbụrụ. Ha na-enyere aka ịmepụta ụkpụrụ iji chebe data onye ọrụ ma hụ na mkpebi AI doro anya ma zie ezi.",
-        skills: ["Echiche Dị Mkpa", "Ụkpụrụ Omume", "Nkwurịta Okwu", "Nghọta nke ajọ mbunobi AI"],
-        day_in_the_life: "Otu ìgwè na-ewu AI iji nyere ndị dọkịta aka ịchọpụta ọrịa. Ọrụ m bụ ịjụ ajụjụ siri ike: A zụrụ AI na data sitere n'ụlọ ọgwụ Naịjirịa? Ọ na-arụ ọrụ nke ọma maka ụmụ nwanyị dịka ọ na-arụ maka ụmụ nwoke? Ọrụ m bụ ịbụ olu maka ikpe ziri ezi."
+        what_they_do: "Ha na-arụkọ ọrụ na ụlọ ọrụ teknụzụ iji nwalee ụdị AI maka ajọ mbunobi, na-ahụ na ha na-arụ ọrụ nke ọma maka ndị si n'agbụrụ niile. Ha na-enyere aka ịmepụta ụkpụrụ iji chebe data onye ọrụ ma hụ na mkpebi AI doro anya ma bụrụ nke ziri ezi.",
+        skills: ["Echiche Dị Mkpa", "Ụkpụrụ Omume", "Nkwurịta Okwu", "Nghọta nke Ajọ Mbuobi AI"],
+        day_in_the_life: "Otu ìgwè na-ewu AI iji nyere ndị dọkịta aka ịchọpụta ọrịa. Ọrụ m bụ ịjụ ajụjụ ndị siri ike: A zụrụ AI na data sitere n'ụlọ ọgwụ Naịjirịa? Ọ na-arụ ọrụ nke ọma maka ụmụ nwanyị dịka ọ na-arụ maka ụmụ nwoke? Ọrụ m bụ ịbụ olu maka izi ezi."
       }
     }
   },
+  creationStudio: {
+    title: "Ụlọ Ọrụ Okike",
+    description: "Ebe gị iji soro AI kee ihe. Jiri echiche bido, wee nụchaa ma megharịa ya na onye òtù ọlụlụ AI gị.",
+    selectTemplate: "1. Họrọ Ọrụ",
+    createButton: "Mepụta",
+    creatingButton: "Na-emepụta...",
+    outputTitle: "Ihe Okike AI Gị",
+    canvasPlaceholder: "Ihe okike gị ga-apụta ebe a... Ka anyị mee ihe dị ịtụnanya! ✨",
+    pointDescription: (templateName) => `Ihe Okike na Studio: ${templateName}`,
+    pointsAwarded: "Akara +5!",
+    errorMessage: "Ndo, ihe mebiri. Biko nwaa imepụta ọzọ.",
+    systemInstruction: "Ị bụ onye òtù ọlụlụ AI nwere ihe okike ma na-agba ume. Ebumnuche gị bụ inyere onye ọrụ aka imepụta ọdịnaya dị mkpirikpi, na-atọ ụtọ, na nke nwere echiche dabere na ntụziaka ha. Ikwesịrị ịdị nkenke ma soro ntuziaka maka imezi (dị ka ime ka ihe na-atọ ọchị, dị ogologo, wdg) ozugbo. Naanị ihe okike ederede ka ị na-ewepụta, na-enweghị ederede mkparịta ụka ọzọ.",
+    templates: {
+        'poem': {
+            title: "Onye Na-emepụta Abụ",
+            description: "Mepụta abụ dị mkpirikpi ma dị ụtọ n'isiokwu ọ bụla.",
+            inputLabel: "2. Gịnị ka abụ gị gbasara?",
+            placeholder: "d.m., ụbọchị anwụ na-acha na Lagos, otu egwuregwu bọọlụ kacha amasị m, ụtọ osikapa jollof..."
+        },
+        'story': {
+            title: "Onye Mbido Akụkọ",
+            description: "Nweta paragraf nke mbụ nke akụkọ ọhụrụ na-akpali akpali.",
+            inputLabel: "2. Gịnị bụ echiche akụkọ gị?",
+            placeholder: "d.m., nwa agbọghọ nke chọpụtara map zoro ezo, rọbọt chọrọ ịbụ onye isi nri..."
+        },
+        'proverb': {
+            title: "Onye Okike Ilu",
+            description: "Chepụta ilu ọhụrụ maka ụwa nke oge a.",
+            inputLabel: "2. Gịnị bụ isiokwu gị nke oge a?",
+            placeholder: "d.m., mgbasa ozi ọha, ịzụ ahịa n'ịntanetị, mkpọchi ụgbọala..."
+        }
+    },
+    refinementActions: {
+      longer: "Mee ka ọ dị ogologo",
+      shorter: "Mee ka ọ dị mkpụmkpụ",
+      funnier: "Mee ka ọ na-atọ ọchị",
+      moreSerious: "Ụda Dị Mkpa Karị",
+      tryAgain: "Nwaa ọzọ",
+    },
+    creatorTools: {
+      changeStyle: "Gbanwee Ụdị",
+      downloadImage: "Budata dịka Onyonyo",
+    }
+  },
+  studentPortfolio: {
+    title: "Pọtụfoliyo Mmụta M",
+    description: "Nchịkọta nke ihe ị rụzuru na ọganihu gị. Budata ma kesaa njem gị!",
+    downloadButton: "Budata Pọtụfoliyo",
+    generating: "Na-emepụta...",
+    completedModules: "Modul Emechara",
+    badgesEarned: "Baajị E nwetara",
+  },
   levels: {
     [LearningPath.Beginner]: 'Onye mbido',
-    [LearningPath.Intermediate]: 'Ọkara',
-    [LearningPath.Advanced]: 'Ọkachamara',
+    [LearningPath.Intermediate]: 'Etiti',
+    [LearningPath.Advanced]: 'Dị Elu',
   },
   curriculum: {
     'what-is-ai': { title: 'Gịnị bụ AI?', description: 'Mụta nkọwa bụ isi nke AI.', lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
-    'how-ai-works': { title: 'Kedu ka AI si arụ ọrụ?', description: 'Chọpụta ka igwe si amụta site na data.', lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
-    'ai-in-daily-life': { title: 'AI na ndụ kwa ụbọchị', description: 'Hụ ihe atụ nke AI gburugburu gị.', lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
-    'risks-and-bias': { title: 'Ihe egwu & ele mmadụ anya n\'ihu na AI', description: 'Ghọta ihe ịma aka nke AI.', lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
-    'ai-and-jobs': { title: 'AI na Ọdịnihu nke Ọrụ', description: 'Hụ ka AI si agbanwe ọrụ.', lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
+    'how-ai-works': { title: 'Kedu ka AI si arụ ọrụ?', description: 'Chọpụta otú igwe si amụta site na data.', lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
+    'ai-in-daily-life': { title: 'AI na Ndụ Kwa Ụbọchị', description: 'Hụ ihe atụ nke AI gburugburu gị.', lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
+    'risks-and-bias': { title: 'Ihe Iche & Ajọ Mbuobi na AI', description: 'Ghọta ihe ịma aka nke AI.', lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
+    'ai-safety': {
+        title: 'Nchekwa AI: Ịnọgide Na-enwe Ezi Uche n\'Ịntanetị',
+        description: 'Mụta ịmata deepfakes, zere ojoro, ma chebe ozi nkeonwe gị.',
+        lessonContent: englishTranslations.curriculum['ai-safety'].lessonContent,
+    },
+    'ai-and-jobs': { title: 'AI na Ọdịnihu Ọrụ', description: 'Hụ ka AI si agbanwe ọrụ.', lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
+    'digital-citizenship': {
+        title: 'Ịbụ Nwa Amaala Dijital n\'Oge AI',
+        description: 'Ghọta ọrụ gị dị ka onye okike nwere ọrụ na onye otu obodo n\'ịntanetị.',
+        lessonContent: englishTranslations.curriculum['digital-citizenship'].lessonContent,
+    },
+    'prompt-engineering': {
+        title: "Injinia Ngwa ngwa: Iso AI Kwurịta Okwu",
+        description: "Mụta otu esi ede ntuziaka doro anya iji nweta nsonaazụ kacha mma site na ngwaọrụ AI.",
+        lessonContent: englishTranslations.curriculum['prompt-engineering'].lessonContent,
+    },
   },
   tooltips: {},
   badges: {}
 };
 
 const pidginPartial: DeepPartial<Translation> = {
-  onboarding: {
-    signInButton: "Sign In",
-    signUpButton: "Create Account",
-  },
   dashboard: {
     greeting: (name) => `How far, ${name}!`,
-    subGreeting: "You ready to continue your AI adventure?",
-    multiplayerTitle: "Peer-to-Peer Practice",
-    multiplayerDescription: "Practice AI ideas with your friend for collaborative session.",
-    profileTitle: "Profile & Certificates",
-    leaderboardTitle: "Leaderboard",
-    leaderboardDescription: "See how you dey rank with other learners.",
-    glossaryTitle: "AI Glossary",
-    glossaryDescription: "Find meaning for key AI words.",
-    podcastGeneratorTitle: "Podcast Generator",
-    podcastGeneratorDescription: "Use AI make your own short audio show. Go from learner to creator!",
-    careerExplorerTitle: "AI Career Explorer",
-    careerExplorerDescription: "Discover future job opportunities for the world of AI.",
-  },
-  peerPractice: {
-    title: "Peer-to-Peer Practice",
-    waitingForPlayers: "Dey wait for other people...",
+    subGreeting: "You ready to continue your AI waka?",
+    creationStudioTitle: "Creation Studio",
+    creationStudioDescription: "Follow AI do collabo to create, remix, and share your own unique content.",
+    myPortfolioTitle: "My Portfolio",
+    myPortfolioDescription: "Generate summary of your learning waka wey you fit share.",
   },
   game: {
-      title: "AI vs. Human",
-      description: "You fit tell which proverb na AI write am?",
-      difficulty: "Level",
-      easy: "Easy Peasy",
-      hard: "Hard",
-      pointDescription: "Correct answer for AI vs Human game",
-  },
-  profile: {
-      title: "Your Profile & Progress",
-      learnerLevel: (level) => `Learner Level: ${level}`,
-      points: "Points",
-      feedbackButton: "Send Feedback",
-      multiplayerStatsTitle: "Practice Stats",
-      wins: "Wins",
-      gamesPlayed: "Sessions Completed",
-      certificateIssuedBy: (orgName) => `From ${orgName}`,
-  },
-  lesson: {
-      submitAnswer: "Submit",
-      yourAnswer: "Your answer...",
-      readAloud: "Read Aloud",
-      quizCorrect: (points) => `Correct! (+${points} points)`,
-  },
-  leaderboard: {
-    title: "Leaderboard",
-    description: "See how your learning progress dey compare to others for the community!",
-    rank: "Rank",
-    player: "Player",
-    points: "Points",
-    you: "You",
+    title: "AI vs. Human",
+    description: "You fit sabi which proverb na AI write am?",
+    aiAuthor: "one AI",
+    humanAuthor: "one Human",
   },
   common: {
-    backToDashboard: "Back to Dashboard",
-    submit: "Submit",
-    close: "Close",
+      backToDashboard: "Go Back Dashboard",
   },
-  feedback: {
-    title: "Share Your Feedback",
-    description: "We value your input! Let us know how we fit improve.",
-    typeLabel: "Feedback Type",
-    types: {
-        [FeedbackType.Bug]: "Bug Report",
-        [FeedbackType.Suggestion]: "Suggestion",
-        [FeedbackType.General]: "General Feedback",
-    },
-    messageLabel: "Your Message",
-    messagePlaceholder: "Abeg, describe the issue or your idea...",
-    submitting: "Submitting...",
-    successTitle: "Thank You!",
-    successDescription: "We don receive your feedback. We appreciate say you help us make AI Kasahorow better.",
-  },
-  settings: {
-    title: "Settings",
-    voiceMode: "Voice-First Mode",
-    voiceModeDescription: "Enable voice commands and narration.",
-  },
-  offline: {
-    download: "Download for Offline",
-    downloaded: "Available Offline",
-    downloading: "Downloading...",
-    offlineIndicator: "Offline Mode",
-    onlineIndicator: "You dey online",
-    syncing: "Syncing your progress...",
-    notAvailable: "This content no dey available offline.",
-  },
-  voice: {
-    listening: "Dey listen...",
-    voiceModeActive: "Voice mode dey active",
-    navigatingTo: {
-      dashboard: "Dey go dashboard.",
-      profile: "Dey open your profile.",
-      leaderboard: "Dey show leaderboard.",
-      game: "Dey start AI versus Human game.",
-      peerPractice: "Dey open peer-to-peer practice.",
-      wallet: "Dey open your wallet.",
-    },
-    startingModule: (moduleName) => `Dey start module: ${moduleName}.`,
-    openingSettings: "Dey open settings.",
-    closingSettings: "Dey close settings.",
-    loggingOut: "Dey log you out.",
-  },
-  glossary: {
-    title: "AI Glossary",
-    description: "Quick reference for all the key AI terms wey we use for the lessons.",
-    searchPlaceholder: "Search for a term...",
-    noResultsTitle: "No Terms Found",
-    noResultsDescription: (term) => `We no fit find any terms wey match "${term}". Try another search.`,
-  },
-  podcastGenerator: {
-    title: "AI Paddi's Podcast Studio",
-    description: "Turn your ideas to audio. Become an AI Creator!",
-    scriptLabel: "Your Podcast Script",
-    scriptPlaceholder: "Write short script here. You fit explain AI concept, tell story, or share news from your community!",
-    voiceLabel: "Choose a Voice",
-    voices: {
-        kore: "Deep, Clear Voice (Kore)",
-        puck: "Friendly, Upbeat Voice (Puck)",
-    },
-    generateButton: "Generate Audio",
-    generatingButton: "Dey create magic...",
-    yourCreation: "Your Creation",
-    errorMessage: "Oops! Something go wrong while we dey generate the audio. Abeg try again.",
-  },
-  careerExplorer: {
-    title: "AI Career Explorer",
-    description: "See how your AI skills fit create real opportunities for Nigeria and beyond.",
-    whatTheyDo: "Wetin Dem Dey Do",
-    skillsNeeded: "Skills Wey You Need",
-    dayInTheLife: "One Day for their Life",
-    relevantLessons: "Relevant Lessons",
-    startLearning: "Start Learning",
-    careers: {
-      'agritech-specialist': {
-        title: "AI for Agriculture Specialist",
-        description: "Dey use AI help farmers improve crop yields and manage resources.",
-        what_they_do: "Dem dey analyze data from drones and sensors to check crop health, predict weather, and recommend best time to plant and harvest. Their work dey help make farming more efficient and sustainable.",
-        skills: ["Data Analysis", "Problem-Solving", "Knowledge of Agric", "Communication"],
-        day_in_the_life: "My day no dey start for office, but to dey check drone footage from one farm for Kano. The AI go flag one section of maize with potential signs of nutrient deficiency. I go then work with the local farm extension officer via WhatsApp, send them the coordinates and recommendation."
+  creationStudio: {
+      title: "Creation Studio",
+      description: "Your space to create with AI. Start with idea, then dey refine and remix am with your AI padi.",
+      createButton: "Create",
+      creatingButton: "Dey create...",
+      outputTitle: "Your AI Creation",
+      canvasPlaceholder: "Your creation go show here... Make we do something spectacular! ✨",
+      pointDescription: (templateName) => `Creation for Studio: ${templateName}`,
+      pointsAwarded: "+5 Points!",
+      errorMessage: "Sorry, something do mistake. Abeg try create am again.",
+      templates: {
+          'poem': {
+              title: "Poem Generator",
+              inputLabel: "2. Wetin your poem be about?",
+              placeholder: "e.g., sunny day for Lagos, my best football team, the sweet taste of jollof rice..."
+          },
+          'story': {
+              title: "Story Starter",
+              inputLabel: "2. Wetin be your story idea?",
+              placeholder: "e.g., one small girl wey see hidden map, robot wey wan be chef..."
+          },
+          'proverb': {
+              title: "Proverb Creator",
+              inputLabel: "2. Wetin be your modern topic?",
+              placeholder: "e.g., social media, online shopping, hold-up..."
+          }
       },
-      'fintech-ml-engineer': {
-        title: "Fintech ML Engineer",
-        description: "Dey build smart financial tools, from fraud detection to loan applications.",
-        what_they_do: "Dem dey create machine learning models wey fit detect fraudulent transactions sharp-sharp, assess loan risk for small business owners, or create personal savings plans for users of banking app.",
-        skills: ["Machine Learning", "Programming (Python)", "Statistics", "Financial Knowledge"],
-        day_in_the_life: "Today, our AI model flag a series of unusual transactions wey dey try drain one account. We stop am in milliseconds. This afternoon, I dey train new model to help market traders for Lagos get small loans faster by analyzing their sales history instead of demanding impossible collateral."
+      refinementActions: {
+        longer: "Make am long",
+        shorter: "Make am short",
+        funnier: "Make am funny",
+        moreSerious: "More serious tone",
+        tryAgain: "Try Again",
       },
-      'ai-content-creator': {
-        title: "AI Tutor & Content Creator",
-        description: "Dey use generative AI create engaging educational materials and stories.",
-        what_they_do: "Dem dey use AI tools generate scripts for educational videos, create illustrations for children's books for local languages, or build simple chatbots wey fit help students practice new subjects.",
-        skills: ["Creativity", "Prompt Engineering", "Writing & Storytelling", "Teaching Skills"],
-        day_in_the_life: "I dey work with one teacher for Port Harcourt to create simple, illustrated science lesson about water cycle. I use AI image generator create beautiful pictures and language model to simplify the text. We dey make learning materials wey look amazing and easy to understand for any student."
-      },
-      'ai-ethicist': {
-        title: "AI Ethicist",
-        description: "Dey make sure say AI systems dey built and used fairly and responsibly.",
-        what_they_do: "Dem dey work with tech companies to test AI models for bias, making sure say dem work equally well for people of all backgrounds. Dem dey help create guidelines to protect user data and make sure say the AI's decisions dey transparent and fair.",
-        skills: ["Critical Thinking", "Ethics", "Communication", "Understanding of AI Bias"],
-        day_in_the_life: "One team dey build AI to help doctors diagnose illnesses. My job na to ask the tough questions: Na data from Nigerian hospitals dem use train the AI? E dey work as well for women as e dey for men? My role na to be the voice for fairness."
+      creatorTools: {
+        changeStyle: "Change Style",
+        downloadImage: "Download as Image",
       }
-    }
   },
-  levels: {
-    [LearningPath.Beginner]: 'Beginner',
-    [LearningPath.Intermediate]: 'Intermediate',
-    [LearningPath.Advanced]: 'Advanced',
+  studentPortfolio: {
+      title: "My Learning Portfolio",
+      description: "Na your progress and achievement snapshot be dis. Download am make you share your journey!",
+      downloadButton: "Download Portfolio",
+      generating: "Dey generate...",
+      completedModules: "Modules Wey You Don Finish",
+      badgesEarned: "Badges Wey You Don Collect",
   },
-  curriculum: {
-    'what-is-ai': { title: 'Wetin be AI?', description: 'Learn the basic definition of AI.', lessonContent: englishTranslations.curriculum['what-is-ai'].lessonContent },
-    'how-ai-works': { title: 'How AI dey Work?', description: 'Discover how machines dey learn from data.', lessonContent: englishTranslations.curriculum['how-ai-works'].lessonContent },
-    'ai-in-daily-life': { title: 'AI for Daily Life', description: 'See examples of AI around you.', lessonContent: englishTranslations.curriculum['ai-in-daily-life'].lessonContent },
-    'risks-and-bias': { title: 'Risks & Bias for AI', description: 'Understand the challenges of AI.', lessonContent: englishTranslations.curriculum['risks-and-bias'].lessonContent },
-    'ai-and-jobs': { title: 'AI and The Future of Jobs', description: 'See how AI dey change work.', lessonContent: englishTranslations.curriculum['ai-and-jobs'].lessonContent },
-  },
-  tooltips: {},
-  badges: {}
 };
 
-// FIX: Add `translations` object to be exported and used by the app. It merges the partial translations with the English base.
-export const translations: Record<Language, Translation> = {
+// --- Merge and Export ---
+export const translations = {
     [Language.English]: englishTranslations,
+    [Language.Swahili]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), swahiliPartial),
     [Language.Hausa]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), hausaPartial),
     [Language.Yoruba]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), yorubaPartial),
     [Language.Igbo]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), igboPartial),
     [Language.Pidgin]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), pidginPartial),
-    [Language.Swahili]: mergeDeep(JSON.parse(JSON.stringify(englishTranslations)), swahiliPartial),
+    // Add other languages here once partials are created
     [Language.Amharic]: englishTranslations,
     [Language.Zulu]: englishTranslations,
     [Language.Shona]: englishTranslations,
     [Language.Somali]: englishTranslations,
 };
 
-// FIX: Add and export `useTranslations` hook to provide translations to components based on the current app language.
 export const useTranslations = (): Translation => {
-  const context = useContext(AppContext);
-  const lang = context?.language || Language.English;
-  return translations[lang] || englishTranslations;
+  // FIX: Cast context to the correct type to resolve TS inference errors.
+  const context = useContext(AppContext) as AppContextType | null;
+  const language = context?.language || Language.English;
+  return translations[language] || englishTranslations;
 };

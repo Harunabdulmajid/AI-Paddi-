@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
-import { AppContext } from '../../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from '../AppContext';
 import { useTranslations } from '../../i18n';
 import { ArrowDownLeft, ArrowUpRight, Award, ShoppingCart } from 'lucide-react';
-import { Transaction } from '../../types';
+import { Transaction, AppContextType } from '../../types';
 
 const TransactionRow: React.FC<{ tx: Transaction }> = ({ tx }) => {
     const getIcon = () => {

@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
-import { Module, Page } from '../types';
+import { Module, Page, AppContextType } from '../types';
 import { ArrowRight, Download, CheckCircle, Loader2 } from 'lucide-react';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from './AppContext';
 import { useTranslations } from '../i18n';
 
 interface ModuleCardProps {
@@ -9,7 +9,8 @@ interface ModuleCardProps {
 }
 
 export const ModuleCard: React.FC<ModuleCardProps> = ({ module }) => {
-  const context = useContext(AppContext);
+  // FIX: Cast context to the correct type to resolve TS inference errors.
+  const context = useContext(AppContext) as AppContextType | null;
   if (!context) throw new Error("ModuleCard must be used within an AppProvider");
   const { setCurrentPage, setActiveModuleId, downloadedModules, downloadModule, isOnline } = context;
   const t = useTranslations();

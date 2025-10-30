@@ -1,5 +1,6 @@
 import React, { useContext, useState } from 'react';
-import { AppContext } from '../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from './AppContext';
 import { useTranslations } from '../i18n';
 import { Award, History, Send, Store } from 'lucide-react';
 import { TransactionHistory } from './Wallet/TransactionHistory';

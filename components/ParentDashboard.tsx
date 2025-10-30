@@ -1,7 +1,8 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from './AppContext';
 import { useTranslations } from '../i18n';
-import { Page, Module, User } from '../types';
+import { Page, Module, User, AppContextType } from '../types';
 import { ArrowRight, BookOpen, Briefcase, Users, GraduationCap, CheckSquare, Award, BookMarked, UserPlus, Loader2 } from 'lucide-react';
 import { LEARNING_PATHS, CURRICULUM_MODULES } from '../constants';
 import { ParentGuideModal } from './ParentGuideModal';

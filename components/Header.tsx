@@ -1,6 +1,6 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
-import { Language } from '../types';
+import { AppContext } from './AppContext';
+import { AppContextType, Language } from '../types';
 import { Award, GraduationCap, Languages, LogOut, UserCircle, Settings, Wifi, WifiOff, Mic } from 'lucide-react';
 import { useTranslations } from '../i18n';
 import { Page } from '../types';
@@ -75,7 +75,8 @@ export const UserAvatar: React.FC<{ name: string; avatarUrl?: string; avatarId?:
 };
 
 const OfflineIndicator: React.FC = () => {
-    const context = useContext(AppContext);
+    // FIX: Cast context to the correct type to resolve TS inference errors.
+    const context = useContext(AppContext) as AppContextType | null;
     if (!context) return null;
     const { isOnline } = context;
     const t = useTranslations();
@@ -90,7 +91,8 @@ const OfflineIndicator: React.FC = () => {
 }
 
 const VoiceIndicator: React.FC = () => {
-    const context = useContext(AppContext);
+    // FIX: Cast context to the correct type to resolve TS inference errors.
+    const context = useContext(AppContext) as AppContextType | null;
     if (!context) return null;
     const { isVoiceModeEnabled, isListening } = context;
     const t = useTranslations();
@@ -106,7 +108,8 @@ const VoiceIndicator: React.FC = () => {
 
 
 export const Header: React.FC<{ onSettingsClick: () => void }> = ({ onSettingsClick }) => {
-  const context = useContext(AppContext);
+  // FIX: Cast context to the correct type to resolve TS inference errors.
+  const context = useContext(AppContext) as AppContextType | null;
   if (!context) throw new Error('Header must be used within an AppProvider');
   const { user, language, setLanguage, setCurrentPage, logout } = context;
   const t = useTranslations();

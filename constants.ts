@@ -1,4 +1,4 @@
-import { BrainCircuit, BookOpen, Bot, ShieldCheck, Briefcase, Star, Award, Trophy, Swords, Zap, Paintbrush, Medal, GraduationCap, Users, MessageSquarePlus, RotateCcw, Image as ImageIcon, Palette, Gift, HeartHandshake, Leaf, Landmark, PenTool } from 'lucide-react';
+import { BrainCircuit, BookOpen, Bot, ShieldCheck, Briefcase, Star, Award, Trophy, Swords, Zap, Paintbrush, Medal, GraduationCap, Users, MessageSquarePlus, RotateCcw, Image as ImageIcon, Palette, Gift, HeartHandshake, Leaf, Landmark, PenTool, Shield, Globe } from 'lucide-react';
 import { Badge, MarketplaceItem, User, Language, LearningPath } from './types';
 
 export const CURRICULUM_MODULES = [
@@ -19,8 +19,20 @@ export const CURRICULUM_MODULES = [
     icon: ShieldCheck,
   },
   {
+    id: 'ai-safety',
+    icon: Shield,
+  },
+  {
     id: 'ai-and-jobs',
     icon: Briefcase,
+  },
+  {
+    id: 'digital-citizenship',
+    icon: Globe,
+  },
+  {
+    id: 'prompt-engineering',
+    icon: PenTool,
   },
 ];
 
@@ -29,10 +41,10 @@ export const LEARNING_PATHS = {
     modules: ['what-is-ai', 'ai-in-daily-life'],
   },
   [LearningPath.Intermediate]: {
-    modules: ['how-ai-works', 'risks-and-bias'],
+    modules: ['how-ai-works', 'risks-and-bias', 'ai-safety'],
   },
   [LearningPath.Advanced]: {
-    modules: ['ai-and-jobs'],
+    modules: ['ai-and-jobs', 'digital-citizenship', 'prompt-engineering'],
   },
 };
 
@@ -50,12 +62,12 @@ export const CAREER_PROFILES = [
   {
     id: 'ai-content-creator',
     icon: PenTool,
-    relevantModuleIds: ['what-is-ai', 'ai-in-daily-life'],
+    relevantModuleIds: ['what-is-ai', 'ai-in-daily-life', 'digital-citizenship', 'prompt-engineering'],
   },
   {
     id: 'ai-ethicist',
     icon: ShieldCheck,
-    relevantModuleIds: ['risks-and-bias', 'ai-and-jobs'],
+    relevantModuleIds: ['risks-and-bias', 'ai-and-jobs', 'ai-safety'],
   }
 ];
 

@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from './AppContext';
 import { Page, Badge, Language, LessonContent } from '../types';
 import { useTranslations, englishTranslations } from '../i18n';
 import { Quiz } from './Quiz';

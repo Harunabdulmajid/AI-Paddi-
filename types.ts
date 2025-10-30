@@ -30,6 +30,9 @@ export enum Page {
   Glossary = 'Glossary',
   PodcastGenerator = 'Podcast Generator',
   CareerExplorer = 'AI Career Explorer',
+  CreationStudio = 'Creation Studio',
+  StudentPortfolio = 'Student Portfolio',
+  AiTutor = 'AI Tutor',
 }
 
 export type Difficulty = 'Easy' | 'Hard';
@@ -92,7 +95,7 @@ export interface User {
   badges: string[];
   multiplayerStats: MultiplayerStats;
   wallet: Wallet;
-  lastLoginDate: string; // YYYY-MM-DD
+  lastLoginDate: string; // YYYY-DD-MM
   loginStreak: number;
   certificateLevel: 'basic' | 'distinction';
   theme: string; // e.g., 'default', 'dark'
@@ -206,7 +209,6 @@ export interface AppContextType {
   setActiveModuleId: React.Dispatch<React.SetStateAction<string | null>>;
   addTransaction: (transaction: Omit<Transaction, 'id' | 'timestamp'>) => Promise<void>;
   awardBadge: (badgeId: string) => Promise<void>;
-  // FIX: Add missing `completeModule` to the context type to fix error in `Lesson.tsx`.
   completeModule: (moduleId: string) => Promise<void>;
   gameSession: GameSession | null;
   setGameSession: React.Dispatch<React.SetStateAction<GameSession | null>>;

@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from './AppContext';
 import { apiService } from '../services/apiService';
 import { useTranslations } from '../i18n';
 import { Loader2, Clipboard, Check, Users, Play, Crown, LogIn, Share2 } from 'lucide-react';

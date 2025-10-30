@@ -9,8 +9,8 @@ import { AppContextType, User, Language, Page, Badge, GameSession, Module, Trans
 import { ArrowLeft, Loader2, Send } from 'lucide-react';
 import { translations, englishTranslations } from './i18n';
 import { Lesson } from './components/Lesson';
-import { AppContext } from './context/AppContext';
-import { useLocalStorage } from './hooks/useLocalStorage';
+import { AppContext } from './components/AppContext';
+import { useLocalStorage } from './services/hooks/useLocalStorage';
 import { Leaderboard } from './components/Leaderboard';
 import { apiService } from './services/apiService';
 import { Toast } from './components/Toast';
@@ -18,13 +18,16 @@ import { BADGES, CURRICULUM_MODULES } from './constants';
 import { dbService } from './services/db';
 import { geminiService } from './services/geminiService';
 import { SettingsModal } from './components/SettingsModal';
-import { useSpeech } from './hooks/useSpeech';
+import { useSpeech } from './services/hooks/useSpeech';
 import { Wallet } from './components/Wallet';
 import { Glossary } from './components/Glossary';
 import { PodcastGenerator } from './components/PodcastGenerator';
 import { CareerExplorer } from './components/CareerExplorer';
 import { TeacherDashboard } from './components/TeacherDashboard';
 import { ParentDashboard } from './components/ParentDashboard';
+import { CreationStudio } from './components/ProjectSandbox';
+import { StudentPortfolio } from './components/StudentPortfolio';
+import { AiTutor } from './components/AiTutor';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -368,6 +371,9 @@ const App: React.FC = () => {
         case Page.Glossary: return <Glossary />;
         case Page.PodcastGenerator: return <PodcastGenerator />;
         case Page.CareerExplorer: return <CareerExplorer />;
+        case Page.CreationStudio: return <CreationStudio />;
+        case Page.StudentPortfolio: return <StudentPortfolio />;
+        case Page.AiTutor: return <AiTutor />;
         default: return <Dashboard />;
     }
   }

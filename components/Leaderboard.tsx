@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { AppContext } from '../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from './AppContext';
 import { useTranslations } from '../i18n';
 import { Trophy, Award, Loader2 } from 'lucide-react';
 import { apiService } from '../services/apiService';

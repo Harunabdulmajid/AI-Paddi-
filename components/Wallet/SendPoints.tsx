@@ -1,9 +1,11 @@
 import React, { useContext, useState } from 'react';
-import { AppContext } from '../../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from '../AppContext';
 import { useTranslations } from '../../i18n';
 import { apiService } from '../../services/apiService';
 import { Loader2, Send } from 'lucide-react';
 import { ConfirmationModal } from './ConfirmationModal';
+import { AppContextType } from '../../types';
 
 export const SendPoints: React.FC = () => {
   const context = useContext(AppContext);

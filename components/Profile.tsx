@@ -1,8 +1,8 @@
 // FIX: Import `useEffect` from React to resolve the "Cannot find name 'useEffect'" error.
 import React, { useContext, useRef, useCallback, useState, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from './AppContext';
 import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Wallet, Feather, BookOpen, BrainCircuit } from 'lucide-react';
-import { LearningPath, User, Page } from '../types';
+import { LearningPath, User, Page, AppContextType } from '../types';
 import { useTranslations } from '../i18n';
 // FIX: Import the `BADGES` constant to resolve the "Cannot find name 'BADGES'" error.
 import { CURRICULUM_MODULES, LEARNING_PATHS, BADGES } from '../constants';
@@ -138,7 +138,8 @@ const PathSelectionModal: React.FC<{ isOpen: boolean, onClose: () => void, onSel
 
 
 export const Profile: React.FC = () => {
-    const context = useContext(AppContext);
+    // FIX: Cast context to the correct type to resolve TS inference errors.
+    const context = useContext(AppContext) as AppContextType | null;
     if (!context) throw new Error("Profile must be used within an AppProvider");
     const { user, setUser, logout, setCurrentPage } = context;
     const t = useTranslations();

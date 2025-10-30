@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Language } from '../types';
+import { Language } from '../../types';
 
 const languageMap: Record<Language, string> = {
     [Language.English]: 'en-US',

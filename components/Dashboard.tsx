@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from './AppContext';
 import { CURRICULUM_MODULES, LEARNING_PATHS } from '../constants';
 import { ModuleCard } from './ModuleCard';
-import { Page, Module, UserRole } from '../types';
-import { Sword, UserCircle, ArrowRight, BarChart3, BookCopy, Star, Users, Wallet, BookMarked, Mic, Briefcase } from 'lucide-react';
+import { Page, Module, UserRole, AppContextType } from '../types';
+import { Sword, UserCircle, ArrowRight, BarChart3, BookCopy, Star, Users, Wallet, BookMarked, Mic, Briefcase, Sparkles, ClipboardList, MessageSquare } from 'lucide-react';
 import { useTranslations } from '../i18n';
 
 const FeatureButton: React.FC<{ icon: React.ReactNode; title: string; description: string; onClick: () => void }> = ({ icon, title, description, onClick }) => (
@@ -20,7 +20,8 @@ const FeatureButton: React.FC<{ icon: React.ReactNode; title: string; descriptio
 );
 
 const ProgressSummary: React.FC = () => {
-    const context = useContext(AppContext);
+    // FIX: Cast context to the correct type to resolve TS inference errors.
+    const context = useContext(AppContext) as AppContextType | null;
     if (!context) return null;
     const { user, setCurrentPage, setActiveModuleId } = context;
     const t = useTranslations();
@@ -65,7 +66,8 @@ const ProgressSummary: React.FC = () => {
 
 
 export const Dashboard: React.FC = () => {
-  const context = useContext(AppContext);
+  // FIX: Cast context to the correct type to resolve TS inference errors.
+  const context = useContext(AppContext) as AppContextType | null;
   if (!context) throw new Error("Dashboard must be used within an AppProvider");
   const { user, setCurrentPage } = context;
   const t = useTranslations();
@@ -98,6 +100,18 @@ export const Dashboard: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+        <FeatureButton 
+            icon={<MessageSquare size={32} />}
+            title={t.aiTutor.title}
+            description={t.aiTutor.description}
+            onClick={() => setCurrentPage(Page.AiTutor)}
+        />
+        <FeatureButton 
+            icon={<Sparkles size={32} />}
+            title={t.dashboard.creationStudioTitle}
+            description={t.dashboard.creationStudioDescription}
+            onClick={() => setCurrentPage(Page.CreationStudio)}
+        />
         <FeatureButton 
             icon={<Mic size={32} />}
             title={t.dashboard.podcastGeneratorTitle}
@@ -133,6 +147,12 @@ export const Dashboard: React.FC = () => {
             title={t.dashboard.profileTitle}
             description={t.dashboard.profileDescription}
             onClick={() => setCurrentPage(Page.Profile)}
+        />
+        <FeatureButton 
+            icon={<ClipboardList size={32} />}
+            title={t.dashboard.myPortfolioTitle}
+            description={t.dashboard.myPortfolioDescription}
+            onClick={() => setCurrentPage(Page.StudentPortfolio)}
         />
         <FeatureButton 
             icon={<BarChart3 size={32} />}

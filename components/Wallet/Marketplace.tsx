@@ -1,8 +1,9 @@
 import React, { useContext, useState } from 'react';
-import { AppContext } from '../../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from '../AppContext';
 import { useTranslations } from '../../i18n';
 import { MARKETPLACE_ITEMS } from '../../constants';
-import { MarketplaceItem, MarketplaceCategory } from '../../types';
+import { MarketplaceItem, MarketplaceCategory, AppContextType } from '../../types';
 import { Award, Check, Loader2 } from 'lucide-react';
 import { ConfirmationModal } from './ConfirmationModal';
 import { apiService } from '../../services/apiService';

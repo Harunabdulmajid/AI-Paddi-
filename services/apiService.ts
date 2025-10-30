@@ -76,7 +76,17 @@ export const apiService = {
         let newTransactions: Transaction[] = [];
 
         // --- Backward compatibility & Initialization for old users ---
-        if (!user.wallet) user.wallet = initializeDefaultWallet(user.points);
+        if (!user.wallet) {
+            user.wallet = initializeDefaultWallet(user.points);
+        } else {
+            // Also check for nested properties for older wallet structures
+            if (!Array.isArray(user.wallet.transactions)) {
+                user.wallet.transactions = [];
+            }
+            if (!user.wallet.dailyTransfer) {
+                user.wallet.dailyTransfer = { date: getTodayDateString(), amount: 0 };
+            }
+        }
         if (!user.lastLoginDate) user.lastLoginDate = '';
         if (!user.loginStreak) user.loginStreak = 0;
         if (!user.certificateLevel) user.certificateLevel = 'basic';

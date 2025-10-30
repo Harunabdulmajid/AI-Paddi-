@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
-import { AppContext } from '../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from './AppContext';
 import { useTranslations } from '../i18n';
 import { apiService } from '../services/apiService';
 import { FeedbackType } from '../types';

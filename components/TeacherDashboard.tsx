@@ -1,5 +1,6 @@
 import React, { useContext } from 'react';
-import { AppContext } from '../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from './AppContext';
 import { useTranslations } from '../i18n';
 import { Page } from '../types';
 import { ArrowRight, BookOpen, Briefcase, Users } from 'lucide-react';

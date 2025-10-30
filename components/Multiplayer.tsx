@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from './AppContext';
 import { PracticeLobby } from './MultiplayerLobby';
 import { PracticeGame } from './MultiplayerGame';
 import { PracticeResults } from './MultiplayerResults';

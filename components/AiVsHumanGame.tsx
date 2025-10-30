@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
-import { AppContext } from '../context/AppContext';
+import { AppContext } from './AppContext';
 import { geminiService } from '../services/geminiService';
 import { Loader2, Bot, User, RefreshCw } from 'lucide-react';
 import { useTranslations } from '../i18n';
-import { Difficulty } from '../types';
+import { Difficulty, AppContextType } from '../types';
 
 export const AiVsHumanGame: React.FC = () => {
-  const context = useContext(AppContext);
+  // FIX: Cast context to the correct type to resolve TS inference errors.
+  const context = useContext(AppContext) as AppContextType | null;
   if (!context) throw new Error("AiVsHumanGame must be used within an AppProvider");
   const { language, user, addTransaction } = context;
   const t = useTranslations();

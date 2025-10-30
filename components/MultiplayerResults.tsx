@@ -1,5 +1,6 @@
 import React, { useContext, useMemo, useEffect } from 'react';
-import { AppContext } from '../context/AppContext';
+// FIX: Correct the import path for AppContext.
+import { AppContext } from './AppContext';
 import { useTranslations } from '../i18n';
 import { Page, User } from '../types';
 import { Trophy, Award, RotateCw, LogOut, CheckCircle } from 'lucide-react';

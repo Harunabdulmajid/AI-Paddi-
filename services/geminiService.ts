@@ -1,9 +1,10 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, Chat } from "@google/genai";
 import { Language, LearningPath, Difficulty, LessonContent } from "../types";
+import { translations, englishTranslations } from '../i18n';
 
 // FIX: Per @google/genai guidelines, initialize the SDK with process.env.API_KEY directly
 // and assume it's set in the environment.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 const model: string = 'gemini-2.5-flash';
 
@@ -122,5 +123,27 @@ export const geminiService = {
       // Re-throw the error to allow the component to handle the fallback.
       throw error;
     }
+  },
+
+  startCreationStudioChat(language: Language): Chat {
+    const t = (translations[language] || englishTranslations).creationStudio;
+    const chat: Chat = ai.chats.create({
+        model,
+        config: {
+            systemInstruction: t.systemInstruction,
+        },
+    });
+    return chat;
+  },
+
+  startTutorChat(language: Language): Chat {
+    const t = (translations[language] || englishTranslations).aiTutor;
+    const chat: Chat = ai.chats.create({
+        model,
+        config: {
+            systemInstruction: t.systemInstruction,
+        },
+    });
+    return chat;
   },
 };
