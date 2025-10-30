@@ -1,10 +1,10 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import { AppContext } from './AppContext';
 import { Page, Badge, Language, LessonContent } from '../types';
 import { useTranslations, englishTranslations } from '../i18n';
 import { Quiz } from './Quiz';
 import { TooltipTerm } from './TooltipTerm';
-import { Award, PartyPopper, Loader2, Volume2 } from 'lucide-react';
+import { Award, PartyPopper, Loader2, Volume2, StopCircle } from 'lucide-react';
 import { BADGES } from '../constants';
 import { BadgeIcon } from './BadgeIcon';
 import { geminiService } from '../services/geminiService';
@@ -45,10 +45,21 @@ const CompletionModal: React.FC<{ onAcknowledge: () => void; points: number, unl
     );
 };
 
+// Helper to decode base64 string to Uint8Array
+const decode = (base64: string): Uint8Array => {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+};
+
 export const Lesson: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("Lesson component must be used within AppProvider");
-    const { activeModuleId, setCurrentPage, setActiveModuleId, completeModule, user, language, isOnline, isVoiceModeEnabled, speak } = context;
+    const { activeModuleId, setCurrentPage, setActiveModuleId, completeModule, user, language, isOnline } = context;
     const t = useTranslations();
     
     const [lessonState, setLessonState] = useState<LessonState>('reading');
@@ -56,11 +67,28 @@ export const Lesson: React.FC = () => {
 
     const [dynamicContent, setDynamicContent] = useState<Omit<LessonContent, 'quiz' | 'title'> | null>(null);
     const [isLoadingContent, setIsLoadingContent] = useState(true);
-    const [isOfflineContent, setIsOfflineContent] = useState(false);
+    
+    // TTS State
+    const [speakingSectionKey, setSpeakingSectionKey] = useState<string | null>(null);
+    const [isTTSLoading, setIsTTSLoading] = useState(false);
+    const audioContextRef = useRef<AudioContext | null>(null);
+    const activeSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
     const initialBadges = user?.badges || [];
     const staticModuleContent = activeModuleId ? t.curriculum[activeModuleId]?.lessonContent : null;
     const englishModuleContent = activeModuleId ? englishTranslations.curriculum[activeModuleId]?.lessonContent : null;
+
+    useEffect(() => {
+        // @ts-ignore
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+            audioContextRef.current = new AudioContext({ sampleRate: 24000 });
+        }
+        return () => {
+            activeSourceRef.current?.stop();
+            audioContextRef.current?.close().catch(console.error);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchContent = async () => {
@@ -70,13 +98,11 @@ export const Lesson: React.FC = () => {
             }
             
             setIsLoadingContent(true);
-            setIsOfflineContent(false);
 
             // Try fetching from offline DB first
             const offlineContent = await dbService.getContent(activeModuleId, language);
             if (offlineContent) {
                 setDynamicContent(offlineContent);
-                setIsOfflineContent(true);
                 setIsLoadingContent(false);
                 return;
             }
@@ -120,6 +146,69 @@ export const Lesson: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [lessonState, user?.badges]);
 
+    const playRawAudio = async (pcmData: Uint8Array) => {
+        const ctx = audioContextRef.current;
+        if (!ctx) return;
+    
+        if (activeSourceRef.current) {
+            activeSourceRef.current.stop();
+        }
+    
+        const dataInt16 = new Int16Array(pcmData.buffer);
+        const frameCount = dataInt16.length;
+        const buffer = ctx.createBuffer(1, frameCount, 24000); // 1 channel, 24000 sample rate
+        const channelData = buffer.getChannelData(0);
+    
+        for (let i = 0; i < frameCount; i++) {
+            channelData[i] = dataInt16[i] / 32768.0; // convert from Int16 to Float32 range [-1, 1]
+        }
+    
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(ctx.destination);
+        source.start();
+        activeSourceRef.current = source;
+        
+        source.onended = () => {
+            if (activeSourceRef.current === source) {
+                setSpeakingSectionKey(null);
+                activeSourceRef.current = null;
+            }
+        };
+    };
+
+    const handleReadAloud = async (sectionKey: string, text: string) => {
+        if (speakingSectionKey === sectionKey) { // Clicked on the currently playing/loading section
+            if (activeSourceRef.current) {
+                activeSourceRef.current.stop();
+            }
+            setSpeakingSectionKey(null);
+            setIsTTSLoading(false);
+            return;
+        }
+
+        if (activeSourceRef.current) {
+            activeSourceRef.current.stop();
+        }
+
+        setSpeakingSectionKey(sectionKey);
+        setIsTTSLoading(true);
+
+        try {
+            const base64Audio = await geminiService.generateSpeech(text);
+            const pcmData = decode(base64Audio);
+            if (speakingSectionKey === sectionKey) { // Check if user hasn't clicked another button while loading
+                await playRawAudio(pcmData);
+            }
+        } catch (error) {
+            console.error("Failed to generate or play speech:", error);
+            alert("Sorry, there was a problem reading this aloud.");
+            setSpeakingSectionKey(null);
+        } finally {
+            setIsTTSLoading(false);
+        }
+    };
+    
     if (!activeModuleId) {
         setCurrentPage(Page.Dashboard);
         return null;
@@ -160,10 +249,6 @@ export const Lesson: React.FC = () => {
         setCurrentPage(Page.Dashboard);
         setActiveModuleId(null);
     }
-    
-    const handleSpeak = (text: string) => {
-        speak(text, language);
-    };
 
     const renderContentWithTooltips = (text: string) => {
         const tooltips = t.tooltips;
@@ -181,6 +266,23 @@ export const Lesson: React.FC = () => {
           return part;
         });
     };
+    
+    const ReadAloudButton: React.FC<{ sectionKey: string; text: string; }> = ({ sectionKey, text }) => {
+        const isSpeakingThis = speakingSectionKey === sectionKey;
+        const isLoadingThis = isSpeakingThis && isTTSLoading;
+        const isPlayingThis = isSpeakingThis && !isTTSLoading;
+
+        return (
+            <button 
+                onClick={() => handleReadAloud(sectionKey, text)} 
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400 hover:text-primary p-1 disabled:cursor-not-allowed"
+                aria-label={t.lesson.readAloud}
+                disabled={isTTSLoading && !isSpeakingThis}
+            >
+                {isLoadingThis ? <Loader2 className="animate-spin"/> : isPlayingThis ? <StopCircle/> : <Volume2/>}
+            </button>
+        );
+    };
 
     return (
         <div className="container mx-auto p-4 md:p-8">
@@ -189,7 +291,7 @@ export const Lesson: React.FC = () => {
                 <h1 className="text-4xl md:text-5xl font-extrabold text-neutral-800 mb-4">{displayContent.title}</h1>
                 <div className="group flex gap-2 items-start">
                     <p className="text-lg md:text-xl text-neutral-600 italic border-l-4 border-primary pl-4">{renderContentWithTooltips(displayContent.introduction)}</p>
-                     {isVoiceModeEnabled && <button onClick={() => handleSpeak(displayContent.introduction)} className="opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400 hover:text-primary p-1" aria-label={t.lesson.readAloud}><Volume2/></button>}
+                    <ReadAloudButton sectionKey="introduction" text={displayContent.introduction} />
                 </div>
 
                 <div className="prose prose-lg max-w-none text-neutral-700 leading-relaxed space-y-6 mt-8">
@@ -197,7 +299,7 @@ export const Lesson: React.FC = () => {
                         <div key={index} className="group">
                              <div className="flex gap-2 items-center">
                                 <h2 className="text-2xl md:text-3xl font-bold text-neutral-800 !mb-3">{section.heading}</h2>
-                                {isVoiceModeEnabled && <button onClick={() => handleSpeak(section.heading + ". " + section.content)} className="opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400 hover:text-primary" aria-label={t.lesson.readAloud}><Volume2/></button>}
+                                <ReadAloudButton sectionKey={`section-${index}`} text={`${section.heading}. ${section.content}`} />
                              </div>
                             <p className="whitespace-pre-line mt-6">{renderContentWithTooltips(section.content)}</p>
                         </div>
@@ -208,7 +310,7 @@ export const Lesson: React.FC = () => {
                     <h3 className="text-xl font-bold text-neutral-800 mb-3">Key Takeaway</h3>
                     <div className="flex gap-2 items-start">
                         <p className="bg-primary/10 text-primary-dark font-medium p-6 rounded-xl flex-grow">{renderContentWithTooltips(displayContent.summary)}</p>
-                        {isVoiceModeEnabled && <button onClick={() => handleSpeak(displayContent.summary)} className="opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400 hover:text-primary p-1 mt-4" aria-label={t.lesson.readAloud}><Volume2/></button>}
+                        <ReadAloudButton sectionKey="summary" text={displayContent.summary} />
                     </div>
                 </div>
                 

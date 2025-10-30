@@ -28,6 +28,7 @@ import { ParentDashboard } from './components/ParentDashboard';
 import { CreationStudio } from './components/ProjectSandbox';
 import { StudentPortfolio } from './components/StudentPortfolio';
 import { AiTutor } from './components/AiTutor';
+import { UpgradeModal } from './components/UpgradeModal';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -44,6 +45,10 @@ const App: React.FC = () => {
   const [isVoiceModeEnabled, setIsVoiceModeEnabled] = useLocalStorage('voiceMode', false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { isListening, speak, startContinuousListening, stopListening } = useSpeech();
+  
+  // Pro Plan State
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [featureToUnlock, setFeatureToUnlock] = useState('');
 
   const t = translations[language] || englishTranslations;
   
@@ -327,6 +332,16 @@ const App: React.FC = () => {
     }
     setIsVoiceModeEnabled(!isVoiceModeEnabled);
   };
+  
+  const openUpgradeModal = (featureName: string) => {
+    setFeatureToUnlock(featureName);
+    setIsUpgradeModalOpen(true);
+  };
+
+  const closeUpgradeModal = () => {
+      setIsUpgradeModalOpen(false);
+      setFeatureToUnlock('');
+  };
 
   const contextValue: AppContextType = useMemo(() => ({
     user,
@@ -350,9 +365,21 @@ const App: React.FC = () => {
     toggleVoiceMode,
     speak,
     isListening,
+    openUpgradeModal,
   }), [user, language, setLanguage, currentPage, activeModuleId, gameSession, isOnline, downloadedModules, isVoiceModeEnabled, addTransaction, completeModule, awardBadge, downloadModule, speak, isListening, logout, handleSetUser]);
 
   const renderCurrentPage = () => {
+    // Gated Pages
+    const proPages = [Page.PeerPractice, Page.PodcastGenerator, Page.CareerExplorer, Page.CreationStudio, Page.StudentPortfolio, Page.AiTutor];
+    if (proPages.includes(currentPage) && !user?.isPro) {
+        // This is a fallback. The primary gating is on the Dashboard buttons.
+        // If a user gets here (e.g., direct nav), show the modal.
+        if (!isUpgradeModalOpen) {
+            openUpgradeModal(currentPage);
+        }
+        return <Dashboard />; // Show dashboard behind the modal
+    }
+
     switch(currentPage) {
         case Page.Dashboard:
             if (user?.role === UserRole.Teacher) {
@@ -425,6 +452,11 @@ const App: React.FC = () => {
              <Toast key={index} item={item} />
         ))}
         <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+        <UpgradeModal
+            isOpen={isUpgradeModalOpen}
+            onClose={closeUpgradeModal}
+            featureName={featureToUnlock}
+        />
         <PageWrapper>
             {renderCurrentPage()}
         </PageWrapper>

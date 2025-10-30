@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type, Chat } from "@google/genai";
+import { GoogleGenAI, Type, Chat, Modality } from "@google/genai";
 import { Language, LearningPath, Difficulty, LessonContent } from "../types";
 import { translations, englishTranslations } from '../i18n';
 
@@ -123,6 +123,31 @@ export const geminiService = {
       // Re-throw the error to allow the component to handle the fallback.
       throw error;
     }
+  },
+
+  async generateSpeech(text: string, voice: string = 'Kore'): Promise<string> {
+      try {
+          const response = await ai.models.generateContent({
+              model: "gemini-2.5-flash-preview-tts",
+              contents: [{ parts: [{ text }] }],
+              config: {
+                  responseModalities: [Modality.AUDIO],
+                  speechConfig: {
+                      voiceConfig: {
+                          prebuiltVoiceConfig: { voiceName: voice },
+                      },
+                  },
+              },
+          });
+          const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+          if (base64Audio) {
+              return base64Audio;
+          }
+          throw new Error("No audio data received from API.");
+      } catch (error) {
+          console.error("Error generating speech:", error);
+          throw error;
+      }
   },
 
   startCreationStudioChat(language: Language): Chat {

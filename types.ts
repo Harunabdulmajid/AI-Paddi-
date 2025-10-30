@@ -105,6 +105,7 @@ export interface User {
   quizRewinds: number;
   unlockedBanners: string[];
   unlockedThemes: string[];
+  isPro: boolean;
 }
 
 export interface StudentProgress {
@@ -220,4 +221,6 @@ export interface AppContextType {
   toggleVoiceMode: () => void;
   speak: (text: string, lang: Language) => void;
   isListening: boolean;
+  // Pro Plan
+  openUpgradeModal: (featureName: string) => void;
 }

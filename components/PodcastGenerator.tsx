@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Modality } from '@google/genai';
 import { useTranslations } from '../i18n';
-import { Loader2, Mic, Play, Download } from 'lucide-react';
+import { Loader2, Mic, Play, Pause, Download } from 'lucide-react';
 
 // Helper to decode base64 string to Uint8Array
 function decode(base64: string): Uint8Array {
@@ -58,6 +58,7 @@ export const PodcastGenerator: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [audioUrl, setAudioUrl] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(false);
 
     const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -67,6 +68,23 @@ export const PodcastGenerator: React.FC = () => {
             if (audioUrl) {
                 URL.revokeObjectURL(audioUrl);
             }
+        };
+    }, [audioUrl]);
+
+    // Add event listeners for the audio element to sync playing state
+    useEffect(() => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        const onPlay = () => setIsPlaying(true);
+        const onPause = () => setIsPlaying(false);
+        const onEnded = () => setIsPlaying(false);
+        audio.addEventListener('play', onPlay);
+        audio.addEventListener('pause', onPause);
+        audio.addEventListener('ended', onEnded);
+        return () => {
+            audio.removeEventListener('play', onPlay);
+            audio.removeEventListener('pause', onPause);
+            audio.removeEventListener('ended', onEnded);
         };
     }, [audioUrl]);
 
@@ -108,6 +126,16 @@ export const PodcastGenerator: React.FC = () => {
             setError(t.podcastGenerator.errorMessage);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handlePlayPause = () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+        if (isPlaying) {
+            audio.pause();
+        } else {
+            audio.play();
         }
     };
 
@@ -168,16 +196,27 @@ export const PodcastGenerator: React.FC = () => {
                 {audioUrl && (
                     <div className="mt-8 animate-fade-in">
                         <h3 className="font-bold text-lg text-neutral-700 mb-3">{t.podcastGenerator.yourCreation}</h3>
-                        <audio ref={audioRef} controls src={audioUrl} className="w-full">
-                            Your browser does not support the audio element.
-                        </audio>
-                        <a 
-                            href={audioUrl} 
-                            download="ai-paddi-podcast.wav"
-                            className="mt-3 inline-flex items-center justify-center gap-2 text-sm font-semibold text-primary hover:underline"
-                        >
-                           <Download size={16}/> Download WAV file
-                        </a>
+                        <audio ref={audioRef} src={audioUrl} className="hidden" />
+                        <div className="flex items-center gap-4 p-3 bg-primary/10 rounded-lg">
+                            <button
+                                onClick={handlePlayPause}
+                                className="w-12 h-12 flex items-center justify-center rounded-full bg-primary text-white hover:bg-primary-dark transition-transform active:scale-90"
+                                aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+                            >
+                                {isPlaying ? <Pause size={24} /> : <Play size={24} className="ml-1" />}
+                            </button>
+                            <div className="flex-grow">
+                                <p className="font-semibold text-primary">Your Generated Audio</p>
+                            </div>
+                            <a 
+                                href={audioUrl} 
+                                download="ai-paddi-podcast.wav"
+                                className="flex items-center justify-center gap-2 text-sm font-semibold text-primary hover:underline p-2 rounded-md hover:bg-primary/10"
+                            >
+                               <Download size={20}/>
+                               <span className="hidden sm:inline">Download</span>
+                            </a>
+                        </div>
                     </div>
                 )}
             </div>

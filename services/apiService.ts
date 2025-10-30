@@ -39,11 +39,11 @@ const initializeDb = () => {
     let users = readDb<Record<string, User>>(DB_KEY_USERS, {});
     if (Object.keys(users).length === 0) {
         const mockUsers: Omit<User, 'wallet'>[] = [
-            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', name: 'Amina', role: UserRole.Student, points: 250, level: LearningPath.Advanced, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 2, quizRewinds: 5, unlockedBanners: [], unlockedThemes: ['default'] },
-            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', name: 'Kwame', role: UserRole.Student, points: 190, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 1, unlockedBanners: [], unlockedThemes: ['default'] },
-            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', name: 'Fatou', role: UserRole.Teacher, points: 175, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
-            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', name: 'Chinedu', role: UserRole.Parent, points: 150, level: LearningPath.Beginner, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], childEmail: 'zola@example.com' },
-            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', name: 'Zola', role: UserRole.Student, points: 120, level: LearningPath.Beginner, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'] },
+            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', name: 'Amina', role: UserRole.Student, points: 250, level: LearningPath.Advanced, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 2, quizRewinds: 5, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
+            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', name: 'Kwame', role: UserRole.Student, points: 190, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 1, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
+            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', name: 'Fatou', role: UserRole.Teacher, points: 175, level: LearningPath.Intermediate, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
+            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', name: 'Chinedu', role: UserRole.Parent, points: 150, level: LearningPath.Beginner, completedModules: ['what-is-ai', 'how-ai-works'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], childEmail: 'zola@example.com', isPro: false },
+            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', name: 'Zola', role: UserRole.Student, points: 120, level: LearningPath.Beginner, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
         ];
         const usersDb = mockUsers.reduce((acc, user) => {
             acc[user.email] = { ...user, wallet: initializeDefaultWallet(user.points) };
@@ -98,6 +98,7 @@ export const apiService = {
         if (!user.unlockedBanners) user.unlockedBanners = [];
         if (!user.unlockedThemes) user.unlockedThemes = ['default'];
         if (!user.role) user.role = UserRole.Student; // Add default role
+        if (user.isPro === undefined) user.isPro = false;
         // --- End Initialization ---
 
         const today = getTodayDateString();
@@ -174,6 +175,7 @@ export const apiService = {
           quizRewinds: 0,
           unlockedBanners: [],
           unlockedThemes: ['default'],
+          isPro: false,
         };
         users[lowercasedEmail] = newUser;
         writeDb(DB_KEY_USERS, users);

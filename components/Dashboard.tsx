@@ -6,18 +6,26 @@ import { Page, Module, UserRole, AppContextType } from '../types';
 import { Sword, UserCircle, ArrowRight, BarChart3, BookCopy, Star, Users, Wallet, BookMarked, Mic, Briefcase, Sparkles, ClipboardList, MessageSquare } from 'lucide-react';
 import { useTranslations } from '../i18n';
 
-const FeatureButton: React.FC<{ icon: React.ReactNode; title: string; description: string; onClick: () => void }> = ({ icon, title, description, onClick }) => (
-    <button onClick={onClick} className="w-full text-left bg-white p-4 md:p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 md:gap-5 group border-2 border-transparent hover:border-primary">
-        <div className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-colors group-hover:bg-primary group-hover:text-white">
-            {icon}
-        </div>
-        <div className="flex-grow">
-            <h3 className="font-bold text-neutral-800 text-lg">{title}</h3>
-            <p className="text-base text-neutral-500">{description}</p>
-        </div>
-         <ArrowRight className="text-neutral-300 group-hover:text-primary transition-transform group-hover:translate-x-1" size={24} />
-    </button>
-);
+const FeatureButton: React.FC<{ icon: React.ReactNode; title: string; description: string; onClick: () => void; isProFeature?: boolean }> = ({ icon, title, description, onClick, isProFeature }) => {
+    const t = useTranslations();
+    return (
+        <button onClick={onClick} className="w-full text-left bg-white p-4 md:p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-4 md:gap-5 group border-2 border-transparent hover:border-primary">
+            <div className="flex-shrink-0 w-12 h-12 md:w-16 md:h-16 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-colors group-hover:bg-primary group-hover:text-white">
+                {icon}
+            </div>
+            <div className="flex-grow">
+                 <h3 className="font-bold text-neutral-800 text-lg flex items-center gap-2">
+                    {title}
+                    {isProFeature && (
+                        <span className="text-xs font-bold bg-primary text-white px-2 py-0.5 rounded-full">{t.proPlan.badge}</span>
+                    )}
+                </h3>
+                <p className="text-base text-neutral-500">{description}</p>
+            </div>
+             <ArrowRight className="text-neutral-300 group-hover:text-primary transition-transform group-hover:translate-x-1" size={24} />
+        </button>
+    );
+};
 
 const ProgressSummary: React.FC = () => {
     // FIX: Cast context to the correct type to resolve TS inference errors.
@@ -69,12 +77,20 @@ export const Dashboard: React.FC = () => {
   // FIX: Cast context to the correct type to resolve TS inference errors.
   const context = useContext(AppContext) as AppContextType | null;
   if (!context) throw new Error("Dashboard must be used within an AppProvider");
-  const { user, setCurrentPage } = context;
+  const { user, setCurrentPage, openUpgradeModal } = context;
   const t = useTranslations();
 
   if (!user || !user.level) {
     return null; // Or a loading/error state if level can be null temporarily
   }
+  
+  const handleFeatureClick = (page: Page, title: string, isPro: boolean) => {
+    if (isPro && !user?.isPro) {
+        openUpgradeModal(title);
+    } else {
+        setCurrentPage(page);
+    }
+  };
 
   const userPathModules = LEARNING_PATHS[user.level].modules;
 
@@ -104,25 +120,29 @@ export const Dashboard: React.FC = () => {
             icon={<MessageSquare size={32} />}
             title={t.aiTutor.title}
             description={t.aiTutor.description}
-            onClick={() => setCurrentPage(Page.AiTutor)}
+            onClick={() => handleFeatureClick(Page.AiTutor, t.aiTutor.title, true)}
+            isProFeature={true}
         />
         <FeatureButton 
             icon={<Sparkles size={32} />}
             title={t.dashboard.creationStudioTitle}
             description={t.dashboard.creationStudioDescription}
-            onClick={() => setCurrentPage(Page.CreationStudio)}
+            onClick={() => handleFeatureClick(Page.CreationStudio, t.dashboard.creationStudioTitle, true)}
+            isProFeature={true}
         />
         <FeatureButton 
             icon={<Mic size={32} />}
             title={t.dashboard.podcastGeneratorTitle}
             description={t.dashboard.podcastGeneratorDescription}
-            onClick={() => setCurrentPage(Page.PodcastGenerator)}
+            onClick={() => handleFeatureClick(Page.PodcastGenerator, t.dashboard.podcastGeneratorTitle, true)}
+            isProFeature={true}
         />
         <FeatureButton 
             icon={<Briefcase size={32} />}
             title={t.dashboard.careerExplorerTitle}
             description={t.dashboard.careerExplorerDescription}
-            onClick={() => setCurrentPage(Page.CareerExplorer)}
+            onClick={() => handleFeatureClick(Page.CareerExplorer, t.dashboard.careerExplorerTitle, true)}
+            isProFeature={true}
         />
         <FeatureButton 
             icon={<Wallet size={32} />}
@@ -134,7 +154,8 @@ export const Dashboard: React.FC = () => {
             icon={<Users size={32} />}
             title={t.dashboard.multiplayerTitle}
             description={t.dashboard.multiplayerDescription}
-            onClick={() => setCurrentPage(Page.PeerPractice)}
+            onClick={() => handleFeatureClick(Page.PeerPractice, t.dashboard.multiplayerTitle, true)}
+            isProFeature={true}
         />
         <FeatureButton 
             icon={<Sword size={32} />}
@@ -152,7 +173,8 @@ export const Dashboard: React.FC = () => {
             icon={<ClipboardList size={32} />}
             title={t.dashboard.myPortfolioTitle}
             description={t.dashboard.myPortfolioDescription}
-            onClick={() => setCurrentPage(Page.StudentPortfolio)}
+            onClick={() => handleFeatureClick(Page.StudentPortfolio, t.dashboard.myPortfolioTitle, true)}
+            isProFeature={true}
         />
         <FeatureButton 
             icon={<BarChart3 size={32} />}

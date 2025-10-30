@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useCallback, useRef } from 'react';
 import { AppContext } from './AppContext';
 import { geminiService } from '../services/geminiService';
-import { Loader2, Bot, User, RefreshCw } from 'lucide-react';
+import { Loader2, Bot, User, RefreshCw, Lock } from 'lucide-react';
 import { useTranslations } from '../i18n';
 import { Difficulty, AppContextType } from '../types';
 
@@ -9,7 +9,7 @@ export const AiVsHumanGame: React.FC = () => {
   // FIX: Cast context to the correct type to resolve TS inference errors.
   const context = useContext(AppContext) as AppContextType | null;
   if (!context) throw new Error("AiVsHumanGame must be used within an AppProvider");
-  const { language, user, addTransaction } = context;
+  const { language, user, addTransaction, openUpgradeModal } = context;
   const t = useTranslations();
   
   const [content, setContent] = useState<{ text: string; isAi: boolean } | null>(null);
@@ -75,6 +75,14 @@ export const AiVsHumanGame: React.FC = () => {
       setResult('incorrect');
     }
   };
+  
+  const handleDifficultyChange = (newDifficulty: Difficulty) => {
+    if (newDifficulty === 'Hard' && !user?.isPro) {
+        openUpgradeModal(`${t.game.title} (${t.game.hard})`);
+        return;
+    }
+    setDifficulty(newDifficulty);
+  };
 
   const getResultClasses = () => {
     if (result === 'correct') return 'bg-green-100 border-green-400 text-green-900';
@@ -113,16 +121,17 @@ export const AiVsHumanGame: React.FC = () => {
                 <span className="font-bold text-neutral-600">{t.game.difficulty}:</span>
                 <div className="flex gap-2 p-1 bg-neutral-100 rounded-lg">
                     <button
-                        onClick={() => setDifficulty('Easy')}
+                        onClick={() => handleDifficultyChange('Easy')}
                         className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors ${difficulty === 'Easy' ? 'bg-primary text-white shadow' : 'text-neutral-500 hover:bg-neutral-200'}`}
                     >
                         {t.game.easy}
                     </button>
                     <button
-                        onClick={() => setDifficulty('Hard')}
-                        className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors ${difficulty === 'Hard' ? 'bg-primary text-white shadow' : 'text-neutral-500 hover:bg-neutral-200'}`}
+                        onClick={() => handleDifficultyChange('Hard')}
+                        className={`px-4 py-1.5 rounded-md text-sm font-semibold transition-colors flex items-center gap-1.5 ${difficulty === 'Hard' ? 'bg-primary text-white shadow' : 'text-neutral-500 hover:bg-neutral-200'}`}
                     >
                         {t.game.hard}
+                        {!user.isPro && <Lock size={12} />}
                     </button>
                 </div>
             </div>
