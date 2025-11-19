@@ -8,7 +8,7 @@ import { Loader2, Clipboard, Check, Users, Play, Crown, LogIn, Share2 } from 'lu
 export const PracticeLobby: React.FC = () => {
   const context = useContext(AppContext);
   if (!context) throw new Error("PracticeLobby must be used within an AppProvider");
-  const { user, language, gameSession, setGameSession } = context;
+  const { user, language, gameSession, setGameSession, isLowDataMode } = context;
 
   const [isLoading, setIsLoading] = useState<'create' | 'join' | 'start' | null>(null);
   const [gameCode, setGameCode] = useState('');
@@ -16,8 +16,10 @@ export const PracticeLobby: React.FC = () => {
   const [isCopied, setIsCopied] = useState(false);
 
   // Polling for session updates
+  // Performance Audit: Adjusted polling frequency based on Low Data Mode.
   useEffect(() => {
     if (gameSession && gameSession.status === 'waiting') {
+      const pollInterval = isLowDataMode ? 10000 : 2000; // 10s for low data, 2s for normal
       const interval = setInterval(async () => {
         try {
           const updatedSession = await apiService.getGameSession(gameSession.code);
@@ -25,10 +27,10 @@ export const PracticeLobby: React.FC = () => {
         } catch (err) {
           console.error("Failed to poll session", err);
         }
-      }, 2000); // Poll every 2 seconds
+      }, pollInterval);
       return () => clearInterval(interval);
     }
-  }, [gameSession, setGameSession]);
+  }, [gameSession, setGameSession, isLowDataMode]);
 
   if (!user) return null;
 

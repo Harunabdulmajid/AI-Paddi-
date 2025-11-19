@@ -1,23 +1,42 @@
-import { BrainCircuit, BookOpen, Bot, ShieldCheck, Briefcase, Star, Award, Trophy, Swords, Zap, Paintbrush, Medal, GraduationCap, Users, MessageSquarePlus, RotateCcw, Image as ImageIcon, Palette, Gift, HeartHandshake, Leaf, Landmark, PenTool, Shield, Globe } from 'lucide-react';
+import { BrainCircuit, BookOpen, Bot, ShieldCheck, Briefcase, Star, Award, Trophy, Swords, Zap, Paintbrush, Medal, GraduationCap, Users, MessageSquarePlus, RotateCcw, Image as ImageIcon, Palette, Gift, HeartHandshake, Leaf, Landmark, PenTool, Shield, Globe, Puzzle, Layers, FileText, LineChart, Construction, Lock, Scale } from 'lucide-react';
 import { Badge, MarketplaceItem, User, Language, LearningPath } from './types';
 
 export const CURRICULUM_MODULES = [
+  // Level 1 - Foundation
   {
     id: 'what-is-ai',
     icon: BrainCircuit,
   },
   {
-    id: 'how-ai-works',
-    icon: BookOpen,
+    id: 'ai-building-blocks',
+    icon: Puzzle,
   },
   {
     id: 'ai-in-daily-life',
     icon: Bot,
   },
+  // Level 2 - Core Concepts
+  {
+    id: 'how-ai-works',
+    icon: BookOpen,
+  },
+  {
+    id: 'types-of-ai',
+    icon: Layers,
+  },
+  {
+    id: 'prompt-engineering',
+    icon: PenTool,
+  },
   {
     id: 'risks-and-bias',
     icon: ShieldCheck,
   },
+  {
+    id: 'data-privacy',
+    icon: Lock,
+  },
+  // Level 3 - Application & Impact
   {
     id: 'ai-safety',
     icon: Shield,
@@ -31,20 +50,55 @@ export const CURRICULUM_MODULES = [
     icon: Globe,
   },
   {
-    id: 'prompt-engineering',
-    icon: PenTool,
+    id: 'ai-for-writing',
+    icon: FileText,
+  },
+  {
+    id: 'ai-for-art',
+    icon: ImageIcon,
+  },
+  {
+    id: 'ai-in-business',
+    icon: LineChart,
+  },
+  {
+    id: 'building-with-ai',
+    icon: Construction,
+  },
+  {
+    id: 'ai-and-society',
+    icon: Scale,
   },
 ];
 
 export const LEARNING_PATHS = {
-  [LearningPath.Beginner]: {
-    modules: ['what-is-ai', 'ai-in-daily-life'],
+  [LearningPath.Explorer]: {
+    levels: [
+      ['what-is-ai', 'ai-building-blocks', 'ai-in-daily-life'], // Level 1
+      ['how-ai-works', 'types-of-ai'], // Level 2
+      ['ai-and-jobs', 'digital-citizenship'], // Level 3
+    ],
   },
-  [LearningPath.Intermediate]: {
-    modules: ['how-ai-works', 'risks-and-bias', 'ai-safety'],
+  [LearningPath.Creator]: {
+    levels: [
+      ['what-is-ai', 'ai-building-blocks', 'ai-in-daily-life'], // Level 1
+      ['prompt-engineering', 'ai-for-writing'], // Level 2
+      ['ai-for-art', 'digital-citizenship'], // Level 3
+    ],
   },
-  [LearningPath.Advanced]: {
-    modules: ['ai-and-jobs', 'digital-citizenship', 'prompt-engineering'],
+  [LearningPath.Innovator]: {
+    levels: [
+      ['what-is-ai', 'ai-building-blocks', 'ai-in-daily-life'], // Level 1
+      ['how-ai-works', 'ai-in-business'], // Level 2
+      ['building-with-ai', 'ai-and-jobs'], // Level 3
+    ],
+  },
+  [LearningPath.Ethicist]: {
+    levels: [
+      ['what-is-ai', 'ai-building-blocks', 'ai-in-daily-life'], // Level 1
+      ['risks-and-bias', 'data-privacy'], // Level 2
+      ['ai-safety', 'ai-and-society'], // Level 3
+    ],
   },
 };
 
@@ -52,22 +106,22 @@ export const CAREER_PROFILES = [
   {
     id: 'agritech-specialist',
     icon: Leaf,
-    relevantModuleIds: ['ai-in-daily-life', 'how-ai-works'],
+    relevantModuleIds: ['ai-in-daily-life', 'how-ai-works', 'ai-in-business'],
   },
   {
     id: 'fintech-ml-engineer',
     icon: Landmark,
-    relevantModuleIds: ['how-ai-works', 'risks-and-bias'],
+    relevantModuleIds: ['how-ai-works', 'risks-and-bias', 'types-of-ai'],
   },
   {
     id: 'ai-content-creator',
     icon: PenTool,
-    relevantModuleIds: ['what-is-ai', 'ai-in-daily-life', 'digital-citizenship', 'prompt-engineering'],
+    relevantModuleIds: ['prompt-engineering', 'ai-for-writing', 'ai-for-art', 'digital-citizenship'],
   },
   {
     id: 'ai-ethicist',
     icon: ShieldCheck,
-    relevantModuleIds: ['risks-and-bias', 'ai-and-jobs', 'ai-safety'],
+    relevantModuleIds: ['risks-and-bias', 'ai-safety', 'ai-and-society', 'data-privacy'],
   }
 ];
 
@@ -81,7 +135,7 @@ export const BADGES: Record<string, Badge> = {
   'ai-graduate': {
     id: 'ai-graduate',
     name: 'AI Graduate',
-    description: 'Completed the entire AI Literacy curriculum.',
+    description: 'Completed an entire AI Learning Path.',
     icon: Star,
   },
   'point-pioneer': {

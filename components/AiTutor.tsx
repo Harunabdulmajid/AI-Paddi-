@@ -5,7 +5,7 @@ import { geminiService } from '../services/geminiService';
 import { Chat } from '@google/genai';
 import { ChatMessage } from './ChatMessage';
 import { UserAvatar } from './Header';
-import { Loader2, Send, GraduationCap } from 'lucide-react';
+import { Loader2, Send, GraduationCap, AlertTriangle } from 'lucide-react';
 
 interface Message {
     text: string;
@@ -100,6 +100,13 @@ export const AiTutor: React.FC = () => {
                     )}
                     <div ref={messagesEndRef} />
                 </div>
+                
+                {/* Transparency/Safety Notice */}
+                <div className="px-6 py-2 bg-amber-50 border-t border-amber-100 text-xs text-amber-700 flex items-center justify-center gap-2">
+                    <AlertTriangle size={12} />
+                    <span>AI can make mistakes. Always check important information.</span>
+                </div>
+
                 <div className="p-4 bg-neutral-100 border-t border-neutral-200">
                     <form onSubmit={handleSendMessage} className="flex items-center gap-3">
                         <textarea

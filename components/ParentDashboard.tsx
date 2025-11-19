@@ -121,7 +121,8 @@ export const ParentDashboard: React.FC = () => {
         );
     }
     
-    const childPathModules = childData.level ? LEARNING_PATHS[childData.level].modules : [];
+    // FIX: Access the `levels` property and flatten the array to get all module IDs for the child's learning path.
+    const childPathModules = childData.level ? LEARNING_PATHS[childData.level].levels.flat() : [];
     const curriculumTopics: Module[] = CURRICULUM_MODULES
         .filter(module => childPathModules.includes(module.id))
         .map(module => ({

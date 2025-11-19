@@ -1,9 +1,10 @@
 import React from 'react';
 
 export enum LearningPath {
-  Beginner = 'Beginner',
-  Intermediate = 'Intermediate',
-  Advanced = 'Advanced',
+  Explorer = 'Explorer',
+  Creator = 'Creator',
+  Innovator = 'Innovator',
+  Ethicist = 'Ethicist',
 }
 
 export enum Language {
@@ -131,6 +132,7 @@ export interface Question {
   correctAnswerIndex: number; // Unused for fill-in-the-blank
   answer?: string; // For fill-in-the-blank questions
   explanation: string;
+  hint?: string;
 }
 
 
@@ -223,4 +225,7 @@ export interface AppContextType {
   isListening: boolean;
   // Pro Plan
   openUpgradeModal: (featureName: string) => void;
+  // Accessibility & Performance
+  isLowDataMode: boolean;
+  toggleLowDataMode: () => void;
 }

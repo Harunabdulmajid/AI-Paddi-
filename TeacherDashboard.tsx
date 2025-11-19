@@ -1,10 +1,9 @@
 import React, { useContext } from 'react';
-// FIX: Correct the import path for AppContext.
-import { AppContext } from './AppContext';
-import { useTranslations } from '../i18n';
-import { Page } from '../types';
+import { AppContext } from './components/AppContext';
+import { useTranslations } from './i18n';
+import { Page } from './types';
 import { ArrowRight, BookOpen, Briefcase, Users } from 'lucide-react';
-import { ClassManagement } from './ClassManagement';
+import { ClassManagement } from './components/ClassManagement';
 
 const FeatureButton: React.FC<{ icon: React.ReactNode; title: string; description: string; onClick: () => void }> = ({ icon, title, description, onClick }) => (
      <button onClick={onClick} className="w-full text-left bg-white p-6 rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-5 group border-2 border-transparent hover:border-primary">

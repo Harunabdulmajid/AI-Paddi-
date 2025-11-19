@@ -14,7 +14,7 @@ import { useLocalStorage } from './services/hooks/useLocalStorage';
 import { Leaderboard } from './components/Leaderboard';
 import { apiService } from './services/apiService';
 import { Toast } from './components/Toast';
-import { BADGES, CURRICULUM_MODULES } from './constants';
+import { BADGES, CURRICULUM_MODULES, LEARNING_PATHS } from './constants';
 import { dbService } from './services/db';
 import { geminiService } from './services/geminiService';
 import { SettingsModal } from './components/SettingsModal';
@@ -23,7 +23,7 @@ import { Wallet } from './components/Wallet';
 import { Glossary } from './components/Glossary';
 import { PodcastGenerator } from './components/PodcastGenerator';
 import { CareerExplorer } from './components/CareerExplorer';
-import { TeacherDashboard } from './components/TeacherDashboard';
+import { TeacherDashboard } from './TeacherDashboard';
 import { ParentDashboard } from './components/ParentDashboard';
 import { CreationStudio } from './components/ProjectSandbox';
 import { StudentPortfolio } from './components/StudentPortfolio';
@@ -43,6 +43,7 @@ const App: React.FC = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [downloadedModules, setDownloadedModules] = useState<string[]>([]);
   const [isVoiceModeEnabled, setIsVoiceModeEnabled] = useLocalStorage('voiceMode', false);
+  const [isLowDataMode, setIsLowDataMode] = useLocalStorage('lowDataMode', false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { isListening, speak, startContinuousListening, stopListening } = useSpeech();
   
@@ -280,7 +281,7 @@ const App: React.FC = () => {
   }, [user, isOnline, showToast]);
 
   const completeModule = useCallback(async (moduleId: string) => {
-    if (!user || user.completedModules.includes(moduleId)) return;
+    if (!user || user.completedModules.includes(moduleId) || !user.level) return;
     
     const updatedCompletedModules = [...user.completedModules, moduleId];
     
@@ -303,9 +304,14 @@ const App: React.FC = () => {
     if(updatedCompletedModules.length === 1) {
       awardBadge('first-step');
     }
-    if(updatedCompletedModules.length === CURRICULUM_MODULES.length) {
+    
+    // Check for path completion
+    const userPathModules = LEARNING_PATHS[user.level].levels.flat();
+    const completedInPath = updatedCompletedModules.filter(id => userPathModules.includes(id));
+    if (completedInPath.length === userPathModules.length) {
       awardBadge('ai-graduate');
     }
+
   }, [user, isOnline, awardBadge, addTransaction, t.curriculum]);
 
   const downloadModule = useCallback(async (moduleId: string) => {
@@ -331,6 +337,10 @@ const App: React.FC = () => {
         alert("Voice-First mode requires microphone access to function. Please allow access if prompted.");
     }
     setIsVoiceModeEnabled(!isVoiceModeEnabled);
+  };
+
+  const toggleLowDataMode = () => {
+      setIsLowDataMode(!isLowDataMode);
   };
   
   const openUpgradeModal = (featureName: string) => {
@@ -366,7 +376,9 @@ const App: React.FC = () => {
     speak,
     isListening,
     openUpgradeModal,
-  }), [user, language, setLanguage, currentPage, activeModuleId, gameSession, isOnline, downloadedModules, isVoiceModeEnabled, addTransaction, completeModule, awardBadge, downloadModule, speak, isListening, logout, handleSetUser]);
+    isLowDataMode,
+    toggleLowDataMode,
+  }), [user, language, setLanguage, currentPage, activeModuleId, gameSession, isOnline, downloadedModules, isVoiceModeEnabled, addTransaction, completeModule, awardBadge, downloadModule, speak, isListening, logout, handleSetUser, isLowDataMode, toggleLowDataMode]);
 
   const renderCurrentPage = () => {
     // Gated Pages

@@ -1,7 +1,7 @@
 // FIX: Import `useEffect` from React to resolve the "Cannot find name 'useEffect'" error.
 import React, { useContext, useRef, useCallback, useState, useEffect } from 'react';
 import { AppContext } from './AppContext';
-import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Wallet, Feather, BookOpen, BrainCircuit } from 'lucide-react';
+import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Wallet, Feather, BookOpen, BrainCircuit, PenTool, Briefcase } from 'lucide-react';
 import { LearningPath, User, Page, AppContextType } from '../types';
 import { useTranslations } from '../i18n';
 // FIX: Import the `BADGES` constant to resolve the "Cannot find name 'BADGES'" error.
@@ -104,9 +104,10 @@ const AvatarSelectionModal: React.FC<AvatarSelectionModalProps> = ({ isOpen, onC
 const PathSelectionModal: React.FC<{ isOpen: boolean, onClose: () => void, onSelect: (path: LearningPath) => void, currentPath: LearningPath }> = ({ isOpen, onClose, onSelect, currentPath }) => {
     const t = useTranslations();
     const paths = [
-        { level: LearningPath.Beginner, icon: Feather },
-        { level: LearningPath.Intermediate, icon: BookOpen },
-        { level: LearningPath.Advanced, icon: BrainCircuit },
+        { level: LearningPath.Explorer, icon: Feather },
+        { level: LearningPath.Creator, icon: PenTool },
+        { level: LearningPath.Innovator, icon: Briefcase },
+        { level: LearningPath.Ethicist, icon: ShieldCheck },
     ];
 
     if (!isOpen) return null;
@@ -118,7 +119,7 @@ const PathSelectionModal: React.FC<{ isOpen: boolean, onClose: () => void, onSel
                     <X size={24} />
                 </button>
                 <h2 className="text-2xl font-bold text-neutral-800">Change Learning Path</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
                     {paths.map(({ level, icon: Icon }) => (
                         <button
                             key={level}
@@ -221,7 +222,7 @@ export const Profile: React.FC = () => {
         setSelectedPath(null);
     };
 
-    const userPathModules = user.level ? LEARNING_PATHS[user.level].modules : [];
+    const userPathModules = user.level ? LEARNING_PATHS[user.level].levels.flat() : [];
     const completedModulesCount = user.completedModules.filter(id => userPathModules.includes(id)).length;
     const totalModules = userPathModules.length;
     const progressPercentage = totalModules > 0 ? (completedModulesCount / totalModules) * 100 : 0;
@@ -295,7 +296,7 @@ export const Profile: React.FC = () => {
                             </div>
                         )}
 
-                        <p className="text-neutral-500 text-base md:text-lg mt-1">{t.profile.learnerLevel(user.level || LearningPath.Beginner)}</p>
+                        <p className="text-neutral-500 text-base md:text-lg mt-1">{t.profile.learnerLevel(user.level || LearningPath.Explorer)}</p>
                         <div className="mt-6 inline-flex items-center gap-2 bg-amber-100 text-amber-800 font-bold px-6 py-3 rounded-full text-base md:text-lg">
                             <Award size={22} />
                             {user.points} {t.profile.points}

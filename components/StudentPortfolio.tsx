@@ -37,7 +37,8 @@ export const StudentPortfolio: React.FC = () => {
           });
     }, [user.name]);
 
-    const userPathModules = user.level ? LEARNING_PATHS[user.level].modules : [];
+    // FIX: Access the `levels` property and flatten the array to get all module IDs for the user's learning path.
+    const userPathModules = user.level ? LEARNING_PATHS[user.level].levels.flat() : [];
     const completedModules = user.completedModules
         .filter(id => userPathModules.includes(id))
         .map(id => t.curriculum[id]?.title || 'Unknown Module')

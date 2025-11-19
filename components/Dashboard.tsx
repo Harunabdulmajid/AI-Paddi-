@@ -36,7 +36,7 @@ const ProgressSummary: React.FC = () => {
     
     if (!user || !user.level) return null;
     
-    const userPathModules = LEARNING_PATHS[user.level].modules;
+    const userPathModules = LEARNING_PATHS[user.level].levels.flat();
     const completedCount = user.completedModules.filter(id => userPathModules.includes(id)).length;
     const totalCount = userPathModules.length;
     const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
@@ -92,15 +92,7 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  const userPathModules = LEARNING_PATHS[user.level].modules;
-
-  const curriculumTopics: Module[] = CURRICULUM_MODULES
-    .filter(module => userPathModules.includes(module.id))
-    .map(module => ({
-        ...module,
-        title: t.curriculum[module.id].title,
-        description: t.curriculum[module.id].description,
-    }));
+  const userPathLevels = LEARNING_PATHS[user.level].levels;
     
   const subGreeting = user.role === UserRole.Parent ? t.dashboard.subGreetingParent : t.dashboard.subGreeting;
 
@@ -190,19 +182,39 @@ export const Dashboard: React.FC = () => {
         />
       </div>
 
-      <div>
-        <h3 className="text-2xl md:text-3xl font-bold text-neutral-800 mb-6">{t.dashboard.learningPathTitle}</h3>
-        {curriculumTopics.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {curriculumTopics.map((module) => (
-                    <ModuleCard key={module.id} module={module} />
-                ))}
-            </div>
-        ) : (
-            <div className="bg-white p-8 rounded-2xl text-center">
-                <p className="text-neutral-500">No modules available for your current path.</p>
-            </div>
-        )}
+      <div className="space-y-12">
+        {userPathLevels.map((levelModuleIds, levelIndex) => {
+             const curriculumTopics: Module[] = levelModuleIds
+                .map(moduleId => {
+                    const moduleData = CURRICULUM_MODULES.find(m => m.id === moduleId);
+                    if (!moduleData) return null;
+                    return {
+                        ...moduleData,
+                        title: t.curriculum[moduleId].title,
+                        description: t.curriculum[moduleId].description,
+                    };
+                })
+                .filter((m): m is Module => m !== null);
+            
+            return (
+                <div key={levelIndex}>
+                    <h3 className="text-2xl md:text-3xl font-bold text-neutral-800 mb-6 border-b-2 border-primary/20 pb-2">
+                        Level {levelIndex + 1}: <span className="text-primary">{t.dashboard.learningPathLevels[levelIndex]}</span>
+                    </h3>
+                    {curriculumTopics.length > 0 ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {curriculumTopics.map((module) => (
+                                <ModuleCard key={module.id} module={module} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-white p-8 rounded-2xl text-center">
+                            <p className="text-neutral-500">No modules available for this level.</p>
+                        </div>
+                    )}
+                </div>
+            );
+        })}
       </div>
     </main>
   );

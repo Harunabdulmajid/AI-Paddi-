@@ -33,7 +33,7 @@ const ProgressTracker: React.FC<{ players: Player[], currentQuestionIndex: numbe
 export const PracticeGame: React.FC = () => {
     const context = useContext(AppContext);
     if (!context) throw new Error("PracticeGame must be used within an AppProvider");
-    const { gameSession, setGameSession, user } = context;
+    const { gameSession, setGameSession, user, isLowDataMode } = context;
     const t = useTranslations();
 
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -50,7 +50,9 @@ export const PracticeGame: React.FC = () => {
         : null;
 
     // Polling for game state updates
+    // Performance Audit: Adjusted polling frequency based on Low Data Mode.
     useEffect(() => {
+        const pollInterval = isLowDataMode ? 10000 : 2000;
         const interval = setInterval(async () => {
             if (gameSession && gameSession.status === 'in-progress') {
                 try {
@@ -60,9 +62,9 @@ export const PracticeGame: React.FC = () => {
                     console.error("Failed to poll session", err);
                 }
             }
-        }, 2000);
+        }, pollInterval);
         return () => clearInterval(interval);
-    }, [gameSession, setGameSession]);
+    }, [gameSession, setGameSession, isLowDataMode]);
 
     // Reset for next question
     useEffect(() => {

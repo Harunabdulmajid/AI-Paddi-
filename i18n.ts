@@ -57,6 +57,21 @@ export type Translation = {
       parent: string;
       parentDescription: string;
     };
+    createClass: {
+        title: string;
+        description: string;
+        placeholder: string;
+        ctaButton: string;
+        successMessage: string;
+    };
+    linkChild: {
+        title: string;
+        description: string;
+        placeholder: string;
+        ctaButton: string;
+        successMessage: string;
+    };
+    skipButton: string;
     ctaButton: string;
     signInButton: string;
     signUpButton: string;
@@ -101,6 +116,7 @@ export type Translation = {
     myPortfolioTitle: string;
     myPortfolioDescription: string;
     learningPathTitle: string;
+    learningPathLevels: string[];
   };
   aiTutor: {
     title: string;
@@ -253,6 +269,7 @@ export type Translation = {
     quizCorrect: (points: number) => string;
     quizIncorrect: string;
     nextQuestionButton: string;
+    tryAgainButton: string;
     completionModalTitle: string;
     completionModalPoints: (points: number) => string;
     badgeUnlocked: string;
@@ -458,6 +475,8 @@ export type Translation = {
     completedModules: string;
     badgesEarned: string;
   },
+// FIX: Converted implementation logic to type signatures for the proPlan object.
+// The previous code had function bodies and string literals, which are not valid in a type definition.
   proPlan: {
     badge: string;
     modalTitle: (featureName: string) => string;
@@ -524,6 +543,21 @@ export const englishTranslations: Translation = {
       parent: "I'm a Parent",
       parentDescription: "I want to guide my child's learning journey.",
     },
+    createClass: {
+        title: "Create Your First Class",
+        description: "Let's get your virtual classroom set up. Give your class a name to begin.",
+        placeholder: "e.g., JSS1 Computer Studies",
+        ctaButton: "Create Class",
+        successMessage: "Class Created!",
+    },
+    linkChild: {
+        title: "Link Your Child's Account",
+        description: "To see your child's progress, enter the email address they use for their AI Paddi account.",
+        placeholder: "Your child's email address",
+        ctaButton: "Link Account",
+        successMessage: "Account Linked!",
+    },
+    skipButton: "Skip for Now",
     ctaButton: "Start Learning!",
     signInButton: "Sign In",
     signUpButton: "Create Account",
@@ -568,6 +602,7 @@ export const englishTranslations: Translation = {
     myPortfolioTitle: "My Portfolio",
     myPortfolioDescription: "Generate a shareable summary of your learning achievements.",
     learningPathTitle: "Your Learning Path",
+    learningPathLevels: ["Foundations", "Specialization", "Advanced Application"],
   },
   aiTutor: {
     title: "AI Tutor",
@@ -686,7 +721,7 @@ aiButton: "AI",
   profile: {
     title: "My Profile",
     description: "Here's a snapshot of your incredible learning journey so far.",
-    learnerLevel: (level) => `${level} Learner`,
+    learnerLevel: (level: LearningPath) => `${level} Path`,
     points: "Points",
     progressTitle: "Learning Progress",
     progressDescription: (completed, total) => `You have completed ${completed} of ${total} modules.`,
@@ -720,6 +755,7 @@ aiButton: "AI",
     quizCorrect: (points) => `Correct! +${points} Points`,
     quizIncorrect: "Not quite.",
     nextQuestionButton: "Next Question",
+    tryAgainButton: "Try Again",
     completionModalTitle: "Lesson Complete!",
     completionModalPoints: (points) => `You earned ${points} points!`,
     badgeUnlocked: "Badge Unlocked!",
@@ -1006,14 +1042,16 @@ aiButton: "AI",
               question: 'What is the main goal of AI?',
               options: ['To make computers faster', 'To make computers think and learn like humans', 'To replace all human jobs', 'To create movie robots'],
               correctAnswerIndex: 1,
-              explanation: "That's right! AI is all about creating computer systems that can perform tasks that usually require human intelligence."
+              explanation: "That's right! AI is all about creating computer systems that can perform tasks that usually require human intelligence.",
+              hint: "Think about the main purpose. Is it about speed, or something more... intelligent?",
             },
             {
               type: 'multiple-choice',
               question: 'What does AI use to learn?',
               options: ['Electricity', 'Magic', 'Data (information)', 'Internet speed'],
               correctAnswerIndex: 2,
-              explanation: "Correct! AI systems are trained on large amounts of data to recognize patterns and make decisions."
+              explanation: "Correct! AI systems are trained on large amounts of data to recognize patterns and make decisions.",
+              hint: "What is the 'food' that AI needs to learn and grow smart?",
             },
             {
 // FIX: Added missing 'options' and 'correctAnswerIndex' properties to conform to the Question type.
@@ -1022,7 +1060,59 @@ aiButton: "AI",
               options: [],
               correctAnswerIndex: -1,
               answer: "Narrow",
-              explanation: "Exactly! All the AI we use today, from Siri to Google Maps, is considered 'Narrow AI' because it's specialized for specific jobs."
+              explanation: "Exactly! All the AI we use today, from Siri to Google Maps, is considered 'Narrow AI' because it's specialized for specific jobs.",
+              hint: "It's the opposite of a 'General' AI that can do anything.",
+            }
+          ]
+        }
+      }
+    },
+    'ai-building-blocks': {
+      title: 'AI\'s Building Blocks',
+      description: 'Learn about the essential ingredients of AI: Data, Algorithms, and Models. The foundation for everything!',
+      lessonContent: {
+        title: 'The Three Pillars of AI',
+        introduction: "To really understand how AI works, we need to know about its three most important parts: Data, Algorithms, and Models. Think of it like building a house. You need bricks, a building plan, and the finished house itself.",
+        sections: [
+          {
+            heading: 'Pillar 1: Data (The Bricks)',
+            content: "Data is the raw material for AI. It's just information. For an AI that recognizes animals, the data would be thousands of pictures of dogs, cats, goats, and lions. For a language AI, the data would be millions of books and articles. Without good, high-quality data, you can't build good AI. The more diverse and accurate the data, the stronger the AI's foundation."
+          },
+          {
+            heading: 'Pillar 2: Algorithm (The Plan)',
+            content: "An Algorithm is the step-by-step instruction, or the 'building plan', that tells the computer how to learn from the data. It's the recipe. For example, a simple algorithm might say: 1. Look at a picture. 2. Identify shapes and colors. 3. Compare these patterns to patterns you've seen before. 4. Make a guess about what's in the picture. Engineers choose different algorithms for different jobs."
+          },
+          {
+            heading: 'Pillar 3: Model (The House)',
+            content: "The Model is the final product that is created after the algorithm has finished learning from all the data. It's the 'trained' AI, the finished house. When you ask Siri a question, you are talking to an AI model. When Google Maps finds you a route, you are using an AI model. The model contains all the knowledge and patterns learned during training, and it's what makes the predictions."
+          }
+        ],
+        summary: "AI is built on three pillars: Data (the information), Algorithms (the instructions for learning), and Models (the trained 'brain' that makes decisions). All three are needed to create a working AI system.",
+        quiz: {
+          questions: [
+            {
+              type: 'multiple-choice',
+              question: 'In the house analogy, what represents the "Data"?',
+              options: ['The building plan', 'The finished house', 'The bricks', 'The architect'],
+              correctAnswerIndex: 2,
+              explanation: "Correct! Data is the raw material, like bricks, that AI is built from.",
+              hint: "The lesson compared data to the raw materials for a house. What were they?",
+            },
+            {
+              type: 'multiple-choice',
+              question: 'What is the name for the set of instructions that tells the AI how to learn?',
+              options: ['A Model', 'A Data Point', 'A Program', 'An Algorithm'],
+              correctAnswerIndex: 3,
+              explanation: "Excellent! The algorithm is the recipe or plan for learning.",
+              hint: "This is the 'recipe' or the 'plan' that the AI follows.",
+            },
+            {
+              type: 'multiple-choice',
+              question: "When you use an AI tool, what are you directly interacting with?",
+              options: ['The raw data', 'The AI model', 'The algorithm', 'The engineer\'s computer'],
+              correctAnswerIndex: 1,
+              explanation: "That's right! The model is the output of the training process, and it's what we use to get predictions and answers.",
+              hint: "This is the final, trained product – the 'finished house'.",
             }
           ]
         }
@@ -1056,21 +1146,24 @@ aiButton: "AI",
               question: 'In AI, what is an algorithm?',
               options: ['A type of computer chip', 'The data used for training', 'A set of rules or a recipe for the computer to follow', 'The final AI program'],
               correctAnswerIndex: 2,
-              explanation: "That's it! An algorithm is the step-by-step procedure that tells the AI how to learn from the data."
+              explanation: "That's it! An algorithm is the step-by-step procedure that tells the AI how to learn from the data.",
+              hint: "It's the set of steps or the 'recipe' for learning.",
             },
             {
               type: 'multiple-choice',
               question: "The process of teaching an AI with data is called...",
               options: ['Cooking', 'Training', 'Downloading', 'Inference'],
               correctAnswerIndex: 1,
-              explanation: "Correct! Just like a student trains for an exam, an AI model is trained on data."
+              explanation: "Correct! Just like a student trains for an exam, an AI model is trained on data.",
+              hint: "It's the process of 'teaching' the AI, similar to how a student studies.",
             },
             {
               type: 'multiple-choice',
               question: "What is the 'brain' of the AI that is created after training?",
               options: ['The algorithm', 'The data', 'The computer', 'The model'],
               correctAnswerIndex: 3,
-              explanation: "Yes! The model is the output of the training process and is what you interact with when you use an AI tool."
+              explanation: "Yes! The model is the output of the training process and is what you interact with when you use an AI tool.",
+              hint: "This is the name for the AI's 'brain' after it has learned from the data.",
             }
           ]
         }
@@ -1108,14 +1201,16 @@ aiButton: "AI",
               question: 'When YouTube suggests a video for you to watch, what is that called?',
               options: ['A lucky guess', 'A recommendation engine', 'A social media filter', 'Predictive text'],
               correctAnswerIndex: 1,
-              explanation: "Exactly! Recommendation engines are a very common type of AI that learns your preferences."
+              explanation: "Exactly! Recommendation engines are a very common type of AI that learns your preferences.",
+              hint: "This system 'recommends' things to you based on what you like.",
             },
             {
               type: 'multiple-choice',
               question: 'How do mobile banking apps use AI?',
               options: ['To choose a cool app color', 'To count your money', 'To detect fraud and unusual activity', 'To send you marketing messages'],
               correctAnswerIndex: 2,
-              explanation: "Correct. AI is crucial for security in modern finance, helping to protect your account from unauthorized access."
+              explanation: "Correct. AI is crucial for security in modern finance, helping to protect your account from unauthorized access.",
+              hint: "Banks use AI to look for patterns of suspicious activity to keep you safe.",
             },
              {
 // FIX: Added missing 'options' and 'correctAnswerIndex' properties to conform to the Question type.
@@ -1124,11 +1219,63 @@ aiButton: "AI",
               options: [],
               correctAnswerIndex: -1,
               answer: "predictive",
-              explanation: "Yes! Predictive text is a simple but powerful AI that learns language patterns to help you type faster."
+              explanation: "Yes! Predictive text is a simple but powerful AI that learns language patterns to help you type faster.",
+              hint: "It 'predicts' what you're going to type next.",
             }
           ]
         }
       }
+    },
+    'types-of-ai': {
+        title: 'Types of AI',
+        description: 'Understand the difference between Machine Learning, Deep Learning, and Generative AI.',
+        lessonContent: {
+            title: 'Meet the AI Family',
+            introduction: "AI is a big field, like a big family with many relatives. The most important ones to know are Machine Learning, Deep Learning, and the newest star, Generative AI. Let's see how they're related.",
+            sections: [
+                {
+                    heading: 'Machine Learning (ML): The Foundation',
+                    content: "Machine Learning is the most common type of AI. It's the core idea of learning from data without being explicitly programmed. Most Narrow AI we use today is powered by Machine Learning. Recommendation engines and fraud detection systems are great examples of ML in action. It's excellent at prediction and classification tasks."
+                },
+                {
+                    heading: 'Deep Learning: The Powerful Brain',
+                    content: "Deep Learning is a special, more powerful type of Machine Learning. It uses something called a 'neural network', which is inspired by the human brain. These networks have many layers, which allow them to learn very complex patterns from huge amounts of data. Deep Learning is what makes things like voice assistants and self-driving cars possible. It's the engine behind the most advanced AI today."
+                },
+                {
+                    heading: 'Generative AI: The Creator',
+                    content: "Generative AI is a newer and very exciting type of Deep Learning. While other AIs predict or identify things, Generative AI *creates* new things. It can generate new text, images, music, and code that has never existed before. When you use ChatGPT to write a poem or Midjourney to create an image, you are using Generative AI. It's a tool for creativity."
+                }
+            ],
+            summary: "Machine Learning is the base of AI that learns from data. Deep Learning is a more advanced form of ML using 'neural networks' for complex tasks. Generative AI is a type of Deep Learning that can create brand new content.",
+            quiz: {
+                questions: [
+                    {
+                        type: 'multiple-choice',
+                        question: 'Which type of AI is focused on CREATING new content like images and text?',
+                        options: ['Machine Learning', 'Deep Learning', 'Generative AI', 'All of the above'],
+                        correctAnswerIndex: 2,
+                        explanation: "Correct! Generative AI is all about generating new, original content.",
+                        hint: "Which type is known for being a 'creator'?",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'Deep Learning uses a structure inspired by what?',
+                        options: ['A computer circuit', 'The human brain', 'A library', 'A search engine'],
+                        correctAnswerIndex: 1,
+                        explanation: "That's right! Deep Learning's 'neural networks' are loosely based on the structure of the human brain, allowing it to learn complex patterns.",
+                        hint: "Deep Learning's structure is inspired by a biological network.",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'A system that recommends movies on Netflix is a classic example of...',
+                        options: ['Generative AI', 'Machine Learning', 'General AI', 'A human curator'],
+                        correctAnswerIndex: 1,
+                        explanation: "Yes! Recommendation systems are one of the most common applications of Machine Learning. They predict what you will like based on data.",
+                        hint: "This is the most common and foundational type of AI, used for prediction.",
+                    }
+                ]
+            }
+        }
     },
     'risks-and-bias': {
       title: 'Risks and Bias',
@@ -1158,25 +1305,79 @@ aiButton: "AI",
               question: 'What is the main cause of AI bias?',
               options: ['Slow computers', 'Bad algorithms', 'Unfair or incomplete training data', 'Hackers'],
               correctAnswerIndex: 2,
-              explanation: "Correct. The data used to train an AI is the most common source of bias. Garbage in, garbage out!"
+              explanation: "Correct. The data used to train an AI is the most common source of bias. Garbage in, garbage out!",
+              hint: "The lesson emphasized 'garbage in, garbage out'. What is the 'garbage' in this case?",
             },
             {
               type: 'multiple-choice',
               question: "A fake video created using AI is often called a...",
               options: ['A cheapfake', 'A clone', 'A deepfake', 'A movie clip'],
               correctAnswerIndex: 2,
-              explanation: "That's right. Deepfakes are a powerful technology that can be used for good (like in movies) or for bad (like spreading false information)."
+              explanation: "That's right. Deepfakes are a powerful technology that can be used for good (like in movies) or for bad (like spreading false information).",
+              hint: "These realistic but fake videos have a specific name that combines 'deep learning' and 'fake'.",
             },
             {
               type: 'multiple-choice',
               question: 'Why is it important for AI creators to use diverse data for training?',
               options: ['To make the AI bigger', 'To make the AI fair and accurate for everyone', 'To make the AI run faster', 'It is not important'],
               correctAnswerIndex: 1,
-              explanation: "Exactly! Using data from all groups of people helps ensure the AI works well for everyone and avoids unfair bias."
+              explanation: "Exactly! Using data from all groups of people helps ensure the AI works well for everyone and avoids unfair bias.",
+              hint: "To be fair to everyone, the AI needs to learn from data representing everyone.",
             }
           ]
         }
       }
+    },
+    'data-privacy': {
+        title: 'Data Privacy',
+        description: 'Learn why your data is valuable and how to protect it in the age of AI.',
+        lessonContent: {
+            title: 'Your Data is a Treasure',
+            introduction: "We've learned that data is the food that makes AI smart. A lot of this data comes from us, the users! This makes our personal information very valuable. Understanding data privacy is about knowing your rights and protecting your information online.",
+            sections: [
+                {
+                    heading: 'What is Personal Data?',
+                    content: "Personal data is any information that can be used to identify you. This includes your name, email address, phone number, location, and photos. It can also include your browsing history, what you 'like' on social media, and what you buy online. All of this information creates a 'digital footprint'."
+                },
+                {
+                    heading: 'Why Do Companies Want Your Data?',
+                    content: "Companies collect data for many reasons. Some use it to improve their products, like when Google Maps uses location data to check for traffic. Others use it to show you personalized ads. They learn your interests from your data and show you ads they think you'll click on. This is how many free apps and websites make money."
+                },
+                {
+                    heading: 'How to Protect Your Privacy',
+                    content: "You can take steps to protect your data. Be careful what you share on public profiles. Use strong, unique passwords for different websites. Review the privacy settings on your apps and social media accounts to control who sees your information. Think twice before giving an app permission to access your contacts or location if it doesn't need it to function."
+                }
+            ],
+            summary: "Your personal data is valuable information that powers many AI systems and online services. Protecting your data privacy means being mindful of what you share and managing your privacy settings to control your digital footprint.",
+            quiz: {
+                questions: [
+                    {
+                        type: 'multiple-choice',
+                        question: 'Which of the following is considered personal data?',
+                        options: ['The time of day', 'Your name and email', 'The weather forecast', 'A random number'],
+                        correctAnswerIndex: 1,
+                        explanation: "Correct! Your name and email are pieces of information that can directly identify you.",
+                        hint: "Which option can be used to uniquely find or contact you?",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'What is a common reason companies collect user data?',
+                        options: ['To slow down your phone', 'To show you personalized advertisements', 'To use up your mobile data', 'To make their app look busy'],
+                        correctAnswerIndex: 1,
+                        explanation: "That's right. Personalized advertising is a major business model on the internet, and it relies on collecting user data to be effective.",
+                        hint: "How do free apps often make money from your activity?",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'A good way to protect your privacy online is to...',
+                        options: ['Use the same easy password everywhere', 'Share your phone number publicly', 'Accept all app permissions without reading', 'Review your privacy settings on apps'],
+                        correctAnswerIndex: 3,
+                        explanation: "Exactly! Taking a few minutes to check your privacy settings can give you much more control over how your information is used.",
+                        hint: "This involves taking control of how your information is used by apps.",
+                    }
+                ]
+            }
+        }
     },
     'ai-safety': {
       title: 'AI Safety',
@@ -1206,21 +1407,24 @@ aiButton: "AI",
               question: 'What is the main goal of AI Safety?',
               options: ['Making AI more powerful', 'Making AI cheaper', 'Making sure AI is helpful and does not cause harm', 'Making AI control everything'],
               correctAnswerIndex: 2,
-              explanation: "That's the key idea! Safety and responsibility are the most important things when building powerful technology."
+              explanation: "That's the key idea! Safety and responsibility are the most important things when building powerful technology.",
+              hint: "The focus isn't on power, but on responsibility and benefit.",
             },
             {
               type: 'multiple-choice',
               question: "The 'Alignment Problem' is about making sure an AI's goals match...",
               options: ['The speed of the internet', 'The goals of other AIs', 'Human values and intentions', 'The size of the data'],
               correctAnswerIndex: 2,
-              explanation: "Correct. We need to make sure the AI understands not just what we say, but what we truly mean and value."
+              explanation: "Correct. We need to make sure the AI understands not just what we say, but what we truly mean and value.",
+              hint: "The goal is to align the AI's objectives with human...",
             },
              {
               type: 'multiple-choice',
               question: 'Which of these is NOT one of the "Three H\'s" of safe AI?',
               options: ['Helpful', 'Hidden', 'Honest', 'Harmless'],
               correctAnswerIndex: 1,
-              explanation: "Exactly. Safe AI should be the opposite of hidden; it should be transparent and honest about what it is and what it does."
+              explanation: "Exactly. Safe AI should be the opposite of hidden; it should be transparent and honest about what it is and what it does.",
+              hint: "Think about the three H's: Helpful, Harmless, and Honest. Which one is not on the list?",
             }
           ]
         }
@@ -1254,21 +1458,24 @@ aiButton: "AI",
               question: 'AI is best at automating which kind of tasks?',
               options: ['Creative and strategic tasks', 'Tasks requiring empathy', 'Repetitive and predictable tasks', 'All human tasks'],
               correctAnswerIndex: 2,
-              explanation: "Correct! AI excels at tasks that are done over and over again, freeing up humans for work that requires a human touch."
+              explanation: "Correct! AI excels at tasks that are done over and over again, freeing up humans for work that requires a human touch.",
+              hint: "AI is great at tasks that are done the same way over and over.",
             },
             {
               type: 'multiple-choice',
               question: 'Which of these is a new job created because of AI?',
               options: ['Farmer', 'Doctor', 'Prompt Engineer', 'Teacher'],
               correctAnswerIndex: 2,
-              explanation: "Yes! Prompt Engineering is a new and valuable skill that involves writing effective instructions for AI systems."
+              explanation: "Yes! Prompt Engineering is a new and valuable skill that involves writing effective instructions for AI systems.",
+              hint: "This is a new skill related to writing instructions for AI.",
             },
              {
               type: 'multiple-choice',
               question: 'What is the most important skill in the age of AI?',
               options: ['Typing fast', 'Lifelong learning', 'Memorizing facts', 'Following instructions perfectly'],
               correctAnswerIndex: 1,
-              explanation: "Exactly! Technology changes quickly, so the ability and willingness to learn new things is the best way to prepare for the future."
+              explanation: "Exactly! Technology changes quickly, so the ability and willingness to learn new things is the best way to prepare for the future.",
+              hint: "Since technology is always changing, what's the best way to keep up?",
             }
           ]
         }
@@ -1306,21 +1513,24 @@ aiButton: "AI",
               question: 'Which of these is NOT safe to share online?',
               options: ['Your favorite food', 'Your home address', 'Your opinion on a movie', 'A picture of your pet'],
               correctAnswerIndex: 1,
-              explanation: "Correct. Personal information like your address should be kept private to stay safe."
+              explanation: "Correct. Personal information like your address should be kept private to stay safe.",
+              hint: "Think about which piece of information could lead someone to your physical location.",
             },
             {
               type: 'multiple-choice',
               question: "If you use an AI to help with your homework, what is the responsible thing to do?",
               options: ['Copy the AI\'s answer and pretend it is yours', 'Use the AI to find ideas and check your work, but write the final answer yourself', 'Delete your homework', 'Tell your friends the AI did it for you'],
               correctAnswerIndex: 1,
-              explanation: "Exactly! Using AI as a learning assistant is a great idea, but copying its work is dishonest."
+              explanation: "Exactly! Using AI as a learning assistant is a great idea, but copying its work is dishonest.",
+              hint: "It's about being honest and using AI as a tool, not as a replacement for your own effort.",
             },
             {
               type: 'multiple-choice',
               question: "What should you do before you share an amazing story you saw online?",
               options: ['Share it immediately with everyone', 'Check if the information is from a reliable source', 'Ask an AI if it is true', 'Only share it with your best friend'],
               correctAnswerIndex: 1,
-              explanation: "Yes! Fact-checking is a key skill for a good digital citizen to help prevent the spread of misinformation."
+              explanation: "Yes! Fact-checking is a key skill for a good digital citizen to help prevent the spread of misinformation.",
+              hint: "To stop the spread of fake news, you should first...?",
             }
           ]
         }
@@ -1358,44 +1568,313 @@ aiButton: "AI",
               question: "Which of these is the most effective prompt?",
               options: ['Tell me a story.', 'Write a story for a child.', 'Write a funny, 50-word story for a 5-year-old about a goat that learns to fly.', 'Story about a goat.'],
               correctAnswerIndex: 2,
-              explanation: "Perfect! This prompt is the most effective because it's specific about the tone (funny), length (50-word), audience (5-year-old), and topic."
+              explanation: "Perfect! This prompt is the most effective because it's specific about the tone (funny), length (50-word), audience (5-year-old), and topic.",
+              hint: "The best prompts are detailed and give the AI clear instructions.",
             },
             {
               type: 'multiple-choice',
               question: "Telling the AI 'You are a tour guide' is an example of what technique?",
               options: ['Being vague', 'Giving it a role', 'Few-shot prompting', 'Breaking the AI'],
               correctAnswerIndex: 1,
-              explanation: "Correct! Assigning a role helps the AI understand the context and tone you want for the response."
+              explanation: "Correct! Assigning a role helps the AI understand the context and tone you want for the response.",
+              hint: "This technique involves telling the AI to act as an expert, like a 'teacher' or 'tour guide'.",
             },
             {
               type: 'multiple-choice',
               question: "What should you do if your first prompt doesn't give you the result you want?",
               options: ['Give up and close the program', 'Type the same prompt again in all capital letters', 'Change and improve your prompt with more details', 'Assume the AI is broken'],
               correctAnswerIndex: 2,
-              explanation: "Exactly! The best results come from refining and iterating on your prompts. It's a skill that improves with practice."
+              explanation: "Exactly! The best results come from refining and iterating on your prompts. It's a skill that improves with practice.",
+              hint: "Getting the perfect result is a process of trial and error. What is this process called?",
             }
           ]
         }
       }
+    },
+    'ai-for-writing': {
+        title: 'AI for Writing',
+        description: 'Use AI as a creative partner to help you write stories, poems, and more.',
+        lessonContent: {
+            title: 'Your Creative Writing Assistant',
+            introduction: "Generative AI is an amazing tool for anyone who loves to write. It can help you overcome writer's block, brainstorm ideas, and even co-write with you. Let's explore how to use AI as your creative partner.",
+            sections: [
+                {
+                    heading: 'Brainstorming Ideas',
+                    content: "Staring at a blank page? AI can help. Give it a simple prompt to get started. For example: 'Give me 5 creative ideas for a story about a magical talking drum in ancient Benin.' You can ask it for characters, plot twists, or settings to get your imagination flowing."
+                },
+                {
+                    heading: 'Improving Your Drafts',
+                    content: "Once you have a draft, AI can act as an editor. You can paste your text and ask it to: 'Proofread this for spelling and grammar mistakes', or 'Suggest three alternative ways to phrase this sentence to make it more exciting.' This helps you learn and improve your own writing skills."
+                },
+                {
+                    heading: 'Co-Writing and Expansion',
+                    content: "You can write a paragraph and then ask the AI to continue the story. For example: 'Here is the start of my story: [your paragraph]. Now, write the next paragraph where the main character discovers a hidden map.' It's like having a co-writer who is always ready with new ideas. Remember, you are always in control. You can take the AI's suggestion, change it, or ignore it completely."
+                }
+            ],
+            summary: "AI can be a powerful assistant for writers, helping with brainstorming ideas, editing drafts, and even co-writing new parts of a story. The key is to use it as a tool to enhance your own creativity, not replace it.",
+            quiz: {
+                questions: [
+                    {
+                        type: 'multiple-choice',
+                        question: "What is a good way to use AI when you have writer's block?",
+                        options: ["Ask it to write the whole story for you", "Ask it to brainstorm a list of ideas or characters", "Ask it to criticize your last story", "Give up on writing"],
+                        correctAnswerIndex: 1,
+                        explanation: "Correct! AI is excellent at generating ideas to get you started when you feel stuck.",
+                        hint: "When you're stuck, AI can help generate initial...",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: "When using AI to help with writing, who is in control of the final story?",
+                        options: ["The AI", "The computer", "The writer (you)", "Nobody"],
+                        correctAnswerIndex: 2,
+                        explanation: "Exactly! You, the writer, always have the final say. AI is a tool to assist your vision.",
+                        hint: "AI is a tool. Who directs the tool?",
+                    },
+                    {
+                        type: 'fill-in-the-blank',
+                        question: "Asking an AI to check your text for mistakes is called ________.",
+                        options: [],
+                        correctAnswerIndex: -1,
+                        answer: "proofreading",
+                        explanation: "Yes! AI tools are very good at proofreading and can help you catch small errors in your writing.",
+                        hint: "It's the term for checking for spelling and grammar mistakes.",
+                    }
+                ]
+            }
+        }
+    },
+    'ai-for-art': {
+        title: 'AI for Art',
+        description: 'Learn how to use prompts to create amazing and unique images with AI.',
+        lessonContent: {
+            title: 'Painting with Words',
+            introduction: "With Generative AI, you don't need a paintbrush to be an artist. You can use words! AI image generators like Midjourney or DALL-E can turn your text prompts into beautiful, strange, and wonderful images. Let's learn how.",
+            sections: [
+                {
+                    heading: 'The Magic of a Good Prompt',
+                    content: "Just like with writing, creating great AI art is all about the prompt. The more detail you provide, the better. Instead of 'a cat', try 'A cool cat wearing sunglasses and a leather jacket, riding a skateboard in a futuristic Lagos, vibrant neon lights, detailed illustration'. Details about the subject, style, lighting, and setting are key."
+                },
+                {
+                    heading: 'Controlling the Style',
+                    content: "You can tell the AI what style you want. Do you want it to look like a photograph, a cartoon, an oil painting, or a pencil sketch? Add these words to your prompt! For example: '...in the style of a vintage Nollywood movie poster' or '...3D animation style'. This gives you incredible creative control."
+                },
+                {
+                    heading: 'Iterating and Exploring',
+                    content: "AI image generation is an exploration. Your first image might not be perfect. That's part of the fun! You can run the same prompt again to get a different version, or you can change a few words in your prompt to see what happens. For example, change 'a red jacket' to 'a blue jacket' or 'Lagos' to 'Nairobi'. Small changes can lead to amazing new creations."
+                }
+            ],
+            summary: "AI image generation allows you to create art by writing descriptive text prompts. The key to great results is to be specific about the subject, style, and setting, and to experiment by changing your prompts.",
+            quiz: {
+                questions: [
+                    {
+                        type: 'multiple-choice',
+                        question: 'What is the most important part of creating an image with AI?',
+                        options: ['The computer\'s speed', 'The quality of your text prompt', 'The time of day', 'The color of your screen'],
+                        correctAnswerIndex: 1,
+                        explanation: "Correct! The prompt is your paintbrush. A detailed and creative prompt leads to a better image.",
+                        hint: "The quality of the final image depends entirely on the quality of the...?",
+                    },
+// FIX: Corrected a corrupted question object. Removed an extraneous line, fixed the correctAnswerIndex, and provided the correct explanation.
+                    {
+                        type: 'multiple-choice',
+                        question: "What does it mean to 'iterate' in AI art?",
+                        options: ["To delete your image", "To change your prompt and try again", "To post your image online", "To give up"],
+                        correctAnswerIndex: 1,
+                        explanation: "Exactly! Iteration is the process of making small changes to your prompt to improve the result, exploring different creative directions.",
+                        hint: "This is the process of making small changes and trying again to get a better result.",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'Adding the words "oil painting" to a prompt is an example of controlling the...',
+                        options: ['Subject', 'Color', 'Style', 'Size'],
+                        correctAnswerIndex: 2,
+                        explanation: "Yes! You can specify many different artistic styles in your prompts to guide the AI's creation.",
+                        hint: "Is 'oil painting' a subject, a color, or a method/style of art?",
+                    }
+                ]
+            }
+        }
+    },
+    'ai-in-business': {
+        title: 'AI in Business',
+        description: 'See how companies in Africa are using AI to solve real-world problems in areas like FinTech and AgriTech.',
+        lessonContent: {
+            title: 'AI: The New Business Partner',
+            introduction: "AI isn't just for fun and games; it's a serious tool that is transforming businesses. Across Africa, innovative companies are using AI to create new services, improve efficiency, and solve local challenges. Let's look at a couple of key areas.",
+            sections: [
+                {
+                    heading: 'FinTech: Smarter, Safer Money',
+                    content: "FinTech (Financial Technology) is booming, and AI is at its heart. Mobile money apps use AI-powered Machine Learning to analyze transaction patterns and instantly flag potential fraud, protecting users' accounts. Some companies use AI to analyze data to determine if a small business owner qualifies for a loan, making it easier for entrepreneurs to get funding."
+                },
+                {
+                    heading: 'AgriTech: Farming for the Future',
+                    content: "Agriculture is vital to our economy. AgriTech (Agriculture Technology) companies use AI to help farmers. They use drones to fly over farms and AI image recognition to analyze the pictures. The AI can spot crop diseases early or identify areas that need more water. This helps farmers increase their harvest and waste fewer resources."
+                },
+                {
+                    heading: 'Customer Service Bots',
+                    content: "Many businesses, from banks to online stores, now use AI chatbots on their websites and apps. These bots can answer common customer questions 24/7, instantly. This provides quick help for customers and allows human customer service agents to focus on more complex issues that require a human touch."
+                }
+            ],
+            summary: "Businesses are using AI to create smarter and safer financial services (FinTech), improve farming with data analysis (AgriTech), and provide instant customer support with chatbots. AI is helping companies become more efficient and solve real-world problems.",
+            quiz: {
+                questions: [
+                    {
+                        type: 'multiple-choice',
+                        question: 'What does "FinTech" stand for?',
+                        options: ['Final Technology', 'Financial Technology', 'Fine Technology', 'Future Technology'],
+                        correctAnswerIndex: 1,
+                        explanation: "Correct! FinTech refers to using technology to improve financial services.",
+                        hint: "The 'Fin' part stands for...?",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'How can AI help a farmer?',
+                        options: ['By planting the seeds itself', 'By driving the tractor', 'By analyzing drone photos to spot diseases', 'By selling the crops at the market'],
+                        correctAnswerIndex: 2,
+                        explanation: "That's a key use! AI-powered image recognition can analyze data from drones or satellites to give farmers valuable insights.",
+                        hint: "How can AI 'see' what's happening in a large field from above?",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'What is a major benefit of using AI chatbots for customer service?',
+                        options: ['They can answer questions instantly, any time of day', 'They are more friendly than humans', 'They can give you free products', 'They can solve any problem'],
+                        correctAnswerIndex: 0,
+                        explanation: "Exactly! The 24/7 availability of chatbots for simple questions is a huge advantage for businesses and customers.",
+                        hint: "What is the main advantage of an automated system for customers?",
+                    }
+                ]
+            }
+        }
+    },
+    'building-with-ai': {
+        title: 'Building with AI',
+        description: 'Learn the basic steps of how an AI-powered product is created, from idea to application.',
+        lessonContent: {
+            title: 'From Idea to AI App',
+            introduction: "Have you ever had an idea for an app and thought, 'What if AI could help?' Building an AI product isn't magic; it's a process. Let's look at the basic steps an innovator would take to bring an AI idea to life.",
+            sections: [
+                {
+                    heading: 'Step 1: The Problem and The Idea',
+                    content: "Everything starts with a problem. For example: 'Many farmers in my village struggle to identify crop diseases.' The idea is the solution: 'Let's build a mobile app that uses AI to identify the disease from a photo of a plant's leaf.' A good idea solves a real problem for real people."
+                },
+                {
+                    heading: 'Step 2: Gather the Data',
+                    content: "To teach an AI about crop diseases, you need data! This means collecting thousands of pictures of healthy plant leaves and thousands of pictures of leaves with different diseases. Each picture must be labeled correctly (e.g., 'this is cassava mosaic disease'). This is often the hardest and most important step."
+                },
+                {
+                    heading: 'Step 3: Train the Model',
+                    content: "Now, you use this labeled data to train an AI model. You choose an algorithm (like a Deep Learning image recognition algorithm) and feed it all your pictures. The model learns the patterns of each disease. This can require powerful computers and a lot of time."
+                },
+                {
+                    heading: 'Step 4: Build the App',
+                    content: "Once the model is trained and accurate, you need to build an app that can use it. The app would let a farmer take a picture, send it to the AI model, and get back a prediction (e.g., '85% chance this is mosaic disease'). The app is the 'user interface' that makes the powerful AI model easy for anyone to use."
+                }
+            ],
+            summary: "Creating an AI product involves four main steps: 1. Identify a problem and have an idea. 2. Collect and label a lot of relevant data. 3. Use the data to train an AI model. 4. Build an application that makes the model easy to use.",
+            quiz: {
+                questions: [
+                    {
+                        type: 'multiple-choice',
+                        question: 'What is the very first step in building an AI product?',
+                        options: ['Training a model', 'Writing code', 'Identifying a problem to solve', 'Gathering data'],
+                        correctAnswerIndex: 2,
+                        explanation: "Correct! The best technology solves a real problem. Identifying that problem is always the first step.",
+                        hint: "Before you can create a solution, you must first know the...",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'What is the most important (and often hardest) part of preparing to train an AI model?',
+                        options: ['Designing the app logo', 'Choosing a name for the AI', 'Collecting and labeling high-quality data', 'Buying a fast computer'],
+                        correctAnswerIndex: 2,
+                        explanation: "Exactly. The quality and quantity of your data will determine how good your AI model can be.",
+                        hint: "What is the 'fuel' that AI models need to learn?",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: "The part of the product that the user interacts with (like the buttons and screens) is called the...",
+                        options: ['AI model', 'Algorithm', 'Data set', 'Application / User Interface'],
+                        correctAnswerIndex: 3,
+                        explanation: "That's right! The application is the bridge between the user and the powerful AI model working in the background.",
+                        hint: "This is the part of the app the user actually sees and touches.",
+                    }
+                ]
+            }
+        }
+    },
+    'ai-and-society': {
+        title: 'AI and Society',
+        description: 'Think bigger. Explore the broad impact of AI on our communities, culture, and future.',
+        lessonContent: {
+            title: 'How AI is Shaping Our World',
+            introduction: "AI is more than just a technology; it's a force that is changing our society. From how we communicate to how our economies work, AI is having a huge impact. It's important to think about these big-picture changes.",
+            sections: [
+                {
+                    heading: 'Economic Impact: Growth and Gaps',
+                    content: "AI can help economies grow by making industries like manufacturing and logistics more efficient. However, it can also create challenges. If AI creates many high-skilled jobs but automates low-skilled ones, it could increase the gap between the rich and the poor. It's a challenge for governments to ensure everyone benefits through education and new opportunities."
+                },
+                {
+                    heading: 'Social Impact: Connection and Division',
+                    content: "Social media algorithms use AI to decide what you see. This can help you connect with people who share your interests. But it can also create 'echo chambers', where you only see opinions you already agree with. This can make it harder for people with different views to understand each other. It's important to actively seek out different perspectives."
+                },
+                {
+                    heading: 'The Future of Decision Making',
+                    content: "AI is increasingly being used to help make important decisions in areas like healthcare (diagnosing diseases) and justice (assessing flight risk). This could lead to fairer and more accurate decisions. However, we must be very careful. If the AI is biased, it could make these important decisions unfairly. This is why AI ethics and transparency are so critical for our future society."
+                }
+            ],
+            summary: "AI is having a major impact on society by changing our economy, how we interact online, and even how important decisions are made. It offers great benefits but also presents challenges like economic inequality and the risk of biased decision-making that we must manage carefully.",
+            quiz: {
+                questions: [
+                    {
+                        type: 'multiple-choice',
+                        question: 'What is an "echo chamber" on social media?',
+                        options: ["A place where you hear your voice echo", "Seeing only content and opinions you already agree with", "A very popular video", "A private chat group"],
+                        correctAnswerIndex: 1,
+                        explanation: "Correct. AI algorithms can sometimes create echo chambers by showing us more of what we already like, limiting our exposure to different views.",
+                        hint: "This term describes a situation where you are only exposed to views similar to your own.",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'What is a major societal challenge that AI could make worse if not managed well?',
+                        options: ["The weather", "The gap between rich and poor", "The speed of internet", "The number of movies available"],
+                        correctAnswerIndex: 1,
+                        explanation: "That's a key concern. As AI automates some jobs, we need to focus on education to ensure people are ready for the new jobs AI will create.",
+                        hint: "AI might affect jobs, creating a wider... between different economic groups.",
+                    },
+                    {
+                        type: 'multiple-choice',
+                        question: 'Why is it so important to be careful when using AI for decisions in healthcare or justice?',
+                        options: ["Because it is very expensive", "Because the AI might get tired", "Because a biased AI could make unfair and harmful decisions", "Because it is very slow"],
+                        correctAnswerIndex: 2,
+                        explanation: "Exactly! When the stakes are high, ensuring the AI is fair, unbiased, and transparent is absolutely critical for a just society.",
+                        hint: "Decisions about people's lives must be fair. An AI trained on unfair data would be...?",
+                    }
+                ]
+            }
+        }
     }
   },
   levels: {
-    'Beginner': "Beginner",
-    'Intermediate': "Intermediate",
-    'Advanced': "Advanced"
+    'Explorer': "Explorer",
+    'Creator': "Creator",
+    'Innovator': "Innovator",
+    'Ethicist': "Ethicist",
   },
   paths: {
-    [LearningPath.Beginner]: {
-      name: 'Beginner Path',
-      description: 'Perfect for those new to AI. Learn the absolute basics.',
+    [LearningPath.Explorer]: {
+      name: 'AI Explorer',
+      description: 'Start here! Learn what AI is, how it works, and see it in your daily life.',
     },
-    [LearningPath.Intermediate]: {
-      name: 'Intermediate Path',
-      description: 'For those with some knowledge. Dive a little deeper.',
+    [LearningPath.Creator]: {
+      name: 'AI Creator',
+      description: 'Learn to use AI as a tool for creativity, writing, and making new things.',
     },
-    [LearningPath.Advanced]: {
-      name: 'Advanced Path',
-      description: 'For the curious minds. Explore complex topics and applications.',
+    [LearningPath.Innovator]: {
+      name: 'AI Innovator',
+      description: 'Discover how AI is changing jobs and creating future career opportunities.',
+    },
+    [LearningPath.Ethicist]: {
+      name: 'AI Ethicist',
+      description: 'Explore the important topics of AI fairness, safety, and responsibility.',
     },
   },
   tooltips: {
@@ -1408,6 +1887,11 @@ aiButton: "AI",
     'prompt': 'An instruction or question given to an AI to get a response.',
     'deepfake': 'A realistic but fake image or video created using AI technology.',
     'plagiarism': "The act of taking someone else's work or ideas and passing them off as one's own.",
+    'neural network': "A computer system modeled on the human brain, used in Deep Learning to find complex patterns.",
+    'generative ai': "A type of AI that can create new, original content, such as text, images, or music.",
+    'machine learning': "The most common type of AI, where systems learn from data to make predictions or decisions.",
+    'deep learning': "A powerful type of Machine Learning that uses multi-layered neural networks to learn from vast amounts of data.",
+    'user interface': "The visual part of an app or website that a person interacts with.",
   },
   badges: {
     'first-step': {
