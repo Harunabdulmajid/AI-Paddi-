@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AI Kasahorow: AI Literacy for All</title>
+    <title>AI Paddi: AI Literacy for All</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://rsms.me">
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
@@ -16,30 +16,68 @@
               sans: ['Inter', 'sans-serif'],
             },
             colors: {
+              // Sleek Dark Mode Palette
+              // We invert the 'neutral' scale: 50-100 are dark backgrounds, 800-900 are light text.
+              // We map 'white' to a dark card color and 'black' to white for text contrast inversion.
+              
+              white: '#18181b', // Zinc 900 - Card Background
+              black: '#ffffff', // Text Inverse
+
               primary: {
-                DEFAULT: '#4f46e5',
-                light: '#6366f1',
-                dark: '#4338ca',
+                DEFAULT: '#6366f1', // Indigo 500
+                light: '#818cf8',   // Indigo 400
+                dark: '#4f46e5',    // Indigo 600
               },
               secondary: {
-                DEFAULT: '#10b981',
-                light: '#34d399',
+                DEFAULT: '#10b981', // Emerald 500
+                light: '#34d399',   // Emerald 400
               },
               accent: {
-                DEFAULT: '#f59e0b',
-                light: '#fbbf24',
+                DEFAULT: '#f59e0b', // Amber 500
+                light: '#fbbf24',   // Amber 400
               },
+              
               neutral: {
-                50: '#f8fafc',
-                100: '#f1f5f9',
-                200: '#e2e8f0',
-                300: '#cbd5e1',
-                400: '#94a3b8',
-                500: '#64748b',
-                600: '#475569',
-                700: '#334155',
-                800: '#1e293b',
-                900: '#0f172a',
+                50: '#000000',    // Pure Black
+                100: '#09090b',   // Zinc 950 (App Background)
+                200: '#27272a',   // Zinc 800 (Borders/Inputs)
+                300: '#3f3f46',   // Zinc 700
+                400: '#a1a1aa',   // Zinc 400 (Muted text)
+                500: '#71717a',   // Zinc 500
+                600: '#d4d4d8',   // Zinc 300
+                700: '#e4e4e7',   // Zinc 200 (Main Text)
+                800: '#f4f4f5',   // Zinc 100 (Headings)
+                900: '#ffffff',   // White
+              },
+
+              // Remap standard utility colors for dark mode alerts/badges
+              // 100 = Dark Background, 800/900 = Light Text
+              green: {
+                100: '#052e16', // Dark Green
+                400: '#4ade80',
+                800: '#bbf7d0', // Light Green
+                900: '#dcfce7',
+              },
+              red: {
+                100: '#450a0a', // Dark Red
+                400: '#f87171',
+                500: '#ef4444',
+                600: '#dc2626',
+                800: '#fecaca', // Light Red
+                900: '#fee2e2',
+              },
+              amber: {
+                100: '#451a03', // Dark Amber
+                200: '#78350f',
+                400: '#fbbf24',
+                500: '#f59e0b',
+                600: '#d97706',
+                800: '#fde68a', // Light Amber
+                900: '#fef3c7',
+              },
+              blue: {
+                100: '#172554', // Dark Blue
+                900: '#dbeafe', // Light Blue
               }
             }
           }

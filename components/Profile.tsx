@@ -1,7 +1,7 @@
 // FIX: Import `useEffect` from React to resolve the "Cannot find name 'useEffect'" error.
 import React, { useContext, useRef, useCallback, useState, useEffect } from 'react';
 import { AppContext } from './AppContext';
-import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Wallet, Feather, BookOpen, BrainCircuit, PenTool, Briefcase } from 'lucide-react';
+import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Wallet, Feather, PenTool, Briefcase, Upload, Image as ImageIcon } from 'lucide-react';
 import { LearningPath, User, Page, AppContextType } from '../types';
 import { useTranslations } from '../i18n';
 // FIX: Import the `BADGES` constant to resolve the "Cannot find name 'BADGES'" error.
@@ -47,22 +47,51 @@ const Certificate: React.FC<{ user: User, certificateRef: React.RefObject<HTMLDi
 interface AvatarSelectionModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onSave: (avatarId: string) => Promise<void>;
+    onSave: (avatarId: string, avatarUrl?: string) => Promise<void>;
     currentAvatarId: string;
+    currentAvatarUrl?: string;
     isSaving: boolean;
 }
 
-const AvatarSelectionModal: React.FC<AvatarSelectionModalProps> = ({ isOpen, onClose, onSave, currentAvatarId, isSaving }) => {
+const AvatarSelectionModal: React.FC<AvatarSelectionModalProps> = ({ isOpen, onClose, onSave, currentAvatarId, currentAvatarUrl, isSaving }) => {
     const [selectedAvatarId, setSelectedAvatarId] = useState(currentAvatarId);
+    const [customImage, setCustomImage] = useState<string | null>(currentAvatarUrl || null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        setSelectedAvatarId(currentAvatarId);
-    }, [currentAvatarId, isOpen]);
+        if (isOpen) {
+            setSelectedAvatarId(currentAvatarId);
+            setCustomImage(currentAvatarUrl || null);
+        }
+    }, [currentAvatarId, currentAvatarUrl, isOpen]);
 
     if (!isOpen) return null;
 
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (file.size > 500 * 1024) { // 500KB Limit
+                alert("File size is too large (Max 500KB)");
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setCustomImage(reader.result as string);
+                setSelectedAvatarId(''); // Deselect preset if custom image is uploaded
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleSave = () => {
-        onSave(selectedAvatarId);
+        if (selectedAvatarId) {
+            onSave(selectedAvatarId, undefined);
+        } else if (customImage) {
+            onSave('', customImage);
+        } else {
+            // Fallback to default
+            onSave('avatar-01', undefined);
+        }
     };
 
     return (
@@ -72,25 +101,61 @@ const AvatarSelectionModal: React.FC<AvatarSelectionModalProps> = ({ isOpen, onC
                     <X size={24} />
                 </button>
                 <h2 className="text-2xl font-bold text-neutral-800">Choose Your Avatar</h2>
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 my-6">
+                
+                {/* Custom Upload Section */}
+                <div className="mt-6 mb-6 p-4 bg-neutral-100 rounded-xl border border-neutral-200">
+                    <h3 className="text-neutral-500 text-xs font-bold uppercase tracking-wider mb-3">Custom Photo</h3>
+                    <div className="flex items-center gap-4">
+                        <div 
+                            onClick={() => fileInputRef.current?.click()}
+                            className={`w-16 h-16 rounded-full overflow-hidden bg-neutral-200 flex items-center justify-center cursor-pointer border-2 ${!selectedAvatarId && customImage ? 'border-primary' : 'border-transparent hover:border-neutral-300'}`}
+                        >
+                            {customImage ? (
+                                <img src={customImage} alt="Custom" className="w-full h-full object-cover" />
+                            ) : (
+                                <ImageIcon className="text-neutral-500" size={24} />
+                            )}
+                        </div>
+                        <div>
+                            <button 
+                                onClick={() => fileInputRef.current?.click()}
+                                className="flex items-center gap-2 bg-white border border-neutral-300 text-neutral-700 px-4 py-2 rounded-lg font-semibold transition-colors hover:border-primary hover:text-primary text-sm shadow-sm"
+                            >
+                                <Upload size={16} /> Upload Photo
+                            </button>
+                            <p className="text-xs text-neutral-400 mt-2">Max file size: 500KB</p>
+                            <input 
+                                ref={fileInputRef} 
+                                type="file" 
+                                accept="image/*" 
+                                className="hidden" 
+                                onChange={handleFileChange}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <h3 className="text-neutral-500 text-xs font-bold uppercase tracking-wider mb-3">Presets</h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 mb-6">
                     {Object.entries(AVATARS).map(([id, AvatarComponent]) => (
                         <button
                             key={id}
-                            onClick={() => setSelectedAvatarId(id)}
-                            className={`p-2 rounded-full transition-all duration-200 ${selectedAvatarId === id ? 'ring-4 ring-primary ring-offset-2' : 'hover:ring-2 hover:ring-primary/50'}`}
+                            onClick={() => { setSelectedAvatarId(id); }}
+                            className={`p-2 rounded-full transition-all duration-200 ${selectedAvatarId === id ? 'ring-4 ring-primary ring-offset-2 ring-offset-white bg-neutral-100' : 'hover:ring-2 hover:ring-primary/50'}`}
                             aria-label={`Select avatar ${id.split('-')[1]}`}
                         >
                             <AvatarComponent className="w-20 h-20 sm:w-24 sm:h-24 rounded-full" />
                         </button>
                     ))}
                 </div>
+
                 <div className="flex justify-end gap-3 border-t border-neutral-200 pt-4">
                     <button onClick={onClose} className="font-bold py-2 px-5 rounded-lg text-neutral-600 bg-neutral-200 hover:bg-neutral-300 transition">
                         Cancel
                     </button>
                     <button
                         onClick={handleSave}
-                        disabled={isSaving || selectedAvatarId === currentAvatarId}
+                        disabled={isSaving}
                         className="flex items-center justify-center gap-2 font-bold py-2 px-5 rounded-lg bg-primary text-white hover:bg-primary-dark transition disabled:bg-neutral-300"
                     >
                         {isSaving ? <Loader2 className="animate-spin" size={20} /> : 'Save Changes'}
@@ -183,13 +248,19 @@ export const Profile: React.FC = () => {
         setIsEditingName(false);
     };
 
-    const handleSaveAvatar = async (avatarId: string) => {
-        if (avatarId === user.avatarId) {
+    const handleSaveAvatar = async (avatarId: string, avatarUrl?: string) => {
+        if (avatarId === user.avatarId && avatarUrl === user.avatarUrl) {
             setIsAvatarModalOpen(false);
             return;
         }
         setIsSavingAvatar(true);
-        const updatedUser = await apiService.updateUser(user.email, { avatarId });
+        
+        // Prepare updates. If ID is present (preset), we clear the URL.
+        // If URL is present (upload), we use it.
+        const updates: Partial<User> = { avatarId };
+        updates.avatarUrl = avatarUrl || ''; // Clear URL if not provided (i.e. switching to preset)
+
+        const updatedUser = await apiService.updateUser(user.email, updates);
         if (updatedUser) {
             setUser(updatedUser as User);
         }
@@ -249,6 +320,7 @@ export const Profile: React.FC = () => {
                 onClose={() => setIsAvatarModalOpen(false)}
                 onSave={handleSaveAvatar}
                 currentAvatarId={user.avatarId}
+                currentAvatarUrl={user.avatarUrl}
                 isSaving={isSavingAvatar}
             />
             <PathSelectionModal 

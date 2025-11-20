@@ -12,11 +12,12 @@ const projectTemplates = [
     { id: 'proverb', icon: Sparkles, promptTemplate: (input: string, lang: string) => `Create a new, wise-sounding proverb in ${lang} about the modern topic of "${input}".` }
 ];
 
+// Adjusted for dark mode contrast - these are internal canvas styles, not UI
 const canvasStyles = [
-    { id: 'sunset', class: 'bg-gradient-to-br from-amber-100 to-orange-200 text-orange-900', font: 'font-serif' },
-    { id: 'sky', class: 'bg-gradient-to-br from-sky-200 to-blue-300 text-blue-900', font: 'font-sans' },
-    { id: 'forest', class: 'bg-gradient-to-br from-green-200 to-emerald-300 text-emerald-900', font: 'font-sans' },
-    { id: 'night', class: 'bg-gradient-to-br from-slate-800 to-gray-900 text-white', font: 'font-serif' },
+    { id: 'sunset', class: 'bg-gradient-to-br from-amber-900 to-orange-900 text-orange-100', font: 'font-serif' },
+    { id: 'sky', class: 'bg-gradient-to-br from-sky-900 to-blue-900 text-blue-100', font: 'font-sans' },
+    { id: 'forest', class: 'bg-gradient-to-br from-green-900 to-emerald-900 text-emerald-100', font: 'font-sans' },
+    { id: 'night', class: 'bg-gradient-to-br from-slate-900 to-black text-slate-200', font: 'font-serif' },
 ];
 
 export const CreationStudio: React.FC = () => {
@@ -213,12 +214,13 @@ const styles = `
     border-radius: 0.5rem;
     font-weight: 600;
     font-size: 0.875rem;
-    background-color: #e2e8f0;
-    color: #475569;
+    background-color: #27272a; /* Updated for dark mode: neutral-200 equivalent */
+    color: #e4e4e7; /* Text neutral-700 */
     transition: background-color 0.2s;
+    border: 1px solid #3f3f46;
 }
 .remix-btn:hover {
-    background-color: #cbd5e1;
+    background-color: #3f3f46;
 }
 .creator-btn {
     display: flex;

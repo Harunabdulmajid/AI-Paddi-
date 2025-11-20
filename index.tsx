@@ -1,9 +1,8 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 
-// Define global animation keyframes
+// Define global animation keyframes and dark mode scrollbar
 const keyframes = `
 @keyframes toast-in {
   from {
@@ -33,6 +32,27 @@ const keyframes = `
 }
 .animate-slide-up {
     animation: slide-up 0.4s ease-out forwards;
+}
+
+/* Custom Scrollbar for Dark Theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #09090b; 
+}
+::-webkit-scrollbar-thumb {
+  background: #3f3f46; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b; 
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
 `;
 
