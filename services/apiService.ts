@@ -81,10 +81,8 @@ export const apiService = {
               
               if (!user) return reject(new Error("User not found."));
               
-              // If user was created via Google, they might not have a password
-              if (!user.password && user.googleId) {
-                  return reject(new Error("Please sign in with Google."));
-              }
+              // With Google UI removed, any user without a password needs to reset it.
+              // We do not block them here based on googleId anymore.
 
               if (user.password !== passwordInput) {
                   return reject(new Error("Invalid password."));
