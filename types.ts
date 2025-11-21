@@ -87,6 +87,10 @@ export interface User {
   googleId: string;
   email: string;
   name: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+  country?: string;
   avatarUrl?: string;
   level: LearningPath | null;
   role: UserRole;

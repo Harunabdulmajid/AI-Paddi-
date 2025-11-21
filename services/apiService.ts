@@ -9,7 +9,7 @@ const DB_KEY_GAMES = 'alk_games_by_code';
 const DB_KEY_CLASSES = 'alk_classes_by_id';
 
 
-const SIMULATED_DELAY = 300; // ms
+const SIMULATED_DELAY = 800; // Increased delay to feel more realistic
 const DAILY_TRANSFER_LIMIT = 200;
 
 // --- Helper Functions ---
@@ -36,19 +36,19 @@ const initializeDefaultWallet = (points: number): Wallet => ({
 
 // Initialize with some mock data if empty
 const initializeDb = () => {
-    let users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+    let users = readDb<Record<string, User & { password?: string }>>(DB_KEY_USERS, {});
     if (Object.keys(users).length === 0) {
-        const mockUsers: Omit<User, 'wallet'>[] = [
-            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', name: 'Amina', role: UserRole.Student, points: 250, level: LearningPath.Innovator, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 2, quizRewinds: 5, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
-            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', name: 'Kwame', role: UserRole.Student, points: 190, level: LearningPath.Creator, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 1, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
-            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', name: 'Fatou', role: UserRole.Teacher, points: 175, level: null, completedModules: [], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
-            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', name: 'Chinedu', role: UserRole.Parent, points: 150, level: null, completedModules: [], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], childEmail: 'zola@example.com', isPro: false },
-            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', name: 'Zola', role: UserRole.Student, points: 120, level: LearningPath.Explorer, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
+        const mockUsers: (Omit<User, 'wallet'> & { password?: string })[] = [
+            { id: 'user-amina', googleId: 'gid-amina', email: 'amina@example.com', password: 'password123', name: 'Amina', role: UserRole.Student, points: 250, level: LearningPath.Innovator, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life', 'risks-and-bias', 'ai-and-jobs'], badges: ['first-step', 'ai-graduate', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 2, quizRewinds: 5, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
+            { id: 'user-kwame', googleId: 'gid-kwame', email: 'kwame@example.com', password: 'password123', name: 'Kwame', role: UserRole.Student, points: 190, level: LearningPath.Creator, completedModules: ['what-is-ai', 'how-ai-works', 'ai-in-daily-life'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 1, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
+            { id: 'user-fatou', googleId: 'gid-fatou', email: 'fatou@example.com', password: 'password123', name: 'Fatou', role: UserRole.Teacher, points: 175, level: null, completedModules: [], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
+            { id: 'user-chinedu', googleId: 'gid-chinedu', email: 'chinedu@example.com', password: 'password123', name: 'Chinedu', role: UserRole.Parent, points: 150, level: null, completedModules: [], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], childEmail: 'zola@example.com', isPro: false },
+            { id: 'user-zola', googleId: 'gid-zola', email: 'zola@example.com', password: 'password123', name: 'Zola', role: UserRole.Student, points: 120, level: LearningPath.Explorer, completedModules: ['what-is-ai'], badges: ['first-step', 'point-pioneer'], multiplayerStats: { wins: 0, gamesPlayed: 0 }, lastLoginDate: '', loginStreak: 0, certificateLevel: 'basic', theme: 'default', avatarId: 'avatar-01', unlockedVoices: [], tutorTokens: 0, quizRewinds: 0, unlockedBanners: [], unlockedThemes: ['default'], isPro: false },
         ];
         const usersDb = mockUsers.reduce((acc, user) => {
             acc[user.email] = { ...user, wallet: initializeDefaultWallet(user.points) };
             return acc;
-        }, {} as Record<string, User>);
+        }, {} as Record<string, User & { password?: string }>);
         writeDb(DB_KEY_USERS, usersDb);
     }
 };
@@ -61,15 +61,60 @@ export const apiService = {
     return new Promise((resolve) => {
       setTimeout(() => {
         const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
-        resolve(users[email.toLowerCase()] || null);
+        const user = users[email.toLowerCase()];
+        if (user) {
+            // Don't return password if it exists in the object
+            const { password, ...safeUser } = user as any;
+            resolve(safeUser);
+        } else {
+            resolve(null);
+        }
       }, SIMULATED_DELAY);
     });
+  },
+
+  async authenticateUser(email: string, passwordInput: string): Promise<User> {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              const users = readDb<Record<string, User & { password?: string }>>(DB_KEY_USERS, {});
+              const user = users[email.toLowerCase()];
+              
+              if (!user) return reject(new Error("User not found."));
+              
+              // If user was created via Google, they might not have a password
+              if (!user.password && user.googleId) {
+                  return reject(new Error("Please sign in with Google."));
+              }
+
+              if (user.password !== passwordInput) {
+                  return reject(new Error("Invalid password."));
+              }
+
+              const { password, ...safeUser } = user;
+              resolve(safeUser);
+          }, SIMULATED_DELAY);
+      });
+  },
+
+  async requestPasswordReset(email: string): Promise<void> {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+              const user = users[email.toLowerCase()];
+              if (!user) {
+                  // Security best practice: Don't reveal if user exists, but for this mock we can throw or just resolve.
+                  // We'll resolve to simulate success to the UI.
+              }
+              console.log(`[Mock Email Service] Password reset link sent to ${email}`);
+              resolve();
+          }, SIMULATED_DELAY);
+      });
   },
 
   async handleUserLogin(email: string): Promise<{ user: User, newTransactions: Transaction[] }> {
     return new Promise((resolve, reject) => {
       setTimeout(async () => {
-        const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+        const users = readDb<Record<string, User & { password?: string }>>(DB_KEY_USERS, {});
         let user = users[email.toLowerCase()];
         if (!user) return reject(new Error("User not found"));
 
@@ -137,15 +182,28 @@ export const apiService = {
         users[email.toLowerCase()] = user;
         writeDb(DB_KEY_USERS, users);
         
-        resolve({ user, newTransactions });
+        const { password, ...safeUser } = user;
+        resolve({ user: safeUser, newTransactions });
       }, SIMULATED_DELAY);
     });
   },
 
-  async createUser(details: { name: string, email: string, level: LearningPath | null, role: UserRole, googleId: string, avatarUrl?: string }): Promise<User> {
+  async createUser(details: { 
+      name?: string, 
+      firstName?: string,
+      lastName?: string,
+      email: string, 
+      password?: string,
+      level: LearningPath | null, 
+      role: UserRole, 
+      googleId: string, 
+      avatarUrl?: string,
+      phoneNumber?: string,
+      country?: string 
+    }): Promise<User> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+        const users = readDb<Record<string, User & { password?: string }>>(DB_KEY_USERS, {});
         const lowercasedEmail = details.email.toLowerCase();
         
         if (users[lowercasedEmail]) {
@@ -153,11 +211,20 @@ export const apiService = {
         }
 
         const userId = `user-${Date.now()}`;
-        const newUser: User = {
+        
+        // Construct display name from first/last if not provided
+        const displayName = details.name || `${details.firstName || ''} ${details.lastName || ''}`.trim() || 'New Learner';
+
+        const newUser: User & { password?: string } = {
           id: userId,
           googleId: details.googleId,
           email: lowercasedEmail,
-          name: details.name,
+          name: displayName,
+          firstName: details.firstName,
+          lastName: details.lastName,
+          phoneNumber: details.phoneNumber,
+          country: details.country,
+          password: details.password, // Store password in DB object
           level: details.level,
           role: details.role,
           points: 0,
@@ -180,7 +247,9 @@ export const apiService = {
         };
         users[lowercasedEmail] = newUser;
         writeDb(DB_KEY_USERS, users);
-        resolve(newUser);
+        
+        const { password, ...safeUser } = newUser;
+        resolve(safeUser);
       }, SIMULATED_DELAY);
     });
   },
@@ -188,7 +257,7 @@ export const apiService = {
   async updateUser(email: string, updates: Partial<Omit<User, 'id' | 'email' | 'googleId'>>): Promise<User | null> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+        const users = readDb<Record<string, User & { password?: string }>>(DB_KEY_USERS, {});
         const lowercasedEmail = email.toLowerCase();
         let user = users[lowercasedEmail];
         if (user) {
@@ -208,7 +277,9 @@ export const apiService = {
           
           users[lowercasedEmail] = user;
           writeDb(DB_KEY_USERS, users);
-          resolve(user);
+          
+          const { password, ...safeUser } = user;
+          resolve(safeUser);
         } else {
           resolve(null);
         }
@@ -241,7 +312,7 @@ export const apiService = {
   async sendPoints(senderEmail: string, recipientEmail: string, amount: number, message: string): Promise<{ sender: User, recipient: User }> {
       return new Promise((resolve, reject) => {
           setTimeout(() => {
-              const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+              const users = readDb<Record<string, User & { password?: string }>>(DB_KEY_USERS, {});
               const sender = users[senderEmail.toLowerCase()];
               const recipient = users[recipientEmail.toLowerCase()];
 
@@ -284,7 +355,12 @@ export const apiService = {
               });
 
               writeDb(DB_KEY_USERS, users);
-              resolve({ sender, recipient });
+              
+              // Remove password before returning
+              const { password: sp, ...safeSender } = sender;
+              const { password: rp, ...safeRecipient } = recipient;
+              
+              resolve({ sender: safeSender, recipient: safeRecipient });
           }, SIMULATED_DELAY * 2);
       });
   },
@@ -292,7 +368,7 @@ export const apiService = {
   async redeemItem(userEmail: string, itemId: string, cost: number, payload: any): Promise<User> {
       return new Promise((resolve, reject) => {
           setTimeout(() => {
-              const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
+              const users = readDb<Record<string, User & { password?: string }>>(DB_KEY_USERS, {});
               const user = users[userEmail.toLowerCase()];
 
               if (!user) return reject(new Error("User not found."));
@@ -333,7 +409,8 @@ export const apiService = {
               });
               
               writeDb(DB_KEY_USERS, users);
-              resolve(user);
+              const { password, ...safeUser } = user;
+              resolve(safeUser);
           }, SIMULATED_DELAY);
       });
   },

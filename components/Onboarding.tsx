@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-// FIX: Aliased the `User` icon to `UserIcon` to avoid a name conflict with the `User` type.
-import { Loader2, ArrowRight, GraduationCap, PartyPopper, CheckCircle, Feather, BookOpen, BrainCircuit, User as UserIcon, Users, Book, PenTool, Briefcase, ShieldCheck, BookCopy, UserPlus } from 'lucide-react';
+import { Loader2, ArrowRight, GraduationCap, PartyPopper, CheckCircle, Feather, BookOpen, User as UserIcon, Users, Book, PenTool, Briefcase, ShieldCheck, BookCopy, UserPlus, Eye, EyeOff, Lock, Mail, Globe, Phone, AlertCircle } from 'lucide-react';
 import { apiService } from '../services/apiService';
 import { LearningPath, User, UserRole } from '../types';
 import { Translation } from '../i18n';
@@ -56,7 +55,6 @@ const WelcomeStep: React.FC<{ onGetStarted: () => void, t: Translation }> = ({ o
 
 const RoleSelectionStep: React.FC<{ onSelect: (role: UserRole) => void, isLoading: boolean, t: Translation }> = ({ onSelect, isLoading, t }) => {
     const roles = [
-        // FIX: Replaced `User` icon with the aliased `UserIcon`.
         { role: UserRole.Student, icon: UserIcon, title: t.onboarding.roleSelection.student, desc: t.onboarding.roleSelection.studentDescription },
         { role: UserRole.Teacher, icon: Book, title: t.onboarding.roleSelection.teacher, desc: t.onboarding.roleSelection.teacherDescription },
         { role: UserRole.Parent, icon: Users, title: t.onboarding.roleSelection.parent, desc: t.onboarding.roleSelection.parentDescription },
@@ -256,15 +254,32 @@ const LinkChildStep: React.FC<{ t: Translation, transitionUser: User, setUser: (
 };
 
 export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
-  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
-  const [name, setName] = useState('');
+  const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'forgot-password'>('signin');
+  
+  // Form State
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [country, setCountry] = useState('');
+  
+  const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState<'welcome' | 'auth' | 'select_role' | 'select_path' | 'create_class' | 'link_child' | 'path_assigned' | 'success_signin'>('welcome');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [assignedLevel, setAssignedLevel] = useState<LearningPath | null>(null);
   const [transitionUser, setTransitionUser] = useState<User | null>(null);
-  const [signupDetails, setSignupDetails] = useState<{ name: string; email: string; role: UserRole | null; avatarUrl?: string }>({ name: '', email: '', role: null });
+  const [signupDetails, setSignupDetails] = useState<{ 
+      firstName: string; 
+      lastName: string; 
+      email: string; 
+      phoneNumber: string;
+      country: string;
+      password?: string;
+      role: UserRole | null; 
+      avatarUrl?: string 
+  }>({ firstName: '', lastName: '', email: '', phoneNumber: '', country: '', role: null });
 
   useEffect(() => {
     if (step === 'success_signin') {
@@ -282,7 +297,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
     const data = parseJwt(response.credential);
     if (!data) return;
 
-    const { email, name, picture, sub } = data;
+    const { email, given_name, family_name, picture, sub } = data;
     setIsLoading(true);
     setError(null);
     
@@ -292,8 +307,16 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
             setTransitionUser(existingUser);
             setStep('success_signin');
         } else {
-            // New user from Google
-            setSignupDetails({ name, email, role: null, avatarUrl: picture });
+            // New user from Google - prefill available info
+            setSignupDetails({ 
+                firstName: given_name, 
+                lastName: family_name, 
+                email, 
+                phoneNumber: '',
+                country: '',
+                role: null, 
+                avatarUrl: picture 
+            });
             setStep('select_role');
         }
     } catch (error) {
@@ -304,10 +327,10 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
   };
 
   useEffect(() => {
-    if (window.google && (step === 'welcome' || step === 'auth')) {
+    if (window.google && (step === 'welcome' || step === 'auth') && authMode === 'signin') {
         try {
             window.google.accounts.id.initialize({
-                client_id: "YOUR_GOOGLE_CLIENT_ID_HERE", // Replace with process.env.REACT_APP_GOOGLE_CLIENT_ID in production
+                client_id: "YOUR_GOOGLE_CLIENT_ID_HERE", // Replace in production
                 callback: handleGoogleResponse
             });
             window.google.accounts.id.renderButton(
@@ -318,7 +341,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
             console.error("Error initializing Google Sign In", e);
         }
     }
-  }, [step]);
+  }, [step, authMode]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -329,19 +352,15 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
 
     if (authMode === 'signin') {
         try {
-            const existingUser = await apiService.getUserByEmail(email);
-            if (existingUser) {
-                setTransitionUser(existingUser);
-                setStep('success_signin');
-            } else {
-                setError(t.onboarding.errorUserNotFound);
-            }
-        } catch (err) {
-            setError(t.onboarding.errorGeneric);
+            const authenticatedUser = await apiService.authenticateUser(email, password);
+            setTransitionUser(authenticatedUser);
+            setStep('success_signin');
+        } catch (err: any) {
+            setError(err.message || t.onboarding.errorGeneric);
         } finally {
             setIsLoading(false);
         }
-    } else { // signup
+    } else if (authMode === 'signup') {
         try {
             const existingUser = await apiService.getUserByEmail(email);
             if (existingUser) {
@@ -349,11 +368,29 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
                 setIsLoading(false);
                 return;
             }
-            // Temporarily store name and email, then move to role selection
-            setSignupDetails({ name, email, role: null });
+            // Store full details temporarily
+            setSignupDetails({ 
+                firstName, 
+                lastName, 
+                email, 
+                phoneNumber,
+                country,
+                password,
+                role: null 
+            });
             setStep('select_role');
         } catch (err: any) {
             setError(t.onboarding.errorGeneric);
+        } finally {
+            setIsLoading(false);
+        }
+    } else if (authMode === 'forgot-password') {
+        try {
+            await apiService.requestPasswordReset(email);
+            alert('If an account exists with this email, you will receive a password reset link shortly.');
+            setAuthMode('signin');
+        } catch (err) {
+            setError('Failed to request password reset. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -368,8 +405,14 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
       } else {
           setIsLoading(true);
           try {
-              const googleId = `gid-${Date.now()}`;
-              const createdUser = await apiService.createUser({ ...signupDetails, role, level: null, googleId, avatarUrl: signupDetails.avatarUrl });
+              const googleId = `gid-${Date.now()}`; // Placeholder for non-Google signups
+              const createdUser = await apiService.createUser({ 
+                  ...signupDetails, 
+                  role, 
+                  level: null, 
+                  googleId, 
+                  avatarUrl: signupDetails.avatarUrl 
+              });
               setTransitionUser(createdUser);
               
               if (role === UserRole.Teacher) {
@@ -391,7 +434,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
     setIsLoading(true);
     try {
       const googleId = `gid-${Date.now()}`;
-      const createdUser = await apiService.createUser({ ...signupDetails, role: signupDetails.role, level, googleId, avatarUrl: signupDetails.avatarUrl });
+      const createdUser = await apiService.createUser({ 
+          ...signupDetails, 
+          role: signupDetails.role, 
+          level, 
+          googleId, 
+          avatarUrl: signupDetails.avatarUrl 
+      });
       setTransitionUser(createdUser);
       setAssignedLevel(level);
       setStep('path_assigned');
@@ -407,11 +456,19 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
     }
   };
 
-  const switchAuthMode = (mode: 'signin' | 'signup') => {
+  const switchAuthMode = (mode: 'signin' | 'signup' | 'forgot-password') => {
     setAuthMode(mode);
     setError(null);
-    setName('');
-    setEmail('');
+    // Keep email if switching between signin/forgot password
+    if (mode === 'signup') {
+        setPassword('');
+        setFirstName('');
+        setLastName('');
+        setPhoneNumber('');
+        setCountry('');
+    } else if (mode === 'signin') {
+        // Retain email
+    }
   };
   
   if (step === 'welcome') {
@@ -473,49 +530,188 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
     );
   }
 
+  // Auth Screen (Sign In / Sign Up / Forgot Password)
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-100 p-4">
-        <div className="w-full max-w-md mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-10 text-center">
-                <div className="inline-flex items-center justify-center gap-3 mb-2">
-                    <GraduationCap className="text-primary" size={40} />
-                    <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-800">AI Kasahorow</h1>
+        <div className={`w-full ${authMode === 'signup' ? 'max-w-2xl' : 'max-w-md'} mx-auto transition-all duration-300`}>
+            <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-10">
+                <div className="text-center mb-6">
+                    <div className="inline-flex items-center justify-center gap-3 mb-2">
+                        <GraduationCap className="text-primary" size={40} />
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-neutral-800">AI Kasahorow</h1>
+                    </div>
+                    <h2 className="text-xl font-bold text-neutral-600">
+                        {authMode === 'signin' ? t.onboarding.signInTitle : 
+                         authMode === 'signup' ? t.onboarding.signUpTitle : 
+                         "Reset Password"}
+                    </h2>
+                    {authMode === 'forgot-password' && (
+                        <p className="text-neutral-500 text-sm mt-2">Enter your email to receive reset instructions.</p>
+                    )}
                 </div>
-                <h2 className="text-xl font-bold text-neutral-600 mb-6">{authMode === 'signin' ? t.onboarding.signInTitle : t.onboarding.signUpTitle}</h2>
                 
                 <form onSubmit={handleAuth} className="space-y-4">
                     {authMode === 'signup' && (
-                        <input type="text" placeholder={t.onboarding.namePlaceholder} value={name} onChange={e => setName(e.target.value)} className="w-full p-4 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary bg-white text-neutral-900 placeholder:text-neutral-400 text-lg" required />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-neutral-700 mb-1">First Name</label>
+                                <div className="relative">
+                                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
+                                    <input 
+                                        type="text" 
+                                        placeholder="First Name" 
+                                        value={firstName} 
+                                        onChange={e => setFirstName(e.target.value)} 
+                                        className="w-full pl-10 p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition" 
+                                        required 
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-neutral-700 mb-1">Last Name</label>
+                                <div className="relative">
+                                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Last Name" 
+                                        value={lastName} 
+                                        onChange={e => setLastName(e.target.value)} 
+                                        className="w-full pl-10 p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition" 
+                                        required 
+                                    />
+                                </div>
+                            </div>
+                        </div>
                     )}
-                     <input type="email" placeholder={t.onboarding.emailPlaceholder} value={email} onChange={e => setEmail(e.target.value)} className="w-full p-4 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary bg-white text-neutral-900 placeholder:text-neutral-400 text-lg" required />
+
+                    <div>
+                        <label className="block text-sm font-semibold text-neutral-700 mb-1">Email Address</label>
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
+                            <input 
+                                type="email" 
+                                placeholder="name@example.com" 
+                                value={email} 
+                                onChange={e => setEmail(e.target.value)} 
+                                className="w-full pl-10 p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition" 
+                                required 
+                            />
+                        </div>
+                    </div>
+
+                    {authMode === 'signup' && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-semibold text-neutral-700 mb-1">Phone Number</label>
+                                <div className="relative">
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
+                                    <input 
+                                        type="tel" 
+                                        placeholder="+234..." 
+                                        value={phoneNumber} 
+                                        onChange={e => setPhoneNumber(e.target.value)} 
+                                        className="w-full pl-10 p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition" 
+                                        required 
+                                    />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-semibold text-neutral-700 mb-1">Country</label>
+                                <div className="relative">
+                                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Nigeria" 
+                                        value={country} 
+                                        onChange={e => setCountry(e.target.value)} 
+                                        className="w-full pl-10 p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition" 
+                                        required 
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {(authMode === 'signin' || authMode === 'signup') && (
+                        <div>
+                            <label className="block text-sm font-semibold text-neutral-700 mb-1">Password</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
+                                <input 
+                                    type={showPassword ? "text" : "password"} 
+                                    placeholder="••••••••" 
+                                    value={password} 
+                                    onChange={e => setPassword(e.target.value)} 
+                                    className="w-full pl-10 pr-10 p-3 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary outline-none transition" 
+                                    required 
+                                    minLength={6}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                            {authMode === 'signin' && (
+                                <div className="text-right mt-2">
+                                    <button 
+                                        type="button"
+                                        onClick={() => switchAuthMode('forgot-password')}
+                                        className="text-sm font-semibold text-primary hover:text-primary-dark transition"
+                                    >
+                                        Forgot Password?
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                     
-                    {error && <p className="text-red-500 text-sm font-semibold text-left pt-1">{error}</p>}
+                    {error && (
+                        <div className="bg-red-50 text-red-600 p-3 rounded-lg flex items-start gap-2 text-sm">
+                            <AlertCircle size={16} className="mt-0.5 flex-shrink-0"/>
+                            <span>{error}</span>
+                        </div>
+                    )}
                     
-                    <button type="submit" disabled={isLoading} className="w-full bg-primary text-white font-bold py-4 rounded-lg hover:bg-primary-dark transition flex items-center justify-center gap-2 disabled:bg-neutral-400 text-lg mt-2">
-                        {isLoading ? <Loader2 className="animate-spin" /> : (authMode === 'signin' ? t.onboarding.signInButton : t.onboarding.signUpButton)}
+                    <button type="submit" disabled={isLoading} className="w-full bg-primary text-white font-bold py-4 rounded-lg hover:bg-primary-dark transition flex items-center justify-center gap-2 disabled:bg-neutral-400 text-lg mt-4 shadow-md hover:shadow-lg transform active:scale-[0.98]">
+                        {isLoading ? <Loader2 className="animate-spin" /> : (
+                            authMode === 'signin' ? t.onboarding.signInButton : 
+                            authMode === 'signup' ? t.onboarding.signUpButton : 
+                            "Send Reset Link"
+                        )}
                     </button>
                 </form>
 
-                <div className="my-6 flex items-center gap-4">
-                    <div className="h-px bg-neutral-200 flex-1"></div>
-                    <span className="text-neutral-400 text-sm font-semibold">OR</span>
-                    <div className="h-px bg-neutral-200 flex-1"></div>
-                </div>
-                <div id="googleSignInDiv" className="w-full"></div>
+                {authMode !== 'forgot-password' && (
+                    <>
+                        <div className="my-6 flex items-center gap-4">
+                            <div className="h-px bg-neutral-200 flex-1"></div>
+                            <span className="text-neutral-400 text-sm font-semibold">OR</span>
+                            <div className="h-px bg-neutral-200 flex-1"></div>
+                        </div>
+                        <div id="googleSignInDiv" className="w-full min-h-[44px]"></div>
+                    </>
+                )}
 
-                <p className="mt-6 text-center text-neutral-600">
+                <div className="mt-6 text-center text-neutral-600">
                     {authMode === 'signin' ? (
                         <>
                             {t.onboarding.switchToSignUp.split('?')[0]}?{' '}
                             <button onClick={() => switchAuthMode('signup')} className="font-bold text-primary hover:underline">{t.onboarding.switchToSignUp.split('? ')[1]}</button>
                         </>
-                    ) : (
+                    ) : authMode === 'signup' ? (
                         <>
                             {t.onboarding.switchToSignIn.split('?')[0]}?{' '}
                             <button onClick={() => switchAuthMode('signin')} className="font-bold text-primary hover:underline">{t.onboarding.switchToSignIn.split('? ')[1]}</button>
                         </>
+                    ) : (
+                        <button onClick={() => switchAuthMode('signin')} className="font-bold text-primary hover:underline flex items-center justify-center gap-2 mx-auto">
+                            <ArrowRight className="rotate-180" size={16}/> Back to Sign In
+                        </button>
                     )}
-                </p>
+                </div>
             </div>
              <p className="text-sm text-neutral-400 mt-8 text-center">{t.common.footer(new Date().getFullYear())}</p>
         </div>
