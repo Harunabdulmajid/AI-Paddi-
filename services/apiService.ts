@@ -142,7 +142,7 @@ export const apiService = {
     });
   },
 
-  async createUser(details: { name: string, email: string, level: LearningPath | null, role: UserRole, googleId: string }): Promise<User> {
+  async createUser(details: { name: string, email: string, level: LearningPath | null, role: UserRole, googleId: string, avatarUrl?: string }): Promise<User> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const users = readDb<Record<string, User>>(DB_KEY_USERS, {});
@@ -169,7 +169,8 @@ export const apiService = {
           loginStreak: 1,
           certificateLevel: 'basic',
           theme: 'default',
-          avatarId: 'avatar-01',
+          avatarId: details.avatarUrl ? '' : 'avatar-01',
+          avatarUrl: details.avatarUrl,
           unlockedVoices: [],
           tutorTokens: 0,
           quizRewinds: 0,

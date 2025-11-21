@@ -5,10 +5,26 @@ import { apiService } from '../services/apiService';
 import { LearningPath, User, UserRole } from '../types';
 import { Translation } from '../i18n';
 
+// Global declaration for Google Identity Services
+declare global {
+  interface Window {
+    google: any;
+  }
+}
+
 interface OnboardingProps {
     setUser: (user: User | null) => void;
     t: Translation;
 }
+
+// Helper to decode JWT token from Google
+const parseJwt = (token: string) => {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+      return null;
+    }
+};
 
 const WelcomeStep: React.FC<{ onGetStarted: () => void, t: Translation }> = ({ onGetStarted, t }) => (
     <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-100 p-4">
@@ -248,7 +264,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
   const [error, setError] = useState<string | null>(null);
   const [assignedLevel, setAssignedLevel] = useState<LearningPath | null>(null);
   const [transitionUser, setTransitionUser] = useState<User | null>(null);
-  const [signupDetails, setSignupDetails] = useState<{ name: string; email: string; role: UserRole | null }>({ name: '', email: '', role: null });
+  const [signupDetails, setSignupDetails] = useState<{ name: string; email: string; role: UserRole | null; avatarUrl?: string }>({ name: '', email: '', role: null });
 
   useEffect(() => {
     if (step === 'success_signin') {
@@ -262,6 +278,47 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
     }
   }, [step, transitionUser, setUser]);
 
+  const handleGoogleResponse = async (response: any) => {
+    const data = parseJwt(response.credential);
+    if (!data) return;
+
+    const { email, name, picture, sub } = data;
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+        const existingUser = await apiService.getUserByEmail(email);
+        if (existingUser) {
+            setTransitionUser(existingUser);
+            setStep('success_signin');
+        } else {
+            // New user from Google
+            setSignupDetails({ name, email, role: null, avatarUrl: picture });
+            setStep('select_role');
+        }
+    } catch (error) {
+        setError(t.onboarding.errorGeneric);
+    } finally {
+        setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (window.google && (step === 'welcome' || step === 'auth')) {
+        try {
+            window.google.accounts.id.initialize({
+                client_id: "YOUR_GOOGLE_CLIENT_ID_HERE", // Replace with process.env.REACT_APP_GOOGLE_CLIENT_ID in production
+                callback: handleGoogleResponse
+            });
+            window.google.accounts.id.renderButton(
+                document.getElementById("googleSignInDiv"),
+                { theme: "outline", size: "large", width: "100%" }
+            );
+        } catch (e) {
+            console.error("Error initializing Google Sign In", e);
+        }
+    }
+  }, [step]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -312,7 +369,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
           setIsLoading(true);
           try {
               const googleId = `gid-${Date.now()}`;
-              const createdUser = await apiService.createUser({ ...signupDetails, role, level: null, googleId });
+              const createdUser = await apiService.createUser({ ...signupDetails, role, level: null, googleId, avatarUrl: signupDetails.avatarUrl });
               setTransitionUser(createdUser);
               
               if (role === UserRole.Teacher) {
@@ -334,7 +391,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
     setIsLoading(true);
     try {
       const googleId = `gid-${Date.now()}`;
-      const createdUser = await apiService.createUser({ ...signupDetails, role: signupDetails.role, level, googleId });
+      const createdUser = await apiService.createUser({ ...signupDetails, role: signupDetails.role, level, googleId, avatarUrl: signupDetails.avatarUrl });
       setTransitionUser(createdUser);
       setAssignedLevel(level);
       setStep('path_assigned');
@@ -438,6 +495,13 @@ export const Onboarding: React.FC<OnboardingProps> = ({ setUser, t }) => {
                         {isLoading ? <Loader2 className="animate-spin" /> : (authMode === 'signin' ? t.onboarding.signInButton : t.onboarding.signUpButton)}
                     </button>
                 </form>
+
+                <div className="my-6 flex items-center gap-4">
+                    <div className="h-px bg-neutral-200 flex-1"></div>
+                    <span className="text-neutral-400 text-sm font-semibold">OR</span>
+                    <div className="h-px bg-neutral-200 flex-1"></div>
+                </div>
+                <div id="googleSignInDiv" className="w-full"></div>
 
                 <p className="mt-6 text-center text-neutral-600">
                     {authMode === 'signin' ? (
