@@ -1,10 +1,8 @@
-// FIX: Import `useEffect` from React to resolve the "Cannot find name 'useEffect'" error.
 import React, { useContext, useRef, useCallback, useState, useEffect } from 'react';
 import { AppContext } from './AppContext';
 import { Award, CheckCircle, Download, Share2, Edit, X, Check, Loader2, LogOut, ShieldCheck, MessageSquarePlus, Wallet, Feather, PenTool, Briefcase, Upload, Image as ImageIcon } from 'lucide-react';
 import { LearningPath, User, Page, AppContextType } from '../types';
 import { useTranslations } from '../i18n';
-// FIX: Import the `BADGES` constant to resolve the "Cannot find name 'BADGES'" error.
 import { CURRICULUM_MODULES, LEARNING_PATHS, BADGES } from '../constants';
 import * as htmlToImage from 'html-to-image';
 import { apiService } from '../services/apiService';
@@ -19,26 +17,101 @@ const Certificate: React.FC<{ user: User, certificateRef: React.RefObject<HTMLDi
     const certificateId = `AIK-${new Date().getFullYear()}-${user.id.slice(-6).toUpperCase()}`;
     const isDistinction = user.certificateLevel === 'distinction';
 
+    // IMPORTANT: We use hardcoded HEX colors here to ensure the certificate ALWAYS looks like white paper
+    // with dark text, regardless of the app's global Dark Mode (where 'white' might be inverted).
+    // bg-[#fcfcfc] = Off-white paper
+    // text-[#1a1a1a] = Dark charcoal text
+    // border-[#b8860b] = Dark Goldenrod
+
     return (
-        <div ref={certificateRef} className={`bg-white p-6 md:p-8 rounded-xl border-2 ${isDistinction ? 'border-amber-400' : 'border-primary'} relative overflow-hidden`}>
-            <div className="absolute top-0 left-0 w-full h-full bg-neutral-50 z-0 opacity-50"></div>
-            <div className={`absolute -top-10 -right-10 w-40 h-40 ${isDistinction ? 'bg-amber-400/10' : 'bg-primary/10'} rounded-full z-0`}></div>
-            <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-secondary/10 rounded-full z-0"></div>
+        <div 
+            ref={certificateRef} 
+            className="relative p-8 md:p-12 w-full max-w-4xl mx-auto shadow-2xl overflow-hidden text-center font-serif bg-[#fdfbf7]"
+            style={{ color: '#1a1a1a' }} // Force dark text
+        >
+            {/* Ornamental Border */}
+            <div className="absolute inset-4 border-[6px] border-double border-[#b8860b] pointer-events-none z-10"></div>
+            <div className="absolute inset-2 border border-[#b8860b]/30 pointer-events-none z-10"></div>
             
-            <div className="relative z-10 text-center">
-                <div className={`flex justify-center items-center gap-3 ${isDistinction ? 'text-amber-500' : 'text-primary'}`}>
-                  <ShieldCheck size={40} />
-                  <h3 className="text-2xl md:text-3xl font-bold">{t.profile.certificateTitleSingle}{isDistinction && ' with Distinction'}</h3>
+            {/* Background Pattern (Guilloche-like) */}
+            <div className="absolute inset-0 opacity-5 z-0 pointer-events-none" 
+                 style={{ 
+                     backgroundImage: 'radial-gradient(circle, #000 1px, transparent 1px)', 
+                     backgroundSize: '20px 20px' 
+                 }}>
+            </div>
+
+            {/* Watermark */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none z-0">
+                <ShieldCheck size={400} color="#000000" />
+            </div>
+
+            <div className="relative z-20">
+                {/* Header */}
+                <div className="mb-8">
+                    <div className="flex justify-center mb-4">
+                        <ShieldCheck size={64} color="#b8860b" />
+                    </div>
+                    <h2 className="text-4xl md:text-5xl font-bold uppercase tracking-widest text-[#1a1a1a] mb-2" style={{ fontFamily: 'serif' }}>
+                        {t.profile.certificateTitleSingle}
+                    </h2>
+                    {isDistinction && (
+                        <div className="inline-block px-4 py-1 border border-[#b8860b] text-[#b8860b] text-sm font-bold uppercase tracking-widest rounded-full mt-2">
+                            With Distinction
+                        </div>
+                    )}
                 </div>
-                <p className="text-neutral-500 mt-1 font-semibold">{t.profile.certificateIssuedBy('AI Paddi')}</p>
-                <p className="text-neutral-500 mt-4">{t.profile.certificateFor}</p>
-                <p className="text-3xl md:text-4xl font-extrabold text-neutral-800 my-4 md:my-6 border-y-2 border-neutral-200 py-4">{user.name}</p>
-                <p className="text-base md:text-lg text-neutral-600 font-medium">{t.profile.certificateCourseName}</p>
-                <div className="flex justify-center items-center gap-2 mt-4 text-secondary">
-                    <CheckCircle size={24} />
-                    <p className="font-bold">{t.profile.certificateCompletedOn(completionDate)}</p>
+
+                {/* Body */}
+                <div className="space-y-6 mb-12">
+                    <p className="text-lg italic text-[#4a4a4a]">{t.profile.certificateFor}</p>
+                    
+                    <div className="py-4 border-b-2 border-[#1a1a1a]/10 w-3/4 mx-auto">
+                        <h3 className="text-4xl md:text-5xl font-bold text-[#1a1a1a]" style={{ fontFamily: 'sans-serif' }}>
+                            {user.name}
+                        </h3>
+                    </div>
+
+                    <p className="text-lg text-[#4a4a4a]">
+                        For successfully completing the required coursework and demonstrating proficiency in
+                    </p>
+
+                    <h4 className="text-3xl font-bold text-[#b8860b] my-4">
+                        {t.profile.certificateCourseName}
+                    </h4>
+
+                    <p className="text-base text-[#666666]">
+                        {t.profile.certificateCompletedOn(completionDate)}
+                    </p>
                 </div>
-                <p className="text-xs text-neutral-400 mt-6">{t.profile.certificateId}: {certificateId}</p>
+
+                {/* Footer / Signatures */}
+                <div className="flex flex-col md:flex-row justify-between items-end mt-16 px-8 md:px-16 gap-8">
+                    <div className="text-center">
+                        <div className="w-48 border-b border-[#1a1a1a] mb-2 mx-auto">
+                            <span className="font-cursive text-2xl text-[#1a1a1a]">Dr. A. I. Paddi</span>
+                        </div>
+                        <p className="text-xs uppercase tracking-wider font-bold text-[#666666]">Director of Education</p>
+                    </div>
+
+                    {/* Gold Seal */}
+                    <div className="relative w-24 h-24 hidden md:flex items-center justify-center rounded-full shadow-lg"
+                         style={{ background: 'linear-gradient(135deg, #ffd700 0%, #b8860b 100%)' }}>
+                        <div className="absolute inset-1 border border-[#fff]/50 rounded-full"></div>
+                        <Award size={40} color="#ffffff" />
+                    </div>
+
+                    <div className="text-center">
+                        <div className="w-48 border-b border-[#1a1a1a] mb-2 mx-auto">
+                            <span className="font-mono text-sm text-[#1a1a1a]">{certificateId}</span>
+                        </div>
+                        <p className="text-xs uppercase tracking-wider font-bold text-[#666666]">{t.profile.certificateId}</p>
+                    </div>
+                </div>
+                
+                <div className="mt-8 text-xs text-[#999999]">
+                    {t.profile.certificateIssuedBy('AI Paddi Educational Institute')}
+                </div>
             </div>
         </div>
     );
@@ -204,7 +277,6 @@ const PathSelectionModal: React.FC<{ isOpen: boolean, onClose: () => void, onSel
 
 
 export const Profile: React.FC = () => {
-    // FIX: Cast context to the correct type to resolve TS inference errors.
     const context = useContext(AppContext) as AppContextType | null;
     if (!context) throw new Error("Profile must be used within an AppProvider");
     const { user, setUser, logout, setCurrentPage } = context;
@@ -255,10 +327,8 @@ export const Profile: React.FC = () => {
         }
         setIsSavingAvatar(true);
         
-        // Prepare updates. If ID is present (preset), we clear the URL.
-        // If URL is present (upload), we use it.
         const updates: Partial<User> = { avatarId };
-        updates.avatarUrl = avatarUrl || ''; // Clear URL if not provided (i.e. switching to preset)
+        updates.avatarUrl = avatarUrl || ''; 
 
         const updatedUser = await apiService.updateUser(user.email, updates);
         if (updatedUser) {
@@ -301,7 +371,8 @@ export const Profile: React.FC = () => {
     
     const handleDownload = useCallback(() => {
         if (certificateRef.current === null) return;
-        htmlToImage.toPng(certificateRef.current, { cacheBust: true, backgroundColor: '#ffffff' })
+        // Add backgroundColor to options to ensure it's opaque
+        htmlToImage.toPng(certificateRef.current, { cacheBust: true, backgroundColor: '#fdfbf7', pixelRatio: 2 })
           .then((dataUrl) => {
             const link = document.createElement('a');
             link.download = `AI-Kasahorow-Certificate-${user.name}.png`;

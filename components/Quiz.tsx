@@ -7,35 +7,51 @@ import { useSpeech } from '../services/hooks/useSpeech';
 
 interface QuizProps {
   quiz: QuizType;
+  moduleId: string;
   onComplete: () => void;
 }
 
-export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
+export const Quiz: React.FC<QuizProps> = ({ quiz, moduleId, onComplete }) => {
   const context = useContext(AppContext);
   if (!context) throw new Error("Quiz must be used within an AppProvider");
   const { addTransaction, isVoiceModeEnabled, language } = context;
   const { isListening, speak, startListening } = useSpeech();
 
+  // Stable container for quiz questions.
+  // This prevents questions from "refreshing" or causing state anomalies if the parent re-renders with a new object reference.
+  const quizDataRef = useRef(quiz.questions);
+  
+  // State
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [inputValue, setInputValue] = useState('');
   const [isAnswered, setIsAnswered] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [streak, setStreak] = useState(0);
+  const [quizScore, setQuizScore] = useState(0);
   const [lastPointsAwarded, setLastPointsAwarded] = useState(0);
-  const [quizScore, setQuizScore] = useState(0); // Track score for this specific quiz session
+
   const t = useTranslations();
-
   const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const currentQuestion = quiz.questions[currentQuestionIndex];
 
-  // Reset state when the quiz changes (e.g. new module loaded)
+  // Effect: Initialize or Reset quiz ONLY when moduleId changes.
   useEffect(() => {
-    setCurrentQuestionIndex(0);
-    setQuizScore(0);
-    setStreak(0);
-    resetQuestionState();
-  }, [quiz]);
+      // Update the ref to the new module's questions
+      quizDataRef.current = quiz.questions;
+      // Reset all state
+      setCurrentQuestionIndex(0);
+      setSelectedAnswer(null);
+      setInputValue('');
+      setIsAnswered(false);
+      setIsCorrect(null);
+      setQuizScore(0);
+      setStreak(0);
+  }, [moduleId, quiz]); // Depend on quiz to capture new data, but logic inside relies on moduleId mostly.
+
+  // Defensive check: ensure we have questions
+  const currentQuestion = quizDataRef.current && quizDataRef.current.length > 0 
+      ? quizDataRef.current[currentQuestionIndex] 
+      : null;
 
   const resetQuestionState = () => {
     setSelectedAnswer(null);
@@ -45,16 +61,22 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
   };
 
   const handleNext = useCallback(() => {
-    if (currentQuestionIndex < quiz.questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      resetQuestionState();
-    } else {
-      onComplete();
-    }
-  }, [currentQuestionIndex, quiz.questions.length, onComplete]);
+    // Functional update to avoid stale closures
+    setCurrentQuestionIndex(prev => {
+        const next = prev + 1;
+        if (quizDataRef.current && next < quizDataRef.current.length) {
+            resetQuestionState();
+            return next;
+        } else {
+            // Quiz finished
+            onComplete();
+            return prev; // Keep index at last question until component unmounts
+        }
+    });
+  }, [onComplete]);
 
   const handleSubmit = useCallback((answer: number | string) => {
-    if (isAnswered) return;
+    if (isAnswered || !currentQuestion) return;
 
     let isAnswerCorrect = false;
     if (currentQuestion.type === 'multiple-choice' && typeof answer === 'number') {
@@ -72,6 +94,8 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
         const points = 10 + (streak * 2);
         setLastPointsAwarded(points);
         setQuizScore(prev => prev + points);
+        
+        // Optimistic update: Parent re-render won't hurt us because we use refs/state internally
         addTransaction({
             type: 'earn',
             description: `Correct quiz answer`,
@@ -95,10 +119,16 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
   };
 
   useEffect(() => {
-    optionRefs.current = optionRefs.current.slice(0, currentQuestion.options.length);
-  }, [currentQuestionIndex, currentQuestion.options.length]);
+    if (currentQuestion) {
+        optionRefs.current = optionRefs.current.slice(0, currentQuestion.options.length);
+    }
+  }, [currentQuestionIndex, currentQuestion]);
 
-  const progressPercent = ((currentQuestionIndex + (isAnswered ? 1 : 0)) / quiz.questions.length) * 100;
+  if (!currentQuestion) {
+      return <div className="text-center p-4 text-neutral-500">Loading question...</div>;
+  }
+
+  const progressPercent = ((currentQuestionIndex + (isAnswered ? 1 : 0)) / quizDataRef.current.length) * 100;
 
   return (
     <div className="mt-8 animate-fade-in">
@@ -107,7 +137,7 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
          <div className="flex-grow max-w-xs">
             <div className="flex justify-between text-xs font-bold text-neutral-500 mb-1">
                 <span>Progress</span>
-                <span>{currentQuestionIndex + 1} / {quiz.questions.length}</span>
+                <span>{currentQuestionIndex + 1} / {quizDataRef.current.length}</span>
             </div>
             <div className="w-full bg-neutral-200 rounded-full h-2.5">
                 <div className="bg-secondary h-2.5 rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }}></div>
@@ -154,8 +184,9 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
 
             return (
               <button
-                key={index}
+                key={index} // Stable key
                 ref={(el) => { optionRefs.current[index] = el; }}
+                type="button" // Prevent default form submission behavior
                 onClick={() => handleSubmit(index)}
                 disabled={isAnswered}
                 role="radio"
@@ -215,6 +246,7 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
             <div className="mt-6 flex justify-end">
                 {!isCorrect ? (
                     <button
+                        type="button"
                         onClick={handleTryAgain}
                         className="flex items-center justify-center gap-2 bg-white border-2 border-red-200 text-red-700 font-bold py-3 px-6 rounded-xl hover:bg-red-50 hover:border-red-300 transition-all shadow-sm"
                     >
@@ -222,10 +254,11 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
                     </button>
                 ) : (
                      <button
+                        type="button"
                         onClick={handleNext}
                         className="flex items-center justify-center gap-2 bg-primary text-white font-bold py-3 px-8 rounded-xl hover:bg-primary-dark transition-transform active:scale-95 shadow-md shadow-primary/30"
                     >
-                        {currentQuestionIndex === quiz.questions.length - 1 ? (
+                        {currentQuestionIndex === quizDataRef.current.length - 1 ? (
                             "Complete Lesson"
                         ) : (
                             t.lesson.nextQuestionButton
@@ -239,7 +272,11 @@ export const Quiz: React.FC<QuizProps> = ({ quiz, onComplete }) => {
       
       {isVoiceModeEnabled && !isAnswered && (
           <div className="mt-8 flex justify-center">
-            <button onClick={() => {}} className="p-4 bg-neutral-100 rounded-full text-primary hover:bg-neutral-200 transition-colors">
+            <button 
+              type="button"
+              onClick={() => { /* Voice logic handled by hook/effect, simplified here */ }} 
+              className="p-4 bg-neutral-100 rounded-full text-primary hover:bg-neutral-200 transition-colors"
+            >
                 <Mic size={24} className={isListening ? 'animate-pulse' : ''} />
             </button>
         </div>

@@ -1,45 +1,77 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { AppContext } from './AppContext';
 import { Page, Badge, Language, LessonContent } from '../types';
 import { useTranslations, englishTranslations } from '../i18n';
 import { Quiz } from './Quiz';
 import { TooltipTerm } from './TooltipTerm';
-import { Award, PartyPopper, Loader2, Volume2, StopCircle } from 'lucide-react';
-import { BADGES } from '../constants';
+import { Award, PartyPopper, Loader2, Volume2, StopCircle, Construction, ArrowRight, BookOpen, Home } from 'lucide-react';
+import { BADGES, CURRICULUM_MODULES } from '../constants';
 import { BadgeIcon } from './BadgeIcon';
 import { geminiService } from '../services/geminiService';
 import { dbService } from '../services/db';
 
 type LessonState = 'reading' | 'quizzing' | 'complete';
 
-const CompletionModal: React.FC<{ onAcknowledge: () => void; points: number, unlockedBadgeIds: string[] }> = ({ onAcknowledge, points, unlockedBadgeIds }) => {
+interface CompletionModalProps { 
+    onAcknowledge: () => void; 
+    onNextLesson: () => void;
+    points: number; 
+    unlockedBadgeIds: string[];
+    nextLessonTitle?: string;
+}
+
+const CompletionModal: React.FC<CompletionModalProps> = ({ onAcknowledge, onNextLesson, points, unlockedBadgeIds, nextLessonTitle }) => {
     const t = useTranslations();
     const unlockedBadges: Badge[] = unlockedBadgeIds.map(id => BADGES[id]).filter(Boolean);
 
     return (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 animate-fade-in">
-            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center transform transition-all animate-slide-up">
-                <PartyPopper className="text-accent mx-auto" size={48} />
-                <h2 className="text-3xl font-extrabold text-neutral-800 mt-4">{t.lesson.completionModalTitle}</h2>
-                <p className="text-lg text-secondary font-bold mt-4 flex items-center justify-center gap-2">
-                    <Award size={24} /> {t.lesson.completionModalPoints(points)}
-                </p>
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center transform transition-all animate-slide-up border-4 border-primary/20">
+                <div className="inline-flex p-4 bg-green-100 rounded-full mb-4 text-green-600 shadow-inner">
+                    <PartyPopper size={48} />
+                </div>
+                <h2 className="text-3xl font-extrabold text-neutral-800 mt-2">{t.lesson.completionModalTitle}</h2>
+                
+                <div className="my-6 p-4 bg-neutral-50 rounded-xl border border-neutral-200">
+                    <p className="text-sm text-neutral-500 font-bold uppercase tracking-wider mb-1">Rewards Earned</p>
+                    <p className="text-3xl font-black text-secondary flex items-center justify-center gap-2">
+                        <Award size={32} /> {t.lesson.completionModalPoints(points)}
+                    </p>
+                </div>
+
                 {unlockedBadges.length > 0 && (
-                    <div className="mt-6">
-                        <h3 className="font-bold text-neutral-700">{t.lesson.badgeUnlocked}</h3>
-                        <div className="flex justify-center gap-4 mt-2">
+                    <div className="mb-8">
+                        <h3 className="font-bold text-neutral-700 mb-3 flex items-center justify-center gap-2">
+                            <Award size={18} className="text-accent"/> {t.lesson.badgeUnlocked}
+                        </h3>
+                        <div className="flex justify-center gap-4">
                             {unlockedBadges.map(badge => (
-                                <BadgeIcon key={badge.id} badge={badge} />
+                                <div key={badge.id} className="transform hover:scale-110 transition-transform">
+                                    <BadgeIcon badge={badge} />
+                                </div>
                             ))}
                         </div>
                     </div>
                 )}
-                <button 
-                    onClick={onAcknowledge}
-                    className="mt-8 w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-xl text-lg transition-transform active:scale-95"
-                >
-                    {t.lesson.returnToDashboardButton}
-                </button>
+
+                <div className="space-y-3">
+                    {nextLessonTitle && (
+                        <button 
+                            onClick={onNextLesson}
+                            className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 px-6 rounded-xl text-lg transition-all shadow-lg hover:shadow-xl hover:-translate-y-1 flex items-center justify-center gap-2"
+                        >
+                            <span>Next: {nextLessonTitle}</span>
+                            <ArrowRight size={22} />
+                        </button>
+                    )}
+                    <button 
+                        onClick={onAcknowledge}
+                        className="w-full bg-transparent hover:bg-neutral-100 text-neutral-600 font-bold py-3 px-6 rounded-xl text-base transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Home size={18} />
+                        {t.lesson.returnToDashboardButton}
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -68,6 +100,9 @@ export const Lesson: React.FC = () => {
     const [dynamicContent, setDynamicContent] = useState<Omit<LessonContent, 'quiz' | 'title'> | null>(null);
     const [isLoadingContent, setIsLoadingContent] = useState(true);
     
+    // Track loaded module to prevent unnecessary re-fetching/loading states
+    const loadedModuleRef = useRef<{ id: string, lang: Language } | null>(null);
+    
     // TTS State
     const [speakingSectionKey, setSpeakingSectionKey] = useState<string | null>(null);
     const [isTTSLoading, setIsTTSLoading] = useState(false);
@@ -77,6 +112,20 @@ export const Lesson: React.FC = () => {
     const initialBadges = user?.badges || [];
     const staticModuleContent = activeModuleId ? t.curriculum[activeModuleId]?.lessonContent : null;
     const englishModuleContent = activeModuleId ? englishTranslations.curriculum[activeModuleId]?.lessonContent : null;
+
+    // Calculate Next Module
+    const nextModule = useMemo(() => {
+        if (!activeModuleId) return null;
+        const currentIndex = CURRICULUM_MODULES.findIndex(m => m.id === activeModuleId);
+        if (currentIndex !== -1 && currentIndex < CURRICULUM_MODULES.length - 1) {
+            const nextId = CURRICULUM_MODULES[currentIndex + 1].id;
+            return {
+                id: nextId,
+                title: t.curriculum[nextId]?.title || 'Next Lesson'
+            };
+        }
+        return null;
+    }, [activeModuleId, t]);
 
     useEffect(() => {
         // @ts-ignore
@@ -92,17 +141,36 @@ export const Lesson: React.FC = () => {
 
     useEffect(() => {
         const fetchContent = async () => {
-            if (!activeModuleId || !englishModuleContent) {
+            // If we are already loaded for this module and language, DO NOT trigger loading state
+            if (
+                loadedModuleRef.current && 
+                loadedModuleRef.current.id === activeModuleId && 
+                loadedModuleRef.current.lang === language
+            ) {
+                return;
+            }
+
+            if (!activeModuleId) {
                  setIsLoadingContent(false);
                  return;
             }
             
             setIsLoadingContent(true);
+            setLessonState('reading'); // Reset state when module changes
+
+            // Local variable to use inside async context, avoiding dependency on the unstable 'englishModuleContent' object
+            const currentEnglishContent = englishTranslations.curriculum[activeModuleId]?.lessonContent;
+
+            if (!currentEnglishContent) {
+                setIsLoadingContent(false);
+                return;
+            }
 
             // Try fetching from offline DB first
             const offlineContent = await dbService.getContent(activeModuleId, language);
             if (offlineContent) {
                 setDynamicContent(offlineContent);
+                loadedModuleRef.current = { id: activeModuleId, lang: language };
                 setIsLoadingContent(false);
                 return;
             }
@@ -110,6 +178,7 @@ export const Lesson: React.FC = () => {
             // If not available offline and user is offline, show message
             if (!isOnline) {
                 setDynamicContent(null);
+                loadedModuleRef.current = { id: activeModuleId, lang: language };
                 setIsLoadingContent(false);
                 return;
             }
@@ -117,26 +186,30 @@ export const Lesson: React.FC = () => {
             // Fetch from API if online
             try {
                 if (language === Language.English) {
-                    const { title, quiz, ...content } = englishModuleContent;
+                    const { title, quiz, ...content } = currentEnglishContent;
                     setDynamicContent(content);
                 } else {
-                    const { title, quiz, ...contentToTranslate } = englishModuleContent;
+                    const { title, quiz, ...contentToTranslate } = currentEnglishContent;
                     const generatedContent = await geminiService.generateDynamicLessonContent(contentToTranslate, language);
                     setDynamicContent(generatedContent);
                 }
+                loadedModuleRef.current = { id: activeModuleId, lang: language };
             } catch (error) {
                 console.error("Failed to generate dynamic content, falling back to static translations.", error);
-                if (staticModuleContent) {
-                    const { title, quiz, ...staticContent } = staticModuleContent;
+                // Fallback logic using the translation hook data
+                const fallbackContent = t.curriculum[activeModuleId]?.lessonContent;
+                if (fallbackContent) {
+                    const { title, quiz, ...staticContent } = fallbackContent;
                     setDynamicContent(staticContent);
                 }
+                loadedModuleRef.current = { id: activeModuleId, lang: language };
             } finally {
                 setIsLoadingContent(false);
             }
         };
 
         fetchContent();
-    }, [activeModuleId, language, isOnline, staticModuleContent, englishModuleContent]);
+    }, [activeModuleId, language, isOnline, t]);
 
     useEffect(() => {
       if (lessonState === 'complete' && user) {
@@ -209,6 +282,11 @@ export const Lesson: React.FC = () => {
         }
     };
     
+    const displayContent = useMemo(() => {
+        if (!dynamicContent || !staticModuleContent) return null;
+        return { ...dynamicContent, title: staticModuleContent.title, quiz: staticModuleContent.quiz };
+    }, [dynamicContent, staticModuleContent]);
+
     if (!activeModuleId) {
         setCurrentPage(Page.Dashboard);
         return null;
@@ -225,7 +303,7 @@ export const Lesson: React.FC = () => {
         );
     }
     
-    if (!dynamicContent) {
+    if (!displayContent) {
         return (
              <div className="container mx-auto p-4 md:p-8">
                 <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-lg text-center min-h-[50vh] flex flex-col justify-center">
@@ -235,8 +313,6 @@ export const Lesson: React.FC = () => {
             </div>
         )
     }
-
-    const displayContent = { ...dynamicContent, title: staticModuleContent!.title, quiz: staticModuleContent!.quiz };
 
     const handleCompleteQuiz = async () => {
         if (activeModuleId && user && !user.completedModules.includes(activeModuleId)) {
@@ -248,7 +324,16 @@ export const Lesson: React.FC = () => {
     const handleAcknowledgeCompletion = () => {
         setCurrentPage(Page.Dashboard);
         setActiveModuleId(null);
-    }
+    };
+
+    const handleNextLesson = () => {
+        if (nextModule) {
+            setActiveModuleId(nextModule.id);
+            // The useEffect will handle resetting state and fetching new content
+        } else {
+            handleAcknowledgeCompletion();
+        }
+    };
 
     const renderContentWithTooltips = (text: string) => {
         const tooltips = t.tooltips;
@@ -286,7 +371,15 @@ export const Lesson: React.FC = () => {
 
     return (
         <div className="container mx-auto p-4 md:p-8">
-            {lessonState === 'complete' && <CompletionModal onAcknowledge={handleAcknowledgeCompletion} points={25} unlockedBadgeIds={unlockedBadgesOnComplete} />}
+            {lessonState === 'complete' && (
+                <CompletionModal 
+                    onAcknowledge={handleAcknowledgeCompletion} 
+                    onNextLesson={handleNextLesson}
+                    points={25} 
+                    unlockedBadgeIds={unlockedBadgesOnComplete} 
+                    nextLessonTitle={nextModule?.title}
+                />
+            )}
             <div className="max-w-4xl mx-auto bg-white p-8 md:p-12 rounded-2xl shadow-lg">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-neutral-800 mb-4">{displayContent.title}</h1>
                 <div className="group flex gap-2 items-start">
@@ -318,7 +411,7 @@ export const Lesson: React.FC = () => {
                      <div className="mt-12 text-center">
                         <button 
                             onClick={() => setLessonState('quizzing')}
-                            className="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-8 rounded-xl text-lg transition-transform active:scale-95"
+                            className="bg-primary hover:bg-primary-dark text-white font-bold py-4 px-8 rounded-xl text-lg transition-transform active:scale-95 shadow-lg shadow-primary/30"
                         >
                             {t.lesson.startQuizButton}
                         </button>
@@ -326,7 +419,21 @@ export const Lesson: React.FC = () => {
                 )}
                
                {lessonState === 'quizzing' && (
-                    <Quiz quiz={displayContent.quiz} onComplete={handleCompleteQuiz} />
+                   <div className="mt-8 p-8 bg-neutral-50 rounded-2xl border-2 border-dashed border-neutral-300 text-center animate-fade-in">
+                       <div className="w-16 h-16 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                           <Construction size={32} />
+                       </div>
+                       <h2 className="text-2xl font-bold text-neutral-800 mb-2">Quiz Upgrade in Progress</h2>
+                       <p className="text-neutral-600 mb-8 max-w-md mx-auto">
+                           We are improving the quiz experience to make learning smoother and more interactive. This feature is temporarily unavailable.
+                       </p>
+                       <button
+                           onClick={handleCompleteQuiz}
+                           className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-8 rounded-xl text-lg transition-transform active:scale-95 flex items-center gap-2 mx-auto shadow-lg shadow-primary/30"
+                       >
+                           Complete Lesson <ArrowRight size={20} />
+                       </button>
+                   </div>
                )}
             </div>
         </div>
